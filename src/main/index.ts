@@ -1,6 +1,7 @@
 import {
   app, clipboard, dialog, globalShortcut, ipcMain, Menu, Notification, powerMonitor, shell, Tray, nativeImage
 } from 'electron'
+import { execFile } from 'node:child_process'
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -17,7 +18,8 @@ import { VaultError, VaultService } from './vault'
 import { winHelper } from './winhelper'
 import { MainWindow } from './window'
 
-const APP_ID = 'app.hideout.desktop'
+// Development runs get their own id so they never pose as the installed app.
+const APP_ID = app.isPackaged ? 'app.hideout.desktop' : 'app.hideout.desktop.dev'
 const startHidden = process.argv.includes('--hidden')
 
 // Separate profile for development and automated checks (never touches the real vault).
@@ -35,6 +37,22 @@ const vault = new VaultService(() => settings.vaultDir)
 const tempDir = join(tmpdir(), 'hideout-open')
 
 const resource = (name: string): string => join(app.getAppPath(), 'resources', name)
+/**
+ * Gives Windows notifications the Hideout name and icon. The installer's Start menu shortcut already
+ * does this; the portable build and development runs have no shortcut, so Windows would say "Electron".
+ */
+function registerNotificationIdentity(): void {
+  if (process.platform !== 'win32') return
+  const key = `HKCU\\Software\\Classes\\AppUserModelId\\${APP_ID}`
+  // Windows cannot read inside app.asar; resources are unpacked next to it.
+  const icon = resource('icon.png').replace('app.asar\\', 'app.asar.unpacked\\')
+  const values: Array<[string, string]> = [
+    ['DisplayName', app.isPackaged ? 'Hideout' : 'Hideout (dev)'],
+    ['IconUri', icon]
+  ]
+  for (const [name, data] of values) execFile('reg.exe', ['add', key, '/v', name, '/t', 'REG_EXPAND_SZ', '/d', data, '/f'], { windowsHide: true }, () => {})
+}
+
 const send = (channel: string, payload?: unknown): void => main?.win.webContents.send(channel, payload)
 
 /** Every IPC call answers { ok, value } or { ok: false, error, code } so the UI can show friendly messages. */
@@ -353,6 +371,7 @@ app.on('will-quit', () => {
 app.on('window-all-closed', () => {})
 
 app.whenReady().then(async () => {
+  registerNotificationIdentity()
   Menu.setApplicationMenu(null)
   settings = loadSettings()
   applyLang()
