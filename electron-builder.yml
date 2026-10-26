@@ -24,9 +24,9 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Hideout
-  artifactName: Hideout-Setup-${version}.${ext}
+  artifactName: Hideout-Setup.${ext}
   uninstallDisplayName: Hideout
   deleteAppDataOnUninstall: false
 portable:
-  artifactName: Hideout-Portable-${version}.${ext}
+  artifactName: Hideout-Portable.${ext}
 publish: null

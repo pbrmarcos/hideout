@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hideout: atalhos e configurações</title>
+<meta name="description" content="Atalhos de teclado e configurações do Hideout, com animações mostrando como cada um funciona.">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+.ghead { padding: 24px 0 40px; max-width: 760px; }
+.ghead h1 { font-size: clamp(36px, 4.4vw, 54px); line-height: 1.05; margin: 10px 0 14px; font-weight: 780; }
+.back { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 15px; }
+.back:hover { color: var(--ink); }
+
+/* shortcut cards: one card per shortcut, each with its own scene */
+.shortcuts { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 26px; }
+.sc { background: var(--surface); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.sc p { margin: 0; color: var(--muted); font-size: 15.5px; }
+.keys { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.keys kbd { font: 700 13px 'Figtree', sans-serif; min-width: 34px; height: 34px; padding: 0 10px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line), 0 3px 0 var(--line); transition: transform .08s, box-shadow .08s, background-color .08s; }
+.keys kbd.down { transform: translateY(3px); box-shadow: inset 0 0 0 1.5px var(--primary), 0 0 0 var(--line); background: var(--soft); color: var(--soft-ink); }
+.keys .plus { color: var(--muted); font-size: 13px; }
+.scene { position: relative; height: 170px; border-radius: 12px; background: var(--bg); overflow: hidden; }
+
+/* toggle scene */
+.mini-desk { position: absolute; inset: 0; background: var(--desk); }
+.mini-desk::before { content: ''; position: absolute; left: 10%; top: 14%; width: 46%; height: 60%; background: #F4F6F8; border-radius: 6px; }
+.mini-panel { position: absolute; top: 0; right: 0; width: 30%; height: 100%; background: var(--surface); transform: translateX(105%); transition: transform .45s var(--ease); box-shadow: -6px 0 18px rgb(0 0 0 / .14); padding: 10px 8px; display: flex; flex-direction: column; gap: 6px; }
+.mini-panel.open { transform: none; }
+.mini-panel i { height: 8px; border-radius: 4px; background: var(--line); }
+.mini-panel i.s { width: 50%; align-self: flex-end; background: var(--soft); }
+
+/* auto-type scene */
+.form { position: absolute; inset: 14px 14px; background: #fff; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 0 0 1px var(--line); }
+.form .lbl { font-size: 11px; color: var(--muted); font-weight: 600; }
+.form .fld { height: 28px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--line); padding: 0 10px; display: flex; align-items: center; font-size: 13px; }
+.form .fld.focus { box-shadow: inset 0 0 0 2px var(--primary); }
+.form .fld.focus::after { content: ''; width: 1px; height: 15px; background: var(--ink); margin-left: 1px; animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.form .f-row { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+.form .f-btn { height: 26px; padding: 0 12px; border-radius: 7px; background: var(--primary); color: #fff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; transition: transform .1s; }
+.form .f-btn.down { transform: scale(.94); }
+.form .f-ok { font-size: 12px; font-weight: 700; color: var(--soft-ink); opacity: 0; transition: opacity .25s; }
+.form .f-ok.show { opacity: 1; }
+
+/* search scene */
+.mini-app { position: absolute; inset: 0; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.mini-app i { height: 10px; border-radius: 5px; background: var(--line); }
+.mini-palette { position: absolute; left: 12px; right: 12px; top: 12px; background: var(--surface); border-radius: 10px; box-shadow: 0 10px 30px rgb(0 0 0 / .18); padding: 10px; transform: translateY(-10px); opacity: 0; transition: transform .3s var(--ease), opacity .3s; }
+.mini-palette.open { transform: none; opacity: 1; }
+.p-in { height: 28px; border-radius: 7px; box-shadow: inset 0 0 0 2px var(--primary); display: flex; align-items: center; padding: 0 10px; font-size: 13px; gap: 6px; }
+.p-in svg { width: 14px; height: 14px; color: var(--muted); }
+.p-r, .p-r2 { margin-top: 6px; height: 26px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; font-size: 12.5px; font-weight: 600; gap: 8px; }
+.p-r.hit { background: var(--soft); color: var(--soft-ink); }
+.p-r2 { color: var(--muted); font-weight: 500; }
+
+/* tabs scene */
+.mini-tabs { position: absolute; left: 18px; right: 18px; top: 50%; transform: translateY(-50%); display: grid; grid-template-columns: repeat(3, 1fr); background: var(--tab); border-radius: 11px; padding: 4px; }
+.mini-tabs span { position: relative; z-index: 1; text-align: center; font-size: 13px; font-weight: 650; padding: 9px 0; color: var(--muted); transition: color .2s; }
+.mini-tabs::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); background: var(--surface); border-radius: 8px; box-shadow: 0 1px 2px rgb(0 0 0 / .14); transition: transform .35s var(--ease); }
+.mini-tabs[data-on="2"]::before { transform: translateX(100%); }
+.mini-tabs[data-on="3"]::before { transform: translateX(200%); }
+.mini-tabs[data-on="1"] span:nth-child(1), .mini-tabs[data-on="2"] span:nth-child(2), .mini-tabs[data-on="3"] span:nth-child(3) { color: var(--ink); }
+
+/* new item / esc scene */
+.mini-sheet { position: absolute; inset: 22px 0 0; background: var(--surface); border-radius: 12px 12px 0 0; box-shadow: 0 -6px 20px rgb(0 0 0 / .12); transform: translateY(100%); transition: transform .4s var(--ease); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.mini-sheet.open { transform: none; }
+.mini-sheet b { font-size: 13px; }
+.mini-sheet i { height: 24px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--line); }
+
+/* big feature rows */
+.row2 { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 56px; align-items: center; }
+.row2 + .row2 { margin-top: 64px; }
+.demo { background: var(--bg); border-radius: 20px; padding: 22px; }
+.drow { display: flex; align-items: center; gap: 14px; background: var(--surface); border-radius: 14px; padding: 14px 16px; }
+.av { width: 42px; height: 42px; border-radius: 12px; background: #F1E0E0; color: #7A3B3B; display: flex; align-items: center; justify-content: center; font-weight: 750; flex-shrink: 0; }
+.dtx { flex: 1; min-width: 0; }
+.dtx b { display: block; }
+.dtx span { color: var(--muted); font-size: 14.5px; }
+
+/* agenda scene */
+.a-box { background: var(--surface); border-radius: 14px; padding: 14px; }
+.a-field { display: flex; align-items: center; gap: 8px; min-height: 42px; border-radius: 10px; box-shadow: inset 0 0 0 2px var(--primary); padding: 0 8px 0 12px; }
+.a-field svg { width: 17px; height: 17px; color: var(--primary); flex-shrink: 0; }
+.a-input { flex: 1; font-size: 15px; min-height: 1.2em; }
+.a-input::after { content: ''; display: inline-block; width: 1px; height: 16px; background: var(--ink); margin-left: 1px; vertical-align: -3px; animation: caret 1s steps(1) infinite; }
+.a-chip { font-size: 12.5px; font-weight: 700; color: var(--soft-ink); background: var(--soft); border-radius: 7px; padding: 4px 8px; opacity: 0; transform: scale(.9); transition: opacity .2s, transform .2s; white-space: nowrap; }
+.a-chip.show { opacity: 1; transform: none; }
+.a-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; min-height: 120px; }
+.a-list li { display: flex; align-items: center; gap: 10px; padding: 8px 4px; animation: inrow .35s var(--ease); }
+@keyframes inrow { from { opacity: 0; transform: translateY(-6px); } }
+.a-ck { width: 18px; height: 18px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--muted); flex-shrink: 0; }
+.a-t { flex: 1; font-size: 14.5px; font-weight: 550; }
+.a-w { font-size: 12.5px; color: var(--muted); }
+
+/* settings reference */
+.settings { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 56px; align-items: start; margin-top: 28px; }
+.group { margin-bottom: 26px; }
+.group h3 { display: flex; gap: 10px; align-items: center; font-size: 15px; color: var(--muted); font-weight: 700; margin: 0 0 6px; letter-spacing: 0; }
+.group h3 svg { width: 18px; height: 18px; color: var(--primary); }
+.opt { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 18px; padding: 13px 0; border-top: 1px solid var(--line); }
+.opt b { font-size: 15.5px; }
+.opt span { color: var(--muted); font-size: 15px; }
+.sticky { position: sticky; top: 24px; }
+.sticky img { border-radius: 14px; box-shadow: 0 0 0 1px var(--line), 0 24px 50px -24px rgb(30 39 34 / .4); }
+.final { text-align: center; padding: 56px 0 72px; }
+
+@media (max-width: 960px) {
+  .row2, .settings { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .sticky { position: static; max-width: 360px; }
+  .opt { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+</style>
+</head>
+<body data-title-key="g.meta.title">
+<header class="wrap nav">
+  <a class="brand" href="index.html" data-keep-lang>
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="#47705A"/><circle cx="12" cy="10" r="2.6" fill="#F8FAF7"/><path d="M10.9 11.5h2.2l.7 5h-3.6z" fill="#F8FAF7"/></svg>
+    Hideout
+  </a>
+  <span class="sp"></span>
+  <div class="langs" role="group" aria-label="Idioma / Language">
+    <button data-lang="pt" aria-pressed="true" lang="pt-BR">PT</button>
+    <button data-lang="en" aria-pressed="false" lang="en">EN</button>
+    <button data-lang="es" aria-pressed="false" lang="es">ES</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap ghead">
+    <a class="back" href="index.html" data-keep-lang><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span data-i18n="g.back">Voltar ao início</span></a>
+    <h1 data-i18n="g.title">Atalhos e configurações</h1>
+    <p class="sub" data-i18n="g.lead">Tudo o que dá para fazer pelo teclado e cada ajuste das Configurações, com animações mostrando como funciona.</p>
+  </div>
+
+  <section class="fold tint" style="padding-top:48px">
+    <div class="wrap">
+      <h2 data-i18n="g.sc.title">Atalhos de teclado</h2>
+      <div class="shortcuts">
+        <article class="sc reveal" data-scene="toggle">
+          <div class="keys" aria-label="Ctrl Alt V"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Alt</kbd><span class="plus">+</span><kbd>V</kbd></div>
+          <div class="scene" aria-hidden="true"><div class="mini-desk"></div><div class="mini-panel"><i></i><i class="s"></i><i></i><i class="s"></i><i></i><i class="s"></i></div></div>
+          <p data-i18n="g.sc.v">Mostra ou esconde o Hideout de qualquer lugar do Windows.</p>
+        </article>
+        <article class="sc reveal d1" data-scene="autotype">
+          <div class="keys" aria-label="Ctrl Alt A"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Alt</kbd><span class="plus">+</span><kbd>A</kbd></div>
+          <div class="scene" aria-hidden="true">
+            <div class="form">
+              <span class="lbl">E-mail</span><span class="fld f-user"></span>
+              <span class="lbl">Senha</span><span class="fld f-pass"></span>
+              <span class="f-row"><span class="f-btn">Entrar</span><span class="f-ok">✓</span></span>
+            </div>
+          </div>
+          <p data-i18n="g.sc.a">No campo de login de qualquer site, digita usuário, Tab, senha e Enter.</p>
+        </article>
+        <article class="sc reveal d2" data-scene="search">
+          <div class="keys" aria-label="Ctrl K"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>K</kbd></div>
+          <div class="scene" aria-hidden="true">
+            <div class="mini-app"><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i><i></i></div>
+            <div class="mini-palette">
+              <div class="p-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4.2-4.2"/></svg><span class="p-q"></span></div>
+              <div class="p-r">Google Analytics</div>
+              <div class="p-r2">Gmail</div>
+            </div>
+          </div>
+          <p data-i18n="g.sc.k">Abre a busca em acessos, notas e agenda. Enter copia a senha.</p>
+        </article>
+        <article class="sc reveal" data-scene="tabs">
+          <div class="keys" aria-label="Ctrl 1, 2, 3"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></div>
+          <div class="scene" aria-hidden="true"><div class="mini-tabs" data-on="1"><span>Acessos</span><span>Notas</span><span>Agenda</span></div></div>
+          <p data-i18n="g.sc.tabs">Troca entre Acessos, Notas e Agenda.</p>
+        </article>
+        <article class="sc reveal d1" data-scene="sheet">
+          <div class="keys" aria-label="Ctrl N, Esc"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>N</kbd><span class="plus">/</span><kbd>Esc</kbd></div>
+          <div class="scene" aria-hidden="true">
+            <div class="mini-app"><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i></div>
+            <div class="mini-sheet"><b>Novo: acesso</b><i></i><i></i><i style="width:60%"></i></div>
+          </div>
+          <p><span data-i18n="g.sc.n">Cria um item novo na aba atual.</span> <span data-i18n="g.sc.esc">Fecha o painel aberto.</span></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="fold">
+    <div class="wrap">
+      <div class="row2">
+        <div class="reveal">
+          <h2 data-i18n="g.win.title">A janela</h2>
+          <p class="sub" data-i18n="g.win.d">Começa com 30% da largura da tela. Os três botões na barra do topo encaixam na esquerda, na direita ou deixam flutuar. Arrastar a barra solta a janela. O alfinete mantém o Hideout por cima das outras janelas.</p>
+        </div>
+        <div class="reveal d1" data-scene="snap">
+          <div class="desk" data-mode="right">
+            <div class="other o1"></div>
+            <div class="other o2"></div>
+            <div class="panel"><img src="screenshots/16-agenda.png" alt="" width="576" height="880"></div>
+            <div class="task"></div>
+          </div>
+          <div class="modes">
+            <div class="seg" aria-hidden="true">
+              <button data-m="left" aria-pressed="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg><span data-i18n="demo.left">Esquerda</span></button>
+              <button data-m="float" aria-pressed="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><rect width="8" height="8" x="8" y="8" rx="1.5"/></svg><span data-i18n="demo.float">Flutuar</span></button>
+              <button data-m="right" aria-pressed="true" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg><span data-i18n="demo.right">Direita</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="reveal">
+          <h2 data-i18n="g.seal.title">Copiar uma senha</h2>
+          <p class="sub" data-i18n="g.seal.d">Clique nos pontinhos. A senha vai para a área de transferência marcada para não entrar no histórico do Win+V nem na nuvem, e some sozinha no tempo que você escolher.</p>
+        </div>
+        <div class="demo reveal d1" data-scene="seal">
+          <div class="drow">
+            <span class="av" aria-hidden="true">G</span>
+            <span class="dtx"><b>Gmail</b><span>nome@gmail.com</span></span>
+            <button class="seal" data-seal="6000" aria-label="Copiar senha de exemplo"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="reveal">
+          <h2 data-i18n="g.agenda.title">Agenda em linguagem natural</h2>
+          <p class="sub" data-i18n="g.agenda.d">O Hideout entende datas escritas do jeito que você fala. Com data e hora, a tarefa vira lembrete com notificação do Windows.</p>
+        </div>
+        <div class="a-box reveal d1" data-scene="agenda" data-items='[{"text":"pagar boleto amanhã 9h","title":"pagar boleto","when":"Amanhã, 09:00"},{"text":"ligar para o contador hoje 14:30","title":"ligar para o contador","when":"14:30"},{"text":"revisão do carro 25/12 8h","title":"revisão do carro","when":"Sex, 25 dez, 08:00"}]'>
+          <div class="a-field">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <span class="a-input" aria-hidden="true"></span>
+            <span class="a-chip" aria-hidden="true"></span>
+          </div>
+          <ul class="a-list" aria-label="Exemplos"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fold tint">
+    <div class="wrap">
+      <h2 data-i18n="g.set.title">Configurações</h2>
+      <div class="settings">
+        <div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a6 6 0 0 0 6-6c0-5-4.5-9-10-9Z"/></svg><span data-i18n="g.set.look">Aparência</span></h3>
+            <div class="opt"><b data-i18n="g.set.look.theme">Tema</b><span data-i18n="g.set.look.theme.d">Sálvia, Lavanda, Areia, Névoa, Noite, Oceano, Rubi e Matrix. Cada conta guarda o seu.</span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="g.set.sec">Segurança</span></h3>
+            <div class="opt"><b data-i18n="g.set.sec.lock">Trancar depois de ficar parado</b><span data-i18n="g.set.sec.lock.d">De 1 minuto a 1 hora. Depois disso, só com o PIN.</span></div>
+            <div class="opt"><b data-i18n="g.set.sec.win">Trancar com o Windows</b><span data-i18n="g.set.sec.win.d">Bloqueou o Windows (Win+L) ou suspendeu o PC, o cofre tranca junto.</span></div>
+            <div class="opt"><b data-i18n="g.set.sec.clip">Apagar senha copiada depois de</b><span data-i18n="g.set.sec.clip.d">De 10 a 90 segundos. Só apaga se o que estiver copiado ainda for a senha.</span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg><span data-i18n="g.set.win">Janela</span></h3>
+            <div class="opt"><b data-i18n="g.set.win.start">Abrir junto com o Windows</b><span data-i18n="g.set.win.start.d">Começa escondido na bandeja, perto do relógio, para os lembretes chegarem na hora.</span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 14.06 2 22"/><path d="m18 2 4 4-11.06 11.06-4-4z"/></svg><span data-i18n="g.set.feat">Recursos</span></h3>
+            <div class="opt"><b data-i18n="g.set.feat.type">Digitar login automático</b><span data-i18n="g.set.feat.type.d">Liga ou desliga o atalho Ctrl+Alt+A. O Hideout escolhe o acesso pelo nome da janela; se houver mais de um, pergunta qual.</span></div>
+            <div class="opt"><b data-i18n="g.set.feat.att">Anexos criptografados</b><span data-i18n="g.set.feat.att.d">Arraste PDFs ou fotos para um acesso ou nota. Até 10 MB cada, trancados junto com o cofre.</span></div>
+            <div class="opt"><b data-i18n="g.set.feat.tpl">Modelos prontos</b><span data-i18n="g.set.feat.tpl.d">Acesso, cartão, Wi-Fi com QR Code, documento, conta bancária e servidor, cada um com os campos certos.</span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-i18n="g.set.acc">Conta</span></h3>
+            <div class="opt"><b data-i18n="g.set.acc.pw">Trocar senha mestra e PIN</b><span data-i18n="g.set.acc.pw.d">A senha nova vale em todos os computadores. O PIN é só deste.</span></div>
+            <div class="opt"><b data-i18n="g.set.acc.2fa">Novo QR Code do 2FA</b><span data-i18n="g.set.acc.2fa.d">Trocou de celular? Gere outro código para o autenticador.</span></div>
+            <div class="opt"><b data-i18n="g.set.acc.rc">Novo código de recuperação</b><span data-i18n="g.set.acc.rc.d">Invalida o antigo. Guarde o novo longe do computador.</span></div>
+            <div class="opt"><b data-i18n="g.set.acc.dev">Computadores conhecidos</b><span data-i18n="g.set.acc.dev.d">Remova um PC e ele volta a pedir usuário, senha e 2FA.</span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg><span data-i18n="g.set.data">Dados</span></h3>
+            <div class="opt"><b data-i18n="g.set.data.dir">Pasta dos cofres</b><span data-i18n="g.set.data.dir.d">Por padrão, Hideout-Dados no seu OneDrive. Cada conta tem o próprio arquivo.</span></div>
+            <div class="opt"><b data-i18n="g.set.data.bak">Backup e lixeira</b><span data-i18n="g.set.data.bak.d">Exporte uma cópia criptografada quando quiser. Itens excluídos ficam 30 dias na lixeira.</span></div>
+          </div>
+        </div>
+        <div class="sticky reveal d1"><img src="screenshots/18-settings.png" alt="Tela de Configurações do Hideout" width="576" height="880" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap final">
+    <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+      <span data-i18n="g.cta">Baixar o Hideout</span>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="foot.license">Hideout é código aberto sob a licença MIT.</span>
+    <span class="sp"></span>
+    <a href="index.html" data-keep-lang>Hideout</a>
+    <a href="https://github.com/pbrmarcos/hideout">GitHub</a>
+    <a href="https://github.com/pbrmarcos/hideout/releases" data-i18n="foot.releases">Versões</a>
+  </div>
+</footer>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/site.js"></script>
+<script src="assets/guide.js"></script>
+</body>
+</html>

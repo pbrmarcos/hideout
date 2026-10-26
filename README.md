@@ -7,6 +7,7 @@
 <p align="center">
   Senhas, notas e agenda num cofre criptografado que mora no canto da tela.<br>
   <a href="https://pbrmarcos.github.io/hideout/">Site</a> ·
+  <a href="https://pbrmarcos.github.io/hideout/guia.html">Atalhos e ajustes</a> ·
   <a href="https://github.com/pbrmarcos/hideout/releases/latest">Baixar para Windows</a>
 </p>
 
@@ -42,7 +43,7 @@ Se dois computadores alterarem o cofre ao mesmo tempo, o Hideout junta as mudan�
 
 ## Instalar
 
-Baixe o `Hideout-Setup-x.y.z.exe` (ou a versão portátil) em [Releases](https://github.com/pbrmarcos/hideout/releases/latest). O instalador ainda não tem assinatura digital, então o Windows pode mostrar "O Windows protegeu o computador": clique em **Mais informações → Executar assim mesmo**.
+Baixe o [`Hideout-Setup.exe`](https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe) (ou a [versão portátil](https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Portable.exe)) em [Releases](https://github.com/pbrmarcos/hideout/releases/latest). O instalador ainda não tem assinatura digital, então o Windows pode mostrar "O Windows protegeu o computador": clique em **Mais informações → Executar assim mesmo**.
 
 ## Desenvolver
 
@@ -53,7 +54,7 @@ npm install
 npm run dev        # app em modo de desenvolvimento
 npm test           # testes (criptografia, TOTP, fusão, CSV, datas)
 npm run typecheck
-npm run dist       # gera dist/Hideout-Setup-*.exe e dist/Hideout-Portable-*.exe
+npm run dist       # gera dist/Hideout-Setup.exe e dist/Hideout-Portable.exe
 ```
 
 Para testar sem tocar no seu cofre real, defina `HIDEOUT_PROFILE` (pasta de dados do app) e `HIDEOUT_VAULT_DIR` (pasta dos cofres).
