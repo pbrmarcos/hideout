@@ -146,6 +146,7 @@ async function typeInto(hwnd: number, accessId: string): Promise<void> {
   const a = vault.current?.accesses.find((x) => x.id === accessId)
   if (!a) return
   const ready = await winHelper.prepare(hwnd)
+  if (process.env.HIDEOUT_DEBUG) console.log('[autotype]', a.title, JSON.stringify(ready))
   if (!ready.released) return autoTypeHint(tr('Solte as teclas do atalho logo depois de apertar e tente de novo.'))
   if (!ready.focused) return autoTypeHint(tr('Não consegui voltar para a janela. Clique no campo de login e aperte Ctrl+Alt+A.'))
   const password = (): Promise<void> => winHelper.keys([{ text: a.password }, { key: 'ENTER' }])

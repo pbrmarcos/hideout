@@ -53,7 +53,7 @@ Pronto: o cofre fica em `OneDrive\Hideout-Dados\<usuario>.vault` e, no dia a dia
 | **Acessos** | Modelos de login, cartão, Wi-Fi (com QR Code), documento, conta bancária e servidor. Campos extras, gerador de senhas e histórico das senhas antigas |
 | **Organizar** | Categorias com ícone e cor, favoritos, filtros e ordem por nome, mais usados ou recentes. Arraste categorias e acessos para pôr na ordem que quiser |
 | **Copiar com um clique** | A senha sai da área de transferência depois de 30 segundos (ajustável) e é marcada para não ir ao histórico do Win+V nem à nuvem |
-| **Digitar login** | No campo de login de qualquer site ou programa, `Ctrl+Alt+A` digita usuário, Tab, senha e Enter |
+| **Digitar login** | Clique no campo de usuário ou de senha de qualquer site ou programa e aperte `Ctrl+Alt+A`. O Hideout confere o campo e digita só o que cabe ali; em logins de duas etapas, como o do Google, espera a página da senha |
 | **Notas** | Checklist com `- [ ]`, cores, fixar no topo e anexos criptografados (até 10 MB cada) |
 | **TO DO** | A primeira aba: escreva e aperte Enter. Arraste para mudar a ordem; o que tiver data vai para a Agenda |
 | **Agenda** | Lembretes com notificação do Windows. Entende "pagar boleto amanhã 9h", "sexta 10h" e "25/12 8h" |

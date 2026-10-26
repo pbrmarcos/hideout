@@ -1,7 +1,7 @@
 {
   "name": "hideout",
   "productName": "Hideout",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Senhas, tarefas, notas e agenda num cofre criptografado que mora no canto da tela.",
   "main": "out/main/index.js",
   "author": "Hideout contributors",
