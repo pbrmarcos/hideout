@@ -50,12 +50,13 @@
 .p-r.hit { background: var(--soft); color: var(--soft-ink); }
 .p-r2 { color: var(--muted); font-weight: 500; }
 
-.mini-tabs { position: absolute; left: 18px; right: 18px; top: 50%; transform: translateY(-50%); display: grid; grid-template-columns: repeat(3, 1fr); background: var(--tab); border-radius: 11px; padding: 4px; }
-.mini-tabs span { position: relative; z-index: 1; text-align: center; font-size: 13px; font-weight: 650; padding: 9px 0; color: var(--muted); transition: color .2s; }
-.mini-tabs::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); background: var(--surface); border-radius: 8px; box-shadow: 0 1px 2px rgb(0 0 0 / .14); transition: transform .35s var(--ease); }
+.mini-tabs { position: absolute; left: 18px; right: 18px; top: 50%; transform: translateY(-50%); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--tab); border-radius: 11px; padding: 4px; }
+.mini-tabs span { position: relative; z-index: 1; text-align: center; font-size: 12px; font-weight: 650; padding: 9px 0; color: var(--muted); transition: color .2s; }
+.mini-tabs::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 4); background: var(--surface); border-radius: 8px; box-shadow: 0 1px 2px rgb(0 0 0 / .14); transition: transform .35s var(--ease); }
 .mini-tabs[data-on="2"]::before { transform: translateX(100%); }
 .mini-tabs[data-on="3"]::before { transform: translateX(200%); }
-.mini-tabs[data-on="1"] span:nth-child(1), .mini-tabs[data-on="2"] span:nth-child(2), .mini-tabs[data-on="3"] span:nth-child(3) { color: var(--ink); }
+.mini-tabs[data-on="4"]::before { transform: translateX(300%); }
+.mini-tabs[data-on="1"] span:nth-child(1), .mini-tabs[data-on="2"] span:nth-child(2), .mini-tabs[data-on="3"] span:nth-child(3), .mini-tabs[data-on="4"] span:nth-child(4) { color: var(--ink); }
 
 .mini-sheet { position: absolute; inset: 22px 0 0; background: var(--surface); border-radius: 12px 12px 0 0; box-shadow: 0 -6px 20px rgb(0 0 0 / .12); transform: translateY(100%); transition: transform .4s var(--ease); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .mini-sheet.open { transform: none; }

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.classList.add('js')</script>
-<title>Hideout: senhas, notas e agenda num cofre que só você abre</title>
-<meta name="description" content="App grátis e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.">
+<title>Hideout: senhas, tarefas, notas e agenda num cofre que só você abre</title>
+<meta name="description" content="App grátis e de código aberto para Windows. Senhas, TO DO, notas, lembretes e temporizador num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.">
 <link rel="canonical" href="https://pbrmarcos.github.io/hideout/">
 <link rel="alternate" hreflang="pt-BR" href="https://pbrmarcos.github.io/hideout/">
 <link rel="alternate" hreflang="en" href="https://pbrmarcos.github.io/hideout/en/">
@@ -20,8 +20,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hideout">
 <meta property="og:url" content="https://pbrmarcos.github.io/hideout/">
-<meta property="og:title" content="Hideout: senhas, notas e agenda num cofre que só você abre">
-<meta property="og:description" content="App grátis e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.">
+<meta property="og:title" content="Hideout: senhas, tarefas, notas e agenda num cofre que só você abre">
+<meta property="og:description" content="App grátis e de código aberto para Windows. Senhas, TO DO, notas, lembretes e temporizador num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:locale:alternate" content="es_ES">
@@ -30,7 +30,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="O Hideout encaixado na lateral da tela, com a lista de acessos e senhas ocultas.">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Hideout","url":"https://pbrmarcos.github.io/hideout/","description":"App grátis e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.","applicationCategory":"SecurityApplication","operatingSystem":"Windows 10, Windows 11","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/pbrmarcos/hideout/releases/latest","license":"https://opensource.org/licenses/MIT","image":"https://pbrmarcos.github.io/hideout/og.png","screenshot":"https://pbrmarcos.github.io/hideout/screenshots/09-seal-copied.png","inLanguage":"pt-BR","codeRepository":"https://github.com/pbrmarcos/hideout"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Hideout","url":"https://pbrmarcos.github.io/hideout/","description":"App grátis e de código aberto para Windows. Senhas, TO DO, notas, lembretes e temporizador num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.","applicationCategory":"SecurityApplication","operatingSystem":"Windows 10, Windows 11","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/pbrmarcos/hideout/releases/latest","license":"https://opensource.org/licenses/MIT","image":"https://pbrmarcos.github.io/hideout/og.png","screenshot":"https://pbrmarcos.github.io/hideout/screenshots/09-seal-copied.png","inLanguage":"pt-BR","codeRepository":"https://github.com/pbrmarcos/hideout"}</script>
 <link rel="preload" href="fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/site.css">
 <script src="assets/i18n.js" defer></script>
@@ -61,8 +61,8 @@
   <!-- 1. What it is -->
   <div class="wrap hero">
     <div>
-      <h1 data-i18n="hero.title">Senhas, notas e agenda a um clique, num cofre que só você abre.</h1>
-      <p class="lead" data-i18n="hero.lead">Grátis e de código aberto para Windows. O cofre é um arquivo criptografado no seu PC: sem servidor, sem conta. Encaixa na esquerda ou na direita e copia senhas com um clique.</p>
+      <h1 data-i18n="hero.title">Senhas, tarefas, notas e agenda a um clique, num cofre que só você abre.</h1>
+      <p class="lead" data-i18n="hero.lead">Grátis e de código aberto para Windows. O cofre é um arquivo criptografado no seu PC: sem servidor, sem conta. Encaixa na esquerda ou na direita, copia senhas com um clique e ainda tem TO DO e temporizador.</p>
       <div class="ctas">
         <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -104,13 +104,14 @@
     <div class="wrap sec">
       <div class="reveal">
         <h2 id="h-sec" data-i18n="sec.title">Suas senhas só se abrem no seu computador. Nenhum servidor vê nada.</h2>
-        <p class="sub" data-i18n="sec.lead">O Hideout não tem servidor, não pede conta online e não envia nada para a internet. O cofre é um arquivo criptografado. Se ele estiver no OneDrive, que é o padrão, a nuvem só guarda bytes embaralhados.</p>
+        <p class="sub" data-i18n="sec.lead">O Hideout não tem servidor e não pede conta online. Ele só se conecta à internet para procurar versões novas no GitHub, o que dá para desligar, e para a verificação de vazamentos, quando você pede. Nenhuma senha sai do PC. O cofre é um arquivo criptografado. Se ele estiver no OneDrive, que é o padrão, a nuvem só guarda bytes embaralhados.</p>
         <ul class="points">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p1"><b>Senha mestra</b> vira a chave por scrypt, que torna adivinhação em massa cara e lenta.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p2"><b>2FA</b> com app autenticador quando você entra num computador novo.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p3"><b>PIN de 6 dígitos</b> no dia a dia, protegido pelo Windows. Cinco erros pedem a senha.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p4"><b>Copiou, sumiu:</b> a senha sai da área de transferência em 30 segundos e não entra no histórico do Win+V.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p5"><b>Código aberto:</b> qualquer pessoa pode conferir o que o app faz.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p6"><b>Vazamentos:</b> confere se alguma senha sua apareceu em vazamentos conhecidos. Só 5 caracteres de um hash saem do PC, nunca a senha.</span></li>
         </ul>
         <div class="ctas sec-ctas">
           <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe"><span data-i18n="hero.download">Baixar grátis para Windows</span></a>
@@ -149,17 +150,19 @@
   <section class="fold" id="telas" aria-labelledby="h-scr">
     <div class="wrap screens">
       <div class="reveal intro">
-        <h2 id="h-scr" data-i18n="scr.title">Veja as telas reais e escolha entre 8 temas</h2>
-        <p class="sub" data-i18n="scr.lead">Toque nos botões para trocar a tela ou o tema. A interface do app está em português.</p>
+        <h2 id="h-scr" data-i18n="scr.title">Veja as telas reais e escolha entre 9 temas ou crie o seu</h2>
+        <p class="sub" data-i18n="scr.lead">Toque nos botões para trocar a tela ou o tema. O app está em português, inglês e espanhol.</p>
         <div class="tabs" role="tablist" data-i18n-attr="aria-label:scr.tabs.label" aria-label="Telas e temas">
           <button role="tab" id="t-screens" aria-controls="p-screens" aria-selected="true" tabindex="0" data-panel="p-screens" data-i18n="scr.tab.screens">Telas</button>
           <button role="tab" id="t-themes" aria-controls="p-themes" aria-selected="false" tabindex="-1" data-panel="p-themes" data-i18n="scr.tab.themes">Temas</button>
         </div>
         <div id="p-screens" class="chips" data-group="screens" role="tabpanel" aria-labelledby="t-screens">
           <button aria-pressed="true" data-src="screenshots/09-seal-copied.webp" data-caption="scr.s.accesses.d"><span data-i18n="scr.s.accesses">Acessos</span></button>
+          <button aria-pressed="false" data-src="screenshots/15-todo.webp" data-caption="scr.s.todo.d"><span data-i18n="scr.s.todo">TO DO</span></button>
           <button aria-pressed="false" data-src="screenshots/12-wifi-qr.webp" data-caption="scr.s.wifi.d"><span data-i18n="scr.s.wifi">Modelos</span></button>
           <button aria-pressed="false" data-src="screenshots/13-note-edit.webp" data-caption="scr.s.notes.d"><span data-i18n="scr.s.notes">Notas</span></button>
           <button aria-pressed="false" data-src="screenshots/16-agenda.webp" data-caption="scr.s.agenda.d"><span data-i18n="scr.s.agenda">Agenda</span></button>
+          <button aria-pressed="false" data-src="screenshots/21-timer.webp" data-caption="scr.s.timer.d"><span data-i18n="scr.s.timer">Temporizador</span></button>
           <button aria-pressed="false" data-src="screenshots/17-search.webp" data-caption="scr.s.search.d"><span data-i18n="scr.s.search">Busca</span></button>
           <button aria-pressed="false" data-src="screenshots/03-totp.webp" data-caption="scr.s.2fa.d"><span data-i18n="scr.s.2fa">2FA</span></button>
           <button aria-pressed="false" data-src="screenshots/20-lock.webp" data-caption="scr.s.pin.d"><span data-i18n="scr.s.pin">PIN</span></button>
@@ -172,7 +175,9 @@
           <button aria-pressed="false" data-src="screenshots/19-theme-noite.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#171C21"><i style="background:#8DBBA0"></i></span>Noite</button>
           <button aria-pressed="false" data-src="screenshots/19-theme-oceano.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F5F7FA"><i style="background:#0077C8"></i></span>Oceano</button>
           <button aria-pressed="false" data-src="screenshots/19-theme-rubi.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F6EEEE"><i style="background:#B4232F"></i></span>Rubi</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-onix.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#0A0A0A"><i style="background:#FFFFFF"></i></span>Ônix</button>
           <button aria-pressed="false" data-src="screenshots/19-theme-matrix.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#050A06"><i style="background:#00FF41"></i></span>Matrix</button>
+          <button aria-pressed="false" data-src="screenshots/23-theme-editor.webp" data-caption="scr.custom.d"><span class="sw" style="background:#0E1B21"><i style="background:#34C3B4"></i></span><span data-i18n="scr.custom">Seus temas</span></button>
         </div>
         <p class="note-line">
           <span data-i18n="scr.window">A janela também flutua ou encaixa na esquerda e na direita.</span>
@@ -180,8 +185,8 @@
         </p>
       </div>
       <figure class="stage reveal d1">
-        <div class="frame"><img id="shot" src="screenshots/09-seal-copied.webp" data-i18n-attr="alt:scr.s.accesses.d" alt="Um clique copia a senha. Dá para importar as senhas salvas no Chrome, Edge ou Brave." width="576" height="877" loading="lazy"></div>
-        <figcaption id="shot-caption" aria-live="polite" data-i18n="scr.s.accesses.d">Um clique copia a senha. Dá para importar as senhas salvas no Chrome, Edge ou Brave.</figcaption>
+        <div class="frame"><img id="shot" src="screenshots/09-seal-copied.webp" data-i18n-attr="alt:scr.s.accesses.d" alt="Um clique copia a senha. Categorias com ícone, filtros e ordem do seu jeito: é só arrastar." width="576" height="877" loading="lazy"></div>
+        <figcaption id="shot-caption" aria-live="polite" data-i18n="scr.s.accesses.d">Um clique copia a senha. Categorias com ícone, filtros e ordem do seu jeito: é só arrastar.</figcaption>
       </figure>
     </div>
   </section>
@@ -214,6 +219,7 @@
           <details><summary data-i18n="faq.q3">Dá para trazer as senhas do navegador?</summary><p data-i18n="faq.a3">Sim. Exporte o CSV de senhas do Chrome, Edge ou Brave e use Importar do navegador na aba Acessos. Depois apague o CSV, porque ele não é criptografado.</p></details>
           <details><summary data-i18n="faq.q4">Por que o Windows avisa ao instalar?</summary><p data-i18n="faq.a4">O instalador ainda não tem certificado de assinatura digital, que é pago. Clique em Mais informações e depois em Executar assim mesmo. O código inteiro está no GitHub.</p></details>
           <details><summary data-i18n="faq.q5">Como sei que é seguro?</summary><p data-i18n="faq.a5">O código é aberto (MIT) e qualquer pessoa pode conferir. Não há servidor nem telemetria. A criptografia, AES-256-GCM com chave derivada por scrypt, está no arquivo src/main/crypto.ts. O Hideout ainda não passou por auditoria independente.</p></details>
+          <details><summary data-i18n="faq.q6">O Hideout se atualiza sozinho?</summary><p data-i18n="faq.a6">Sim. Ao abrir e uma vez por dia, ele procura versões novas no GitHub, baixa em segundo plano e pergunta se pode reiniciar. Dá para desligar em Configurações → Dados. A versão portátil só avisa e abre a página de download.</p></details>
         </div>
       </div>
       <div class="community">

@@ -79,8 +79,8 @@
           <p data-i18n="g.sc.k"></p>
         </article>
         <article class="sc reveal" data-scene="tabs">
-          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></h3>
-          <div class="scene" aria-hidden="true"><div class="mini-tabs" data-on="1"><span data-i18n="scr.s.accesses"></span><span data-i18n="scr.s.notes"></span><span data-i18n="scr.s.agenda"></span></div></div>
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></h3>
+          <div class="scene" aria-hidden="true"><div class="mini-tabs" data-on="1"><span data-i18n="scr.s.todo"></span><span data-i18n="scr.s.accesses"></span><span data-i18n="scr.s.notes"></span><span data-i18n="scr.s.agenda"></span></div></div>
           <p data-i18n="g.sc.tabs"></p>
         </article>
         <article class="sc wide reveal d1" data-scene="sheet">
@@ -106,7 +106,7 @@
           <div class="desk" data-mode="right" aria-hidden="true">
             <div class="other o1"></div>
             <div class="other o2"></div>
-            <div class="panel"><img src="screenshots/51-snapped-agenda.webp" alt="" width="576" height="1032" loading="lazy"></div>
+            <div class="panel"><img src="screenshots/50-snapped-right.webp" alt="" width="576" height="1032" loading="lazy"></div>
             <div class="task"></div>
           </div>
           <div class="modes">
@@ -159,16 +159,25 @@
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a6 6 0 0 0 6-6c0-5-4.5-9-10-9Z"/></svg><span data-i18n="g.set.look"></span></h3>
             <div class="opt"><b data-i18n="g.set.look.theme"></b><span data-i18n="g.set.look.theme.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.look.custom"></b><span data-i18n="g.set.look.custom.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.look.lang"></b><span data-i18n="g.set.look.lang.d"></span></div>
           </div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="g.set.sec"></span></h3>
             <div class="opt"><b data-i18n="g.set.sec.lock"></b><span data-i18n="g.set.sec.lock.d"></span></div>
             <div class="opt"><b data-i18n="g.set.sec.win"></b><span data-i18n="g.set.sec.win.d"></span></div>
             <div class="opt"><b data-i18n="g.set.sec.clip"></b><span data-i18n="g.set.sec.clip.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.sec.leaks"></b><span data-i18n="g.set.sec.leaks.d"></span></div>
           </div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg><span data-i18n="g.set.win"></span></h3>
             <div class="opt"><b data-i18n="g.set.win.start"></b><span data-i18n="g.set.win.start.d"></span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/></svg><span data-i18n="g.set.alerts"></span></h3>
+            <div class="opt"><b data-i18n="g.set.alerts.agenda"></b><span data-i18n="g.set.alerts.agenda.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.alerts.todo"></b><span data-i18n="g.set.alerts.todo.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.alerts.sound"></b><span data-i18n="g.set.alerts.sound.d"></span></div>
           </div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 14.06 2 22"/><path d="m18 2 4 4-11.06 11.06-4-4z"/></svg><span data-i18n="g.set.feat"></span></h3>
@@ -187,6 +196,7 @@
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg><span data-i18n="g.set.data"></span></h3>
             <div class="opt"><b data-i18n="g.set.data.dir"></b><span data-i18n="g.set.data.dir.d"></span></div>
             <div class="opt"><b data-i18n="g.set.data.bak"></b><span data-i18n="g.set.data.bak.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.data.upd"></b><span data-i18n="g.set.data.upd.d"></span></div>
           </div>
         </div>
         <div class="sticky reveal d1"><img src="screenshots/18-settings.webp" data-i18n-attr="alt:g.set.alt" alt="" width="576" height="877" loading="lazy"></div>

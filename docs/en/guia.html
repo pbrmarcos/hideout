@@ -102,9 +102,9 @@
           <p data-i18n="g.sc.k">Opens search across logins, notes and agenda. Enter copies the password.</p>
         </article>
         <article class="sc reveal" data-scene="tabs">
-          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></h3>
-          <div class="scene" aria-hidden="true"><div class="mini-tabs" data-on="1"><span data-i18n="scr.s.accesses">Logins</span><span data-i18n="scr.s.notes">Notes</span><span data-i18n="scr.s.agenda">Agenda</span></div></div>
-          <p data-i18n="g.sc.tabs">Switches between Logins, Notes and Agenda.</p>
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></h3>
+          <div class="scene" aria-hidden="true"><div class="mini-tabs" data-on="1"><span data-i18n="scr.s.todo">TO DO</span><span data-i18n="scr.s.accesses">Logins</span><span data-i18n="scr.s.notes">Notes</span><span data-i18n="scr.s.agenda">Agenda</span></div></div>
+          <p data-i18n="g.sc.tabs">Switches between TO DO, Logins, Notes and Agenda.</p>
         </article>
         <article class="sc wide reveal d1" data-scene="sheet">
           <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>N</kbd><span class="plus" aria-hidden="true">/</span><kbd>Esc</kbd></h3>
@@ -129,7 +129,7 @@
           <div class="desk" data-mode="right" aria-hidden="true">
             <div class="other o1"></div>
             <div class="other o2"></div>
-            <div class="panel"><img src="../screenshots/51-snapped-agenda.webp" alt="" width="576" height="1032" loading="lazy"></div>
+            <div class="panel"><img src="../screenshots/50-snapped-right.webp" alt="" width="576" height="1032" loading="lazy"></div>
             <div class="task"></div>
           </div>
           <div class="modes">
@@ -160,7 +160,7 @@
       <div class="row2">
         <div class="reveal">
           <h2 data-i18n="g.agenda.title">Agenda in plain language</h2>
-          <p class="sub" data-i18n="g.agenda.d">Hideout understands dates written the way you say them (in Portuguese for now, as in the examples). With a date and time, the task becomes a Windows reminder.</p>
+          <p class="sub" data-i18n="g.agenda.d">Hideout understands dates written the way you say them, in English, Spanish or Portuguese (the demo is in Portuguese). With a date and time, the task becomes a Windows reminder. Without a date, it goes to TO DO.</p>
         </div>
         <div class="a-box reveal d1" data-scene="agenda" lang="pt-BR" data-items='[{"text":"pagar boleto amanhã 9h","title":"pagar boleto","when":"Amanhã, 09:00"},{"text":"ligar para o contador hoje 14:30","title":"ligar para o contador","when":"14:30"},{"text":"revisão do carro 25/12 8h","title":"revisão do carro","when":"Sex, 25 dez, 08:00"}]'>
           <div class="a-field" aria-hidden="true">
@@ -181,17 +181,26 @@
         <div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a6 6 0 0 0 6-6c0-5-4.5-9-10-9Z"/></svg><span data-i18n="g.set.look">Appearance</span></h3>
-            <div class="opt"><b data-i18n="g.set.look.theme">Theme</b><span data-i18n="g.set.look.theme.d">Sálvia, Lavanda, Areia, Névoa, Noite, Oceano, Rubi and Matrix. Each account keeps its own.</span></div>
+            <div class="opt"><b data-i18n="g.set.look.theme">Theme</b><span data-i18n="g.set.look.theme.d">Sálvia, Lavanda, Areia, Névoa, Noite, Oceano, Rubi, Ônix and Matrix. Each account keeps its own.</span></div>
+            <div class="opt"><b data-i18n="g.set.look.custom">Your themes</b><span data-i18n="g.set.look.custom.d">Up to 3 themes with your own colors. "Copy request for AI" writes the text to ask for colors; then paste the answer. Hideout checks the contrast.</span></div>
+            <div class="opt"><b data-i18n="g.set.look.lang">Language</b><span data-i18n="g.set.look.lang.d">English, Spanish or Portuguese. By default it follows your Windows language.</span></div>
           </div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="g.set.sec">Security</span></h3>
             <div class="opt"><b data-i18n="g.set.sec.lock">Lock when idle</b><span data-i18n="g.set.sec.lock.d">From 1 minute to 1 hour. After that, only the PIN opens it.</span></div>
             <div class="opt"><b data-i18n="g.set.sec.win">Lock with Windows</b><span data-i18n="g.set.sec.win.d">Lock Windows (Win+L) or put the PC to sleep and the vault locks too.</span></div>
             <div class="opt"><b data-i18n="g.set.sec.clip">Clear copied password after</b><span data-i18n="g.set.sec.clip.d">From 10 to 90 seconds. Only clears if the clipboard still holds the password.</span></div>
+            <div class="opt"><b data-i18n="g.set.sec.leaks">Check for leaks</b><span data-i18n="g.set.sec.leaks.d">Compares your passwords with Have I Been Pwned without sending them: only 5 characters of a hash leave your PC.</span></div>
           </div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg><span data-i18n="g.set.win">Window</span></h3>
             <div class="opt"><b data-i18n="g.set.win.start">Start with Windows</b><span data-i18n="g.set.win.start.d">Starts hidden in the tray, next to the clock, so reminders arrive on time.</span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/></svg><span data-i18n="g.set.alerts">Alerts</span></h3>
+            <div class="opt"><b data-i18n="g.set.alerts.agenda">Agenda reminders</b><span data-i18n="g.set.alerts.agenda.d">On or off, at the time or 5 to 60 minutes before, with the sound you pick.</span></div>
+            <div class="opt"><b data-i18n="g.set.alerts.todo">TO DO summary</b><span data-i18n="g.set.alerts.todo.d">One notification a day, at the time you pick, saying how many items are pending.</span></div>
+            <div class="opt"><b data-i18n="g.set.alerts.sound">Sounds and volume</b><span data-i18n="g.set.alerts.sound.d">Chime, Bell, Soft, Pop, Marimba, Digital, the Windows sound or none. The timer has its own sound.</span></div>
           </div>
           <div class="group reveal">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 14.06 2 22"/><path d="m18 2 4 4-11.06 11.06-4-4z"/></svg><span data-i18n="g.set.feat">Features</span></h3>
@@ -210,6 +219,7 @@
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg><span data-i18n="g.set.data">Data</span></h3>
             <div class="opt"><b data-i18n="g.set.data.dir">Vault folder</b><span data-i18n="g.set.data.dir.d">By default, Hideout-Dados in your OneDrive. Each account has its own file.</span></div>
             <div class="opt"><b data-i18n="g.set.data.bak">Backup and trash</b><span data-i18n="g.set.data.bak.d">Export an encrypted copy any time. Deleted items stay in the trash for 30 days.</span></div>
+            <div class="opt"><b data-i18n="g.set.data.upd">Check for updates</b><span data-i18n="g.set.data.upd.d">When the app opens and once a day. The new version downloads in the background and installs when you restart.</span></div>
           </div>
         </div>
         <div class="sticky reveal d1"><img src="../screenshots/18-settings.webp" data-i18n-attr="alt:g.set.alt" alt="The Hideout Settings screen." width="576" height="877" loading="lazy"></div>
@@ -226,7 +236,7 @@
       </a>
       <a class="btn ghost" href="https://github.com/pbrmarcos/hideout"><span data-i18n="hero.github">Check the code</span></a>
     </div>
-    <p class="cta-note center" data-i18n="hero.note">Windows 10 and 11. The app interface is in Portuguese. Windows may warn about an unknown app: click More info, then Run anyway.</p>
+    <p class="cta-note center" data-i18n="hero.note">Windows 10 and 11, in English, Spanish or Portuguese. Windows may warn about an unknown app: click More info, then Run anyway.</p>
   </div>
 </main>
 

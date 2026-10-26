@@ -18,13 +18,14 @@ Você recebe uma resposta assim que possível. Quando a correção sair, o relat
 - Desbloqueio por senha, PIN, 2FA e código de recuperação
 - Área de transferência, digitação automática e anexos
 - Verificação de vazamentos (`src/main/leaks.ts`): só os 5 primeiros caracteres do SHA-1 de cada senha podem sair do computador
+- Atualização automática (`src/main/updater.ts`): só lê a lista de versões do GitHub; nada do cofre é enviado
 - Isolamento entre a interface e o processo principal (`src/preload`, IPC)
 
 ## O que já se sabe e não é falha
 
 - O 2FA funciona sem servidor: quem tiver o arquivo do cofre **e** a senha mestra consegue abri-lo.
 - O PIN só protege no computador onde foi criado e depende da conta do Windows (DPAPI).
-- O instalador ainda não tem assinatura digital.
+- O instalador ainda não tem assinatura digital. Por isso a atualização automática confere o arquivo baixado pelo hash SHA-512 publicado na release do GitHub, mas não por uma assinatura.
 - O projeto ainda não passou por auditoria independente.
 
 ## Versões com suporte

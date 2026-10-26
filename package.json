@@ -2,7 +2,7 @@
   "name": "hideout",
   "productName": "Hideout",
   "version": "1.0.0",
-  "description": "Senhas, notas e agenda num cofre criptografado que mora no canto da tela.",
+  "description": "Senhas, tarefas, notas e agenda num cofre criptografado que mora no canto da tela.",
   "main": "out/main/index.js",
   "author": "Hideout contributors",
   "homepage": "https://pbrmarcos.github.io/hideout/",

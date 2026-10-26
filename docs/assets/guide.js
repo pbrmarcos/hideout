@@ -67,7 +67,7 @@
     },
     async tabs(root) {
       const keys = $$(root, '.keys kbd'), bar = $(root, '.mini-tabs')
-      for (const n of [2, 3, 1]) {
+      for (const n of [2, 3, 4, 1]) {
         keys[0].classList.add('down'); keys[n].classList.add('down')
         bar.dataset.on = String(n)
         await wait(420)

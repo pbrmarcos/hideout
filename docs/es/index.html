@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.classList.add('js')</script>
-<title>Hideout: contraseñas, notas y agenda en una bóveda que solo tú abres</title>
-<meta name="description" content="App gratuita y de código abierto para Windows. Contraseñas, notas y recordatorios en una bóveda cifrada que solo se abre en tu computadora. Sin servidor y sin cuenta.">
+<title>Hideout: contraseñas, tareas, notas y agenda en una bóveda que solo tú abres</title>
+<meta name="description" content="App gratuita y de código abierto para Windows. Contraseñas, tareas, notas, recordatorios y temporizador en una bóveda cifrada que solo se abre en tu computadora. Sin servidor y sin cuenta.">
 <link rel="canonical" href="https://pbrmarcos.github.io/hideout/es/">
 <link rel="alternate" hreflang="pt-BR" href="https://pbrmarcos.github.io/hideout/">
 <link rel="alternate" hreflang="en" href="https://pbrmarcos.github.io/hideout/en/">
@@ -20,8 +20,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hideout">
 <meta property="og:url" content="https://pbrmarcos.github.io/hideout/es/">
-<meta property="og:title" content="Hideout: contraseñas, notas y agenda en una bóveda que solo tú abres">
-<meta property="og:description" content="App gratuita y de código abierto para Windows. Contraseñas, notas y recordatorios en una bóveda cifrada que solo se abre en tu computadora. Sin servidor y sin cuenta.">
+<meta property="og:title" content="Hideout: contraseñas, tareas, notas y agenda en una bóveda que solo tú abres">
+<meta property="og:description" content="App gratuita y de código abierto para Windows. Contraseñas, tareas, notas, recordatorios y temporizador en una bóveda cifrada que solo se abre en tu computadora. Sin servidor y sin cuenta.">
 <meta property="og:locale" content="es_ES">
 <meta property="og:locale:alternate" content="pt_BR">
 <meta property="og:locale:alternate" content="en_US">
@@ -30,7 +30,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Hideout acoplado al lado de la pantalla, con la lista de accesos y las contraseñas ocultas.">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Hideout","url":"https://pbrmarcos.github.io/hideout/es/","description":"App gratuita y de código abierto para Windows. Contraseñas, notas y recordatorios en una bóveda cifrada que solo se abre en tu computadora. Sin servidor y sin cuenta.","applicationCategory":"SecurityApplication","operatingSystem":"Windows 10, Windows 11","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/pbrmarcos/hideout/releases/latest","license":"https://opensource.org/licenses/MIT","image":"https://pbrmarcos.github.io/hideout/og-es.png","screenshot":"https://pbrmarcos.github.io/hideout/screenshots/09-seal-copied.png","inLanguage":"es","codeRepository":"https://github.com/pbrmarcos/hideout"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Hideout","url":"https://pbrmarcos.github.io/hideout/es/","description":"App gratuita y de código abierto para Windows. Contraseñas, tareas, notas, recordatorios y temporizador en una bóveda cifrada que solo se abre en tu computadora. Sin servidor y sin cuenta.","applicationCategory":"SecurityApplication","operatingSystem":"Windows 10, Windows 11","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/pbrmarcos/hideout/releases/latest","license":"https://opensource.org/licenses/MIT","image":"https://pbrmarcos.github.io/hideout/og-es.png","screenshot":"https://pbrmarcos.github.io/hideout/screenshots/09-seal-copied.png","inLanguage":"es","codeRepository":"https://github.com/pbrmarcos/hideout"}</script>
 <link rel="preload" href="../fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/site.css">
 <script src="../assets/i18n.js" defer></script>
@@ -61,8 +61,8 @@
   <!-- 1. What it is -->
   <div class="wrap hero">
     <div>
-      <h1 data-i18n="hero.title">Contraseñas, notas y agenda a un clic, en una bóveda que solo tú abres.</h1>
-      <p class="lead" data-i18n="hero.lead">Gratis y de código abierto para Windows. La bóveda es un archivo cifrado en tu PC: sin servidor, sin cuenta. Se acopla a la izquierda o a la derecha y copia contraseñas con un clic.</p>
+      <h1 data-i18n="hero.title">Contraseñas, tareas, notas y agenda a un clic, en una bóveda que solo tú abres.</h1>
+      <p class="lead" data-i18n="hero.lead">Gratis y de código abierto para Windows. La bóveda es un archivo cifrado en tu PC: sin servidor, sin cuenta. Se acopla a la izquierda o a la derecha, copia contraseñas con un clic y además tiene TO DO y temporizador.</p>
       <div class="ctas">
         <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -73,7 +73,7 @@
           <span data-i18n="hero.github">Revisar el código</span>
         </a>
       </div>
-      <p class="cta-note" data-i18n="hero.note">Windows 10 y 11. La interfaz de la app está en portugués. Windows puede avisar que la app es desconocida: haz clic en Más información y luego en Ejecutar de todas formas.</p>
+      <p class="cta-note" data-i18n="hero.note">Windows 10 y 11, en español, inglés o portugués. Windows puede avisar que la app es desconocida: haz clic en Más información y luego en Ejecutar de todas formas.</p>
       <p class="mobile-note" data-i18n="hero.mobile">Es una app para Windows: abre esta página en tu computadora para instalarla.</p>
       <ul class="trust">
         <li><a href="https://github.com/pbrmarcos/hideout/blob/main/LICENSE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg><span data-i18n="trust.oss">Código abierto (MIT)</span></a></li>
@@ -104,13 +104,14 @@
     <div class="wrap sec">
       <div class="reveal">
         <h2 id="h-sec" data-i18n="sec.title">Tus contraseñas solo se abren en tu computadora. Ningún servidor ve nada.</h2>
-        <p class="sub" data-i18n="sec.lead">Hideout no tiene servidor, no pide cuenta en línea y no envía nada a internet. La bóveda es un archivo cifrado. Si está en OneDrive, que es lo predeterminado, la nube solo guarda bytes revueltos.</p>
+        <p class="sub" data-i18n="sec.lead">Hideout no tiene servidor ni pide cuenta en línea. Solo se conecta a internet para buscar versiones nuevas en GitHub, algo que puedes desactivar, y para la verificación de filtraciones, cuando la pides. Ninguna contraseña sale de tu PC. La bóveda es un archivo cifrado. Si está en OneDrive, que es lo predeterminado, la nube solo guarda bytes revueltos.</p>
         <ul class="points">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p1"><b>Contraseña maestra</b> convertida en clave con scrypt, que hace lentos y caros los intentos masivos.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p2"><b>2FA</b> con app autenticadora al entrar en una computadora nueva.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p3"><b>PIN de 6 dígitos</b> para el día a día, protegido por Windows. Cinco errores piden la contraseña.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p4"><b>Copiada y borrada:</b> la contraseña sale del portapapeles en 30 segundos y no entra al historial de Win+V.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p5"><b>Código abierto:</b> cualquiera puede revisar lo que hace la app.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p6"><b>Filtraciones:</b> comprueba si alguna de tus contraseñas apareció en filtraciones conocidas. Solo salen de tu PC 5 caracteres de un hash, nunca la contraseña.</span></li>
         </ul>
         <div class="ctas sec-ctas">
           <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe"><span data-i18n="hero.download">Descargar gratis para Windows</span></a>
@@ -149,17 +150,19 @@
   <section class="fold" id="telas" aria-labelledby="h-scr">
     <div class="wrap screens">
       <div class="reveal intro">
-        <h2 id="h-scr" data-i18n="scr.title">Mira las pantallas reales y elige entre 8 temas</h2>
-        <p class="sub" data-i18n="scr.lead">Usa los botones para cambiar de pantalla o de tema. Por ahora la interfaz de la app está en portugués.</p>
+        <h2 id="h-scr" data-i18n="scr.title">Mira las pantallas reales y elige entre 9 temas o crea el tuyo</h2>
+        <p class="sub" data-i18n="scr.lead">Usa los botones para cambiar de pantalla o de tema. La app está en español, inglés y portugués.</p>
         <div class="tabs" role="tablist" data-i18n-attr="aria-label:scr.tabs.label" aria-label="Pantallas y temas">
           <button role="tab" id="t-screens" aria-controls="p-screens" aria-selected="true" tabindex="0" data-panel="p-screens" data-i18n="scr.tab.screens">Pantallas</button>
           <button role="tab" id="t-themes" aria-controls="p-themes" aria-selected="false" tabindex="-1" data-panel="p-themes" data-i18n="scr.tab.themes">Temas</button>
         </div>
         <div id="p-screens" class="chips" data-group="screens" role="tabpanel" aria-labelledby="t-screens">
           <button aria-pressed="true" data-src="../screenshots/09-seal-copied.webp" data-caption="scr.s.accesses.d"><span data-i18n="scr.s.accesses">Accesos</span></button>
+          <button aria-pressed="false" data-src="../screenshots/15-todo.webp" data-caption="scr.s.todo.d"><span data-i18n="scr.s.todo">TO DO</span></button>
           <button aria-pressed="false" data-src="../screenshots/12-wifi-qr.webp" data-caption="scr.s.wifi.d"><span data-i18n="scr.s.wifi">Plantillas</span></button>
           <button aria-pressed="false" data-src="../screenshots/13-note-edit.webp" data-caption="scr.s.notes.d"><span data-i18n="scr.s.notes">Notas</span></button>
           <button aria-pressed="false" data-src="../screenshots/16-agenda.webp" data-caption="scr.s.agenda.d"><span data-i18n="scr.s.agenda">Agenda</span></button>
+          <button aria-pressed="false" data-src="../screenshots/21-timer.webp" data-caption="scr.s.timer.d"><span data-i18n="scr.s.timer">Temporizador</span></button>
           <button aria-pressed="false" data-src="../screenshots/17-search.webp" data-caption="scr.s.search.d"><span data-i18n="scr.s.search">Búsqueda</span></button>
           <button aria-pressed="false" data-src="../screenshots/03-totp.webp" data-caption="scr.s.2fa.d"><span data-i18n="scr.s.2fa">2FA</span></button>
           <button aria-pressed="false" data-src="../screenshots/20-lock.webp" data-caption="scr.s.pin.d"><span data-i18n="scr.s.pin">PIN</span></button>
@@ -172,7 +175,9 @@
           <button aria-pressed="false" data-src="../screenshots/19-theme-noite.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#171C21"><i style="background:#8DBBA0"></i></span>Noite</button>
           <button aria-pressed="false" data-src="../screenshots/19-theme-oceano.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F5F7FA"><i style="background:#0077C8"></i></span>Oceano</button>
           <button aria-pressed="false" data-src="../screenshots/19-theme-rubi.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F6EEEE"><i style="background:#B4232F"></i></span>Rubi</button>
+          <button aria-pressed="false" data-src="../screenshots/19-theme-onix.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#0A0A0A"><i style="background:#FFFFFF"></i></span>Ônix</button>
           <button aria-pressed="false" data-src="../screenshots/19-theme-matrix.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#050A06"><i style="background:#00FF41"></i></span>Matrix</button>
+          <button aria-pressed="false" data-src="../screenshots/23-theme-editor.webp" data-caption="scr.custom.d"><span class="sw" style="background:#0E1B21"><i style="background:#34C3B4"></i></span><span data-i18n="scr.custom">Tus temas</span></button>
         </div>
         <p class="note-line">
           <span data-i18n="scr.window">La ventana también flota o se acopla a la izquierda y la derecha.</span>
@@ -180,8 +185,8 @@
         </p>
       </div>
       <figure class="stage reveal d1">
-        <div class="frame"><img id="shot" src="../screenshots/09-seal-copied.webp" data-i18n-attr="alt:scr.s.accesses.d" alt="Un clic copia la contraseña. Puedes importar las contraseñas guardadas en Chrome, Edge o Brave." width="576" height="877" loading="lazy"></div>
-        <figcaption id="shot-caption" aria-live="polite" data-i18n="scr.s.accesses.d">Un clic copia la contraseña. Puedes importar las contraseñas guardadas en Chrome, Edge o Brave.</figcaption>
+        <div class="frame"><img id="shot" src="../screenshots/09-seal-copied.webp" data-i18n-attr="alt:scr.s.accesses.d" alt="Un clic copia la contraseña. Categorías con iconos, filtros y el orden que quieras: solo arrastra." width="576" height="877" loading="lazy"></div>
+        <figcaption id="shot-caption" aria-live="polite" data-i18n="scr.s.accesses.d">Un clic copia la contraseña. Categorías con iconos, filtros y el orden que quieras: solo arrastra.</figcaption>
       </figure>
     </div>
   </section>
@@ -214,6 +219,7 @@
           <details><summary data-i18n="faq.q3">¿Puedo traer las contraseñas del navegador?</summary><p data-i18n="faq.a3">Sí. Exporta el CSV de contraseñas de Chrome, Edge o Brave y usa Importar do navegador (Importar del navegador) en la pestaña Acessos. Después borra el CSV, porque no está cifrado.</p></details>
           <details><summary data-i18n="faq.q4">¿Por qué Windows muestra un aviso al instalar?</summary><p data-i18n="faq.a4">El instalador aún no tiene certificado de firma digital, que es de pago. Haz clic en Más información y luego en Ejecutar de todas formas. Todo el código está en GitHub.</p></details>
           <details><summary data-i18n="faq.q5">¿Cómo sé que es seguro?</summary><p data-i18n="faq.a5">El código es abierto (MIT) y cualquiera puede revisarlo. No hay servidor ni telemetría. El cifrado, AES-256-GCM con clave derivada por scrypt, está en src/main/crypto.ts. Hideout aún no tiene auditoría independiente.</p></details>
+          <details><summary data-i18n="faq.q6">¿Hideout se actualiza solo?</summary><p data-i18n="faq.a6">Sí. Al abrirse y una vez al día busca versiones nuevas en GitHub, las descarga en segundo plano y pregunta si puede reiniciar. Puedes desactivarlo en Configuración → Datos. La versión portátil solo avisa y abre la página de descarga.</p></details>
         </div>
       </div>
       <div class="community">
