@@ -2,8 +2,9 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { hostname } from 'node:os'
 import { join } from 'node:path'
+import { tr } from '@shared/i18n'
 import { emptyData, mergeData, normalizeUser, now, purgeTrash } from '@shared/model'
-import type { AttachmentRef, LoginStep, ScheduledTask, SignupStart, UnlockInfo, VaultData } from '@shared/types'
+import type { AttachmentRef, LoginStep, Schedule, ScheduledTask, SignupStart, UnlockInfo, VaultData } from '@shared/types'
 import {
   KDF, deriveKey, newRecoveryCode, newTotpSecret, normalizeRecoveryCode, open, otpauthUri, seal, verifyTotp, type Sealed
 } from './crypto'
@@ -102,9 +103,9 @@ export class VaultService {
 
   async signupBegin(rawUser: string, password: string): Promise<SignupStart> {
     const user = normalizeUser(rawUser)
-    if (!user) throw new VaultError('bad_user', 'Escolha um nome de usuário com letras ou números.')
-    if (password.length < 12) throw new VaultError('weak_password', 'A senha mestra precisa ter pelo menos 12 caracteres.')
-    if (existsSync(vaultPath(this.getDir(), user))) throw new VaultError('user_exists', 'Já existe uma conta com esse usuário nesta pasta.')
+    if (!user) throw new VaultError('bad_user', tr('Escolha um nome de usuário com letras ou números.'))
+    if (password.length < 12) throw new VaultError('weak_password', tr('A senha mestra precisa ter pelo menos 12 caracteres.'))
+    if (existsSync(vaultPath(this.getDir(), user))) throw new VaultError('user_exists', tr('Já existe uma conta com esse usuário nesta pasta.'))
     const totpSecret = newTotpSecret()
     this.pending = { mode: 'signup', user, key: randomBytes(32), file: null, password, totpSecret, totpOk: false, recoveryCode: newRecoveryCode() }
     return { otpauth: otpauthUri(totpSecret, user), secret: totpSecret }
@@ -112,18 +113,18 @@ export class VaultService {
 
   verifyPendingTotp(code: string): void {
     const p = this.requirePending()
-    if (!p.totpSecret || !verifyTotp(p.totpSecret, code)) throw new VaultError('bad_totp', 'Código incorreto. Confira o horário do celular e tente o código novo.')
+    if (!p.totpSecret || !verifyTotp(p.totpSecret, code)) throw new VaultError('bad_totp', tr('Código incorreto. Confira o horário do celular e tente o código novo.'))
     p.totpOk = true
   }
 
   /** Last step of signup / recovery / first login on this PC. Returns the recovery code when one was created. */
   async finishWithPin(pin: string): Promise<{ recoveryCode: string | null; info: UnlockInfo }> {
     const p = this.requirePending()
-    if (!/^\d{6}$/.test(pin)) throw new VaultError('bad_pin', 'O PIN precisa ter 6 dígitos.')
+    if (!/^\d{6}$/.test(pin)) throw new VaultError('bad_pin', tr('O PIN precisa ter 6 dígitos.'))
     let recoveryCode: string | null = null
 
     if (p.mode === 'signup') {
-      if (!p.totpOk) throw new VaultError('bad_totp', 'Confirme o código do autenticador primeiro.')
+      if (!p.totpOk) throw new VaultError('bad_totp', tr('Confirme o código do autenticador primeiro.'))
       const id = randomUUID()
       const pwSalt = randomBytes(16), rcSalt = randomBytes(16)
       const [pwKey, rcKey] = await Promise.all([deriveKey(p.password!, pwSalt), deriveKey(normalizeRecoveryCode(p.recoveryCode!), rcSalt)])
@@ -140,7 +141,7 @@ export class VaultService {
       this.data = data
       recoveryCode = p.recoveryCode!
     } else if (p.mode === 'recover') {
-      if (!p.totpOk || !p.password) throw new VaultError('bad_totp', 'Confirme o novo código do autenticador primeiro.')
+      if (!p.totpOk || !p.password) throw new VaultError('bad_totp', tr('Confirme o novo código do autenticador primeiro.'))
       const f = p.file!
       const pwSalt = randomBytes(16)
       const pwKey = await deriveKey(p.password, pwSalt)
@@ -173,19 +174,19 @@ export class VaultService {
   async login(rawUser: string, password: string, totp?: string): Promise<LoginStep> {
     const user = normalizeUser(rawUser)
     const path = vaultPath(this.getDir(), user)
-    if (!existsSync(path)) throw new VaultError('bad_credentials', 'Usuário ou senha incorretos.')
+    if (!existsSync(path)) throw new VaultError('bad_credentials', tr('Usuário ou senha incorretos.'))
     const f = readVaultFile(path)
     let key: Buffer
     try {
       key = open(await deriveKey(password, Buffer.from(f.pw.salt, 'base64'), f.kdf), f.pw.wrap, aad(f.id, 'pw'))
     } catch {
-      throw new VaultError('bad_credentials', 'Usuário ou senha incorretos.')
+      throw new VaultError('bad_credentials', tr('Usuário ou senha incorretos.'))
     }
     const data = JSON.parse(open(key, f.data, aad(f.id, 'data')).toString('utf8')) as VaultData
     if (!(await this.isTrusted(user, f.id, data))) {
       if (!totp) return { needTotp: true, needPin: false }
       const secret = open(key, f.totp, aad(f.id, 'totp')).toString('utf8')
-      if (!verifyTotp(secret, totp)) throw new VaultError('bad_totp', 'Código do autenticador incorreto.')
+      if (!verifyTotp(secret, totp)) throw new VaultError('bad_totp', tr('Código do autenticador incorreto.'))
     }
     this.pending = { mode: 'login', user, key, file: f, totpOk: true }
     return { needTotp: false, needPin: true }
@@ -193,9 +194,9 @@ export class VaultService {
 
   async unlockWithPin(user: string, pin: string): Promise<UnlockInfo> {
     const s = await readProtected<Session>(this.sessionPath(user))
-    if (!s) throw new VaultError('no_session', 'Entre com usuário e senha.')
+    if (!s) throw new VaultError('no_session', tr('Entre com usuário e senha.'))
     const path = vaultPath(this.getDir(), user)
-    if (!existsSync(path)) throw new VaultError('no_vault', 'O arquivo do cofre não foi encontrado. Confira a pasta em Configurações.')
+    if (!existsSync(path)) throw new VaultError('no_vault', tr('O arquivo do cofre não foi encontrado. Confira a pasta em Configurações.'))
     const f = readVaultFile(path)
     let key: Buffer
     try {
@@ -204,20 +205,20 @@ export class VaultService {
       s.attempts += 1
       if (s.attempts >= MAX_PIN_ATTEMPTS) {
         this.logout(user)
-        throw new VaultError('pin_locked', 'PIN errado 5 vezes. Por segurança, entre com usuário e senha.')
+        throw new VaultError('pin_locked', tr('PIN errado 5 vezes. Por segurança, entre com usuário e senha.'))
       }
       await writeProtected(this.sessionPath(user), s)
       const left = MAX_PIN_ATTEMPTS - s.attempts
-      throw new VaultError('bad_pin', `PIN incorreto. ${left === 1 ? 'Resta 1 tentativa' : `Restam ${left} tentativas`}.`)
+      throw new VaultError('bad_pin', left === 1 ? tr('PIN incorreto. Resta 1 tentativa.') : tr('PIN incorreto. Restam {left} tentativas.', { left }))
     }
     if (f.id !== s.vaultId) {
       this.logout(user)
-      throw new VaultError('no_session', 'O cofre mudou. Entre com usuário e senha.')
+      throw new VaultError('no_session', tr('O cofre mudou. Entre com usuário e senha.'))
     }
     const data = JSON.parse(open(key, f.data, aad(f.id, 'data')).toString('utf8')) as VaultData
     if (!data.devices.some((d) => d.id === this.deviceId())) {
       this.forgetDevice(user)
-      throw new VaultError('revoked', 'Este computador foi removido da conta. Entre com usuário, senha e 2FA.')
+      throw new VaultError('revoked', tr('Este computador foi removido da conta. Entre com usuário, senha e 2FA.'))
     }
     if (s.attempts) await writeProtected(this.sessionPath(user), { ...s, attempts: 0 })
     this.key = key
@@ -261,19 +262,19 @@ export class VaultService {
   async recoverBegin(rawUser: string, code: string): Promise<void> {
     const user = normalizeUser(rawUser)
     const path = vaultPath(this.getDir(), user)
-    if (!existsSync(path)) throw new VaultError('bad_recovery', 'Usuário ou código de recuperação incorretos.')
+    if (!existsSync(path)) throw new VaultError('bad_recovery', tr('Usuário ou código de recuperação incorretos.'))
     const f = readVaultFile(path)
     try {
       const key = open(await deriveKey(normalizeRecoveryCode(code), Buffer.from(f.rc.salt, 'base64'), f.kdf), f.rc.wrap, aad(f.id, 'rc'))
       this.pending = { mode: 'recover', user, key, file: f, totpOk: false }
     } catch {
-      throw new VaultError('bad_recovery', 'Usuário ou código de recuperação incorretos.')
+      throw new VaultError('bad_recovery', tr('Usuário ou código de recuperação incorretos.'))
     }
   }
 
   recoverSetPassword(password: string): SignupStart {
     const p = this.requirePending()
-    if (password.length < 12) throw new VaultError('weak_password', 'A senha mestra precisa ter pelo menos 12 caracteres.')
+    if (password.length < 12) throw new VaultError('weak_password', tr('A senha mestra precisa ter pelo menos 12 caracteres.'))
     p.password = password
     p.totpSecret = newTotpSecret()
     return { otpauth: otpauthUri(p.totpSecret, p.user), secret: p.totpSecret }
@@ -286,13 +287,13 @@ export class VaultService {
     try {
       open(await deriveKey(password, Buffer.from(f.pw.salt, 'base64'), f.kdf), f.pw.wrap, aad(f.id, 'pw'))
     } catch {
-      throw new VaultError('bad_password', 'Senha mestra incorreta.')
+      throw new VaultError('bad_password', tr('Senha mestra incorreta.'))
     }
   }
 
   async changePassword(current: string, next: string): Promise<void> {
     await this.checkPassword(current)
-    if (next.length < 12) throw new VaultError('weak_password', 'A nova senha precisa ter pelo menos 12 caracteres.')
+    if (next.length < 12) throw new VaultError('weak_password', tr('A nova senha precisa ter pelo menos 12 caracteres.'))
     const f = this.requireFile()
     const salt = randomBytes(16)
     f.pw = { salt: salt.toString('base64'), wrap: seal(await deriveKey(next, salt), this.key!, aad(f.id, 'pw')) }
@@ -301,7 +302,7 @@ export class VaultService {
   }
 
   async changePin(pin: string): Promise<void> {
-    if (!/^\d{6}$/.test(pin)) throw new VaultError('bad_pin', 'O PIN precisa ter 6 dígitos.')
+    if (!/^\d{6}$/.test(pin)) throw new VaultError('bad_pin', tr('O PIN precisa ter 6 dígitos.'))
     this.requireFile()
     await this.writeSession(pin)
   }
@@ -327,7 +328,7 @@ export class VaultService {
 
   totpResetConfirm(code: string): void {
     const f = this.requireFile()
-    if (!this.totpDraft || !verifyTotp(this.totpDraft, code)) throw new VaultError('bad_totp', 'Código incorreto.')
+    if (!this.totpDraft || !verifyTotp(this.totpDraft, code)) throw new VaultError('bad_totp', tr('Código incorreto.'))
     f.totp = seal(this.key!, Buffer.from(this.totpDraft), aad(f.id, 'totp'))
     f.headerAt = now()
     this.totpDraft = null
@@ -397,21 +398,27 @@ export class VaultService {
 
   private async writeSchedule(): Promise<void> {
     if (!this.user || !this.data || !existsSync(this.sessionPath(this.user))) return
-    const list: ScheduledTask[] = this.data.tasks
-      .filter((t) => !t.deletedAt && !t.done && t.due)
-      .map((t) => ({ id: t.id, title: t.title, due: t.due!, snoozedUntil: t.snoozedUntil ?? null }))
-    await writeProtected(this.schedulePath(this.user), list)
+    const open = this.data.tasks.filter((t) => !t.deletedAt && !t.done)
+    const schedule: Schedule = {
+      tasks: open.filter((t) => t.due).map((t) => ({ id: t.id, title: t.title, due: t.due!, snoozedUntil: t.snoozedUntil ?? null })),
+      pendingTodos: open.filter((t) => !t.due).length
+    }
+    await writeProtected(this.schedulePath(this.user), schedule)
   }
 
-  schedules(): Promise<Array<{ user: string; tasks: ScheduledTask[] }>> {
-    return Promise.all(this.sessions().map(async (user) => ({ user, tasks: (await readProtected<ScheduledTask[]>(this.schedulePath(user))) ?? [] })))
+  schedules(): Promise<Array<{ user: string } & Schedule>> {
+    return Promise.all(this.sessions().map(async (user) => {
+      const s = await readProtected<Schedule | ScheduledTask[]>(this.schedulePath(user))
+      // 0.1 stored a bare array of tasks.
+      return { user, ...(Array.isArray(s) ? { tasks: s, pendingTodos: 0 } : (s ?? { tasks: [], pendingTodos: 0 })) }
+    }))
   }
 
   // --- attachments ---------------------------------------------------------------
 
   addAttachment(name: string, mime: string, content: Buffer): AttachmentRef {
     const f = this.requireFile()
-    if (content.length > MAX_ATTACHMENT) throw new VaultError('too_big', 'O anexo pode ter no máximo 10 MB.')
+    if (content.length > MAX_ATTACHMENT) throw new VaultError('too_big', tr('O anexo pode ter no máximo 10 MB.'))
     const ref: AttachmentRef = { id: randomUUID(), name, size: content.length, mime, addedAt: now() }
     const dir = attachmentsDir(this.getDir(), this.user!)
     mkdirSync(dir, { recursive: true })
@@ -446,12 +453,12 @@ export class VaultService {
   }
 
   private requirePending(): Pending {
-    if (!this.pending) throw new VaultError('no_pending', 'Recomece o processo.')
+    if (!this.pending) throw new VaultError('no_pending', tr('Recomece o processo.'))
     return this.pending
   }
 
   private requireFile(): VaultFile {
-    if (!this.key || !this.file || !this.data) throw new VaultError('locked', 'O cofre está trancado.')
+    if (!this.key || !this.file || !this.data) throw new VaultError('locked', tr('O cofre está trancado.'))
     return this.file
   }
 

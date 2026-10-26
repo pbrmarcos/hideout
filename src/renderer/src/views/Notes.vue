@@ -4,6 +4,7 @@ import { newNote } from '@shared/model'
 import { S, live, openNewNote, upsertNote } from '../store'
 import { preview, progress } from '../markdown'
 import { NOTE_COLORS, relDate } from '../format'
+import { t } from '../i18n'
 
 const quick = ref('')
 
@@ -25,22 +26,22 @@ const color = (c: string): string => NOTE_COLORS.find((x) => x.id === c)?.hex ??
   <div class="list">
     <div v-if="!notes.length" class="empty">
       <UIcon name="i-lucide-sticky-note" class="size-9 icon" />
-      <h2>Nenhuma nota ainda</h2>
-      <p>Escreva uma nota rápida lá embaixo e aperte Enter. Use "- [ ]" no começo da linha para criar um checklist.</p>
+      <h2>{{ t('Nenhuma nota ainda') }}</h2>
+      <p>{{ t('Escreva uma nota rápida lá embaixo e aperte Enter. Use "- [ ]" no começo da linha para criar um checklist.') }}</p>
     </div>
     <template v-for="(group, gi) in [pinned, recent]" :key="gi">
       <div v-if="group.length" class="gh">
-        <UIcon v-if="gi === 0" name="i-lucide-pin" class="size-[14px]" />{{ gi === 0 ? 'Fixadas' : pinned.length ? 'Recentes' : 'Todas' }}
+        <UIcon v-if="gi === 0" name="i-lucide-pin" class="size-[14px]" />{{ gi === 0 ? t('Fixadas') : pinned.length ? t('Recentes') : t('Todas') }}
       </div>
       <button v-for="n in group" :key="n.id" class="note" @click="S.sheet = { kind: 'note', id: n.id }">
         <span class="cd" :style="{ background: color(n.color) }" aria-hidden="true" />
         <span class="body">
-          <span class="nt">{{ n.title || 'Sem título' }}</span>
+          <span class="nt">{{ n.title || t('Sem título') }}</span>
           <span v-if="n.body" class="np">{{ preview(n.body) }}</span>
           <span class="meta">
             <span v-if="progress(n.body).total" class="prog">
               <span class="bar"><i :style="{ width: `${(progress(n.body).done / progress(n.body).total) * 100}%` }" /></span>
-              {{ progress(n.body).done }} de {{ progress(n.body).total }} feitos
+              {{ t('{done} de {total} feitos', { done: progress(n.body).done, total: progress(n.body).total }) }}
             </span>
             <span v-if="n.attachments.length"><UIcon name="i-lucide-paperclip" class="size-3 align-[-1px]" /> {{ n.attachments.length }}</span>
             <span>{{ relDate(n.updatedAt) }}</span>
@@ -50,8 +51,8 @@ const color = (c: string): string => NOTE_COLORS.find((x) => x.id === c)?.hex ??
     </template>
   </div>
   <form class="foot" @submit.prevent="addQuick">
-    <div class="hx-in quick"><input v-model="quick" placeholder="Escreva uma nota rápida e pressione Enter" aria-label="Nota rápida" /></div>
-    <button type="button" class="hx-btn hx-primary" @click="openNewNote"><UIcon name="i-lucide-plus" class="size-4" />Nova nota</button>
+    <div class="hx-in quick"><input v-model="quick" :placeholder="t('Escreva uma nota rápida e pressione Enter')" :aria-label="t('Nota rápida')" /></div>
+    <button type="button" class="hx-btn hx-primary" @click="openNewNote"><UIcon name="i-lucide-plus" class="size-4" />{{ t('Nova nota') }}</button>
   </form>
 </template>
 

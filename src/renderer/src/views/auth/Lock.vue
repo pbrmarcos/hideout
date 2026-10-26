@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { AppState, UnlockInfo } from '@shared/types'
 import { api, ApiError } from '../../api'
+import { t } from '../../i18n'
 import { S, enterVault, setTheme } from '../../store'
 import Logo from '../../components/Logo.vue'
 import PinPad from '../../components/PinPad.vue'
@@ -12,12 +13,12 @@ const error = ref('')
 const shake = ref(false)
 const busy = ref(false)
 
-const reasons: Record<string, string> = {
-  idle: 'Trancado por inatividade.',
-  windows: 'Trancado junto com o Windows.',
+const reasons = computed<Record<string, string>>(() => ({
+  idle: t('Trancado por inatividade.'),
+  windows: t('Trancado junto com o Windows.'),
   manual: ''
-}
-const subtitle = computed(() => (S.lockReason && reasons[S.lockReason]) || 'Digite seu PIN para abrir.')
+}))
+const subtitle = computed(() => (S.lockReason && reasons.value[S.lockReason]) || t('Digite seu PIN para abrir.'))
 
 const otherUsers = computed(() => {
   const all = new Set([...(S.app?.sessions ?? []), ...(S.app?.users ?? [])])
@@ -26,7 +27,7 @@ const otherUsers = computed(() => {
 })
 const menu = computed(() => [
   otherUsers.value.map((u) => ({ label: u, icon: 'i-lucide-user', onSelect: () => switchTo(u) })),
-  [{ label: 'Criar outra conta', icon: 'i-lucide-user-plus', onSelect: () => (S.auth = { name: 'signup' }) }]
+  [{ label: t('Criar outra conta'), icon: 'i-lucide-user-plus', onSelect: () => (S.auth = { name: 'signup' }) }]
 ])
 
 function switchTo(u: string): void {
@@ -71,21 +72,21 @@ async function signOut(): Promise<void> {
     <div class="center">
       <Logo :size="56" />
       <UDropdownMenu :items="menu" :content="{ align: 'center' }">
-        <button class="user" aria-label="Trocar de usuário">
+        <button class="user" :aria-label="t('Trocar de usuário')">
           <span class="a">{{ user[0]?.toUpperCase() }}</span>{{ user }}
           <UIcon name="i-lucide-chevron-down" class="size-[14px] opacity-70" />
         </button>
       </UDropdownMenu>
       <div class="titles">
-        <h1>{{ busy ? 'Abrindo seu cofre…' : 'Bem-vindo de volta' }}</h1>
+        <h1>{{ busy ? t('Abrindo seu cofre…') : t('Bem-vindo de volta') }}</h1>
         <p>{{ subtitle }}</p>
       </div>
       <PinPad v-model="pin" :disabled="busy" :error="shake" @complete="unlock" />
       <p v-if="error" class="hx-error" role="alert">{{ error }}</p>
     </div>
     <div class="links">
-      <button class="hx-link" @click="S.auth = { name: 'login', user }">Entrar com a senha</button>
-      <button class="hx-link muted" @click="signOut">Sair da conta</button>
+      <button class="hx-link" @click="S.auth = { name: 'login', user }">{{ t('Entrar com a senha') }}</button>
+      <button class="hx-link muted" @click="signOut">{{ t('Sair da conta') }}</button>
     </div>
   </div>
 </template>

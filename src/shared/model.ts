@@ -55,6 +55,16 @@ export function normalizeData(d: VaultData): VaultData {
   for (const name of [...names].sort((a, b) => (a === DEFAULT_CATEGORY ? -1 : b === DEFAULT_CATEGORY ? 1 : a.localeCompare(b, 'pt-BR')))) {
     if (!d.categories.some((c) => !c.deletedAt && sameName(c.name, name))) d.categories.push(newCategory(name, ++order, name === DEFAULT_CATEGORY ? 'i-lucide-folder' : CATEGORY_ICONS[0]))
   }
+  // Accesses from 0.1 have no manual position yet: start from alphabetical order.
+  const unordered = d.accesses.filter((a) => a.order === undefined)
+  if (unordered.length) {
+    const byCat = new Map<string, number>()
+    for (const a of [...unordered].sort((x, y) => x.title.localeCompare(y.title, 'pt-BR'))) {
+      const n = byCat.get(a.category) ?? d.accesses.filter((x) => x.category === a.category && x.order !== undefined).length
+      a.order = n
+      byCat.set(a.category, n + 1)
+    }
+  }
   return d
 }
 

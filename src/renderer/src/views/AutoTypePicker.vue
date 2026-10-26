@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { template } from '@shared/model'
 import { api } from '../api'
 import { useCopy } from '../copy'
+import { t } from '../i18n'
 import { S, live } from '../store'
 
 const term = ref('')
@@ -19,14 +20,14 @@ const groups = computed(() => {
   const all = live(S.data.accesses).filter((a) => a.password || a.username)
   const best = all.filter((a) => ids.has(a.id))
   const toItem = (a: (typeof all)[number]) => ({
-    label: a.title || 'Sem nome',
+    label: a.title || t('Sem nome'),
     suffix: a.username,
     icon: template(a.type).icon,
     onSelect: () => run(a.id)
   })
   return [
-    ...(best.length ? [{ id: 'best', label: 'Combinam com a janela', items: best.map(toItem) }] : []),
-    { id: 'all', label: 'Todos os acessos', items: all.filter((a) => !ids.has(a.id)).map(toItem) }
+    ...(best.length ? [{ id: 'best', label: t('Combinam com a janela'), items: best.map(toItem) }] : []),
+    { id: 'all', label: t('Todos os acessos'), items: all.filter((a) => !ids.has(a.id)).map(toItem) }
   ]
 })
 
@@ -41,13 +42,13 @@ async function run(id: string | null): Promise<void> {
 </script>
 
 <template>
-  <UModal :open="!!S.autoType" title="Digitar login" :description="S.autoType ? `Na janela: ${S.autoType.title}` : ''" @update:open="(o) => !o && run(null)">
+  <UModal :open="!!S.autoType" :title="t('Digitar login')" :description="S.autoType ? t('Na janela: {title}', { title: S.autoType.title }) : ''" @update:open="(o) => !o && run(null)">
     <template #content>
       <div class="head">
-        <b>Qual login digitar?</b>
-        <span class="hx-hint">Janela: {{ S.autoType?.title }}</span>
+        <b>{{ t('Qual login digitar?') }}</b>
+        <span class="hx-hint">{{ t('Janela: {title}', { title: S.autoType?.title ?? '' }) }}</span>
       </div>
-      <UCommandPalette v-model:search-term="term" :groups="groups" placeholder="Buscar acesso" class="h-[min(420px,60vh)]" />
+      <UCommandPalette v-model:search-term="term" :groups="groups" :placeholder="t('Buscar acesso')" class="h-[min(420px,60vh)]" />
     </template>
   </UModal>
 </template>

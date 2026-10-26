@@ -2,16 +2,20 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import type { Repeat, Task } from '@shared/types'
 import { REPEAT_LABEL, dueLabel, fromLocalInput, parseQuick, time, toLocalInput } from '../format'
-import { S, live, snooze, toggleTask, upsertTask } from '../store'
+import { t } from '../i18n'
+import { useCopy } from '../copy'
+import { S, live, quickTask, snooze, toggleTask, upsertTask } from '../store'
 import { newTask } from '@shared/model'
+
+const { info } = useCopy()
 
 const text = ref('')
 const manualDue = ref('')
 const manualRepeat = ref<Repeat>('none')
 const showDone = ref(false)
 const nowTick = ref(Date.now())
-const t = setInterval(() => (nowTick.value = Date.now()), 30_000)
-onBeforeUnmount(() => clearInterval(t))
+const timer = setInterval(() => (nowTick.value = Date.now()), 30_000)
+onBeforeUnmount(() => clearInterval(timer))
 
 const parsed = computed(() => parseQuick(text.value))
 const due = computed(() => fromLocalInput(manualDue.value) ?? parsed.value.due)
@@ -19,7 +23,11 @@ const due = computed(() => fromLocalInput(manualDue.value) ?? parsed.value.due)
 function add(): void {
   const title = manualDue.value ? text.value.trim() : parsed.value.title
   if (!title) return
-  upsertTask({ ...newTask(title, due.value), repeat: due.value ? manualRepeat.value : 'none' })
+  if (due.value) upsertTask({ ...newTask(title, due.value), repeat: manualRepeat.value })
+  else {
+    quickTask(title, null)
+    info(t('Sem data, foi para o TO DO'))
+  }
   text.value = ''
   manualDue.value = ''
   manualRepeat.value = 'none'
@@ -35,42 +43,41 @@ const groups = computed(() => {
   const open = live(S.data!.tasks).filter((x) => !x.done)
   const dated = open.filter((x) => x.due).sort((a, b) => when(a) - when(b))
   return [
-    { id: 'late', name: 'Atrasados', late: true, items: dated.filter((x) => when(x) < today) },
-    { id: 'today', name: 'Hoje', late: false, items: dated.filter((x) => when(x) >= today && when(x) < tomorrow) },
-    { id: 'tomorrow', name: 'Amanhã', late: false, items: dated.filter((x) => when(x) >= tomorrow && when(x) < after) },
-    { id: 'next', name: 'Próximos', late: false, items: dated.filter((x) => when(x) >= after) },
-    { id: 'nodate', name: 'Sem data', late: false, items: open.filter((x) => !x.due).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) }
+    { id: 'late', name: t('Atrasados'), late: true, items: dated.filter((x) => when(x) < today) },
+    { id: 'today', name: t('Hoje'), late: false, items: dated.filter((x) => when(x) >= today && when(x) < tomorrow) },
+    { id: 'tomorrow', name: t('Amanhã'), late: false, items: dated.filter((x) => when(x) >= tomorrow && when(x) < after) },
+    { id: 'next', name: t('Próximos'), late: false, items: dated.filter((x) => when(x) >= after) }
   ].filter((g) => g.items.length)
 })
-const done = computed(() => live(S.data!.tasks).filter((x) => x.done).sort((a, b) => (b.doneAt ?? '').localeCompare(a.doneAt ?? '')).slice(0, 30))
+const done = computed(() => live(S.data!.tasks).filter((x) => x.done && x.due).sort((a, b) => (b.doneAt ?? '').localeCompare(a.doneAt ?? '')).slice(0, 30))
 const isPast = (x: Task): boolean => !!x.due && when(x) < nowTick.value
 
 const fired = computed(() => S.fired.map((f) => S.data!.tasks.find((x) => x.id === f.id)).filter((x): x is Task => !!x && !x.done))
 
-const repeatItems = [
-  { label: 'Não repetir', value: 'none' },
-  { label: 'Todo dia', value: 'daily' },
-  { label: 'Toda semana', value: 'weekly' },
-  { label: 'Todo mês', value: 'monthly' }
-]
+const repeatItems = computed(() => [
+  { label: t('Não repetir'), value: 'none' },
+  { label: t('Todo dia'), value: 'daily' },
+  { label: t('Toda semana'), value: 'weekly' },
+  { label: t('Todo mês'), value: 'monthly' }
+])
 </script>
 
 <template>
   <form class="add" @submit.prevent="add">
     <UIcon name="i-lucide-plus" class="size-[18px] text-(--hx-primary) shrink-0" />
-    <input v-model="text" placeholder="Nova tarefa. Ex.: pagar boleto amanhã 9h" aria-label="Nova tarefa" />
-    <span v-if="due && text" class="chip" :title="manualDue ? 'Data escolhida' : 'Data entendida do texto'">
+    <input v-model="text" :placeholder="t('Nova tarefa. Ex.: pagar boleto amanhã 9h')" :aria-label="t('Nova tarefa')" />
+    <span v-if="due && text" class="chip" :title="manualDue ? t('Data escolhida') : t('Data entendida do texto')">
       <UIcon name="i-lucide-bell" class="size-3" />{{ dueLabel(due) }}
     </span>
     <UPopover :content="{ align: 'end' }">
-      <button type="button" class="when" aria-label="Escolher data do lembrete"><UIcon name="i-lucide-bell" class="size-[14px]" />Lembrar</button>
+      <button type="button" class="when" :aria-label="t('Escolher data do lembrete')"><UIcon name="i-lucide-bell" class="size-[14px]" />{{ t('Lembrar') }}</button>
       <template #content>
         <div class="pop">
-          <label class="hx-label" for="ag-due">Quando</label>
+          <label class="hx-label" for="ag-due">{{ t('Quando') }}</label>
           <div class="hx-in"><input id="ag-due" v-model="manualDue" type="datetime-local" :min="toLocalInput(new Date().toISOString())" /></div>
-          <label class="hx-label">Repetir</label>
+          <label class="hx-label">{{ t('Repetir') }}</label>
           <USelect v-model="manualRepeat" :items="repeatItems" />
-          <p class="hx-hint">Ou escreva no texto: "hoje 14h", "amanhã 9h", "sexta 10:30", "25/12 8h".</p>
+          <p class="hx-hint">{{ t('Ou escreva no texto: "hoje 14h", "amanhã 9h", "sexta 10:30", "25/12 8h".') }}</p>
         </div>
       </template>
     </UPopover>
@@ -78,43 +85,43 @@ const repeatItems = [
 
   <div v-for="x in fired" :key="'f' + x.id" class="alert" role="status">
     <UIcon name="i-lucide-bell-ring" class="size-[18px] shrink-0" />
-    <div class="atx"><b>{{ x.title }}</b><span>Lembrete de {{ x.due ? time(x.snoozedUntil && x.snoozedUntil > x.due ? x.snoozedUntil : x.due) : 'agora' }}</span></div>
-    <button class="sbtn light" @click="snooze(x.id)">Adiar 10 min</button>
-    <button class="sbtn dark" @click="toggleTask(x)">Concluir</button>
+    <div class="atx"><b>{{ x.title }}</b><span>{{ x.due ? t('Lembrete de {time}', { time: time(x.snoozedUntil && x.snoozedUntil > x.due ? x.snoozedUntil : x.due) }) : t('Lembrete de agora') }}</span></div>
+    <button class="sbtn light" @click="snooze(x.id)">{{ t('Adiar 10 min') }}</button>
+    <button class="sbtn dark" @click="toggleTask(x)">{{ t('Concluir') }}</button>
   </div>
 
   <div class="list">
     <div v-if="!groups.length && !done.length" class="empty">
       <UIcon name="i-lucide-calendar-check" class="size-9 icon" />
-      <h2>Agenda livre</h2>
-      <p>Escreva uma tarefa acima. Se colocar data e hora ("amanhã 9h"), o Hideout avisa com uma notificação do Windows.</p>
+      <h2>{{ t('Agenda livre') }}</h2>
+      <p>{{ t('Escreva um lembrete com data e hora ("amanhã 9h") e o Hideout avisa com uma notificação do Windows. Itens sem data vão para o TO DO.') }}</p>
     </div>
     <section v-for="g in groups" :key="g.id">
       <div class="gh" :class="{ late: g.late }">
         <UIcon v-if="g.late" name="i-lucide-circle-alert" class="size-[14px]" />{{ g.name }}
       </div>
       <div v-for="x in g.items" :key="x.id" class="it" @click="S.sheet = { kind: 'task', id: x.id }">
-        <button class="ck" :aria-label="`Concluir ${x.title}`" :aria-pressed="x.done" @click.stop="toggleTask(x)">
+        <button class="ck" :aria-label="t('Concluir {title}', { title: x.title })" :aria-pressed="x.done" @click.stop="toggleTask(x)">
           <UIcon name="i-lucide-check" class="size-[14px]" />
         </button>
         <div class="tt">
           <div class="n">{{ x.title }}</div>
           <div v-if="x.due" class="d" :class="{ late: isPast(x) }">
             <UIcon name="i-lucide-clock" class="size-3" />
-            <template v-if="x.snoozedUntil && x.snoozedUntil > x.due">Adiado para {{ dueLabel(x.snoozedUntil) }}</template>
+            <template v-if="x.snoozedUntil && x.snoozedUntil > x.due">{{ t('Adiado para {date}', { date: dueLabel(x.snoozedUntil) }) }}</template>
             <template v-else>{{ dueLabel(x.due) }}</template>
           </div>
         </div>
-        <span v-if="x.repeat !== 'none'" class="pill"><UIcon name="i-lucide-repeat" class="size-3" />{{ REPEAT_LABEL[x.repeat] }}</span>
+        <span v-if="x.repeat !== 'none'" class="pill"><UIcon name="i-lucide-repeat" class="size-3" />{{ t(REPEAT_LABEL[x.repeat]) }}</span>
       </div>
     </section>
     <section v-if="done.length">
       <button class="gh toggle" :aria-expanded="showDone" @click="showDone = !showDone">
-        <UIcon name="i-lucide-chevron-down" class="size-[14px] chev" :class="{ closed: !showDone }" />Concluídas ({{ done.length }})
+        <UIcon name="i-lucide-chevron-down" class="size-[14px] chev" :class="{ closed: !showDone }" />{{ t('Concluídas ({n})', { n: done.length }) }}
       </button>
       <template v-if="showDone">
         <div v-for="x in done" :key="x.id" class="it" @click="S.sheet = { kind: 'task', id: x.id }">
-          <button class="ck done" :aria-label="`Reabrir ${x.title}`" aria-pressed="true" @click.stop="toggleTask(x)"><UIcon name="i-lucide-check" class="size-[14px]" /></button>
+          <button class="ck done" :aria-label="t('Reabrir {title}', { title: x.title })" aria-pressed="true" @click.stop="toggleTask(x)"><UIcon name="i-lucide-check" class="size-[14px]" /></button>
           <div class="tt"><div class="n struck">{{ x.title }}</div></div>
         </div>
       </template>

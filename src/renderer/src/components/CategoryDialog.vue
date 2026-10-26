@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { CATEGORY_COLORS, CATEGORY_ICONS } from '@shared/model'
 import { NOTE_COLORS } from '../format'
+import { t } from '../i18n'
 import { S, createCategory, live, updateCategory } from '../store'
 
 const name = ref('')
@@ -33,7 +34,7 @@ function save(): void {
   } else {
     const before = S.data!.categories.length
     const c = createCategory(clean, icon.value, color.value)
-    if (c && S.data!.categories.length === before) return void (error.value = 'Já existe uma categoria com esse nome.')
+    if (c && S.data!.categories.length === before) return void (error.value = t('Já existe uma categoria com esse nome.'))
   }
   S.categoryDialog = null
 }
@@ -42,23 +43,23 @@ function save(): void {
 <template>
   <UModal
     :open="!!S.categoryDialog"
-    :title="editing ? 'Editar categoria' : 'Nova categoria'"
-    :description="editing && count ? `${count} ${count === 1 ? 'acesso' : 'acessos'} nesta categoria. Renomear muda todos.` : 'Agrupe seus acessos do jeito que fizer sentido para você.'"
-    :close="{ 'aria-label': 'Fechar' }"
+    :title="editing ? t('Editar categoria') : t('Nova categoria')"
+    :description="editing && count ? (count === 1 ? t('1 acesso nesta categoria. Renomear muda todos.') : t('{n} acessos nesta categoria. Renomear muda todos.', { n: count })) : t('Agrupe seus acessos do jeito que fizer sentido para você.')"
+    :close="{ 'aria-label': t('Fechar') }"
     @update:open="(o) => !o && (S.categoryDialog = null)"
   >
     <template #body>
       <form class="form" @submit.prevent="save">
         <div class="hx-field">
-          <label class="hx-label" for="cat-name">Nome</label>
+          <label class="hx-label" for="cat-name">{{ t('Nome') }}</label>
           <div class="hx-in">
-            <input id="cat-name" v-model="name" maxlength="40" autofocus placeholder="Ex.: Trabalho, Bancos, Streaming" />
+            <input id="cat-name" v-model="name" maxlength="40" autofocus :placeholder="t('Ex.: Trabalho, Bancos, Streaming')" />
           </div>
-          <p v-if="error" class="hx-error" role="alert">{{ error }}</p>
+          <p v-if="error" class="hx-error" role="alert">{{ t(error) }}</p>
         </div>
         <div class="hx-field">
-          <span class="hx-label">Ícone</span>
-          <div class="icons" role="radiogroup" aria-label="Ícone">
+          <span class="hx-label">{{ t('Ícone') }}</span>
+          <div class="icons" role="radiogroup" :aria-label="t('Ícone')">
             <button
               v-for="i in CATEGORY_ICONS"
               :key="i"
@@ -75,15 +76,15 @@ function save(): void {
           </div>
         </div>
         <div class="hx-field">
-          <span class="hx-label">Cor</span>
-          <div class="colors" role="radiogroup" aria-label="Cor">
+          <span class="hx-label">{{ t('Cor') }}</span>
+          <div class="colors" role="radiogroup" :aria-label="t('Cor')">
             <button
               v-for="c in colors"
               :key="c.id"
               type="button"
               role="radio"
               :aria-checked="color === c.id"
-              :aria-label="c.label"
+              :aria-label="t(c.label)"
               class="c"
               :class="{ on: color === c.id }"
               :style="{ background: c.hex }"
@@ -92,8 +93,8 @@ function save(): void {
           </div>
         </div>
         <div class="foot">
-          <button type="button" class="hx-btn hx-ghost" @click="S.categoryDialog = null">Cancelar</button>
-          <button class="hx-btn hx-primary" :disabled="!name.trim()">{{ editing ? 'Salvar' : 'Criar categoria' }}</button>
+          <button type="button" class="hx-btn hx-ghost" @click="S.categoryDialog = null">{{ t('Cancelar') }}</button>
+          <button class="hx-btn hx-primary" :disabled="!name.trim()">{{ editing ? t('Salvar') : t('Criar categoria') }}</button>
         </div>
       </form>
     </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { S, live, openNewNote, type Tab } from '../store'
+import { S, live, openNewNote, todoList, type Tab } from '../store'
+import { t } from '../i18n'
 import Accesses from './Accesses.vue'
 import AccessEdit from './AccessEdit.vue'
 import Agenda from './Agenda.vue'
@@ -13,24 +14,29 @@ import Settings from './Settings.vue'
 import TaskEdit from './TaskEdit.vue'
 import Templates from './Templates.vue'
 import Trash from './Trash.vue'
+import Leaks from './Leaks.vue'
+import ThemeEditor from './ThemeEditor.vue'
+import Todo from './Todo.vue'
 
 const tabs: Array<{ id: Tab; label: string; icon: string }> = [
+  { id: 'todo', label: 'TO DO', icon: 'i-lucide-list-todo' },
   { id: 'accesses', label: 'Acessos', icon: 'i-lucide-key-round' },
   { id: 'notes', label: 'Notas', icon: 'i-lucide-sticky-note' },
   { id: 'agenda', label: 'Agenda', icon: 'i-lucide-calendar-check' }
 ]
 
+const todoCount = computed(() => (S.data ? todoList().length : 0))
 const todayCount = computed(() => {
   const end = new Date()
   end.setHours(23, 59, 59, 999)
-  return live(S.data?.tasks ?? []).filter((t) => !t.done && t.due && Date.parse(t.due) <= end.getTime()).length
+  return live(S.data?.tasks ?? []).filter((x) => !x.done && x.due && Date.parse(x.due) <= end.getTime()).length
 })
 
 function onKey(e: KeyboardEvent): void {
   if (e.ctrlKey && e.key.toLowerCase() === 'k') {
     e.preventDefault()
     S.search = true
-  } else if (e.ctrlKey && ['1', '2', '3'].includes(e.key)) {
+  } else if (e.ctrlKey && ['1', '2', '3', '4'].includes(e.key)) {
     S.tab = tabs[Number(e.key) - 1].id
     S.sheet = null
   } else if (e.ctrlKey && e.key.toLowerCase() === 'n' && !S.sheet) {
@@ -48,28 +54,30 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     <div class="top">
       <button class="search" @click="S.search = true">
         <UIcon name="i-lucide-search" class="size-[17px]" />
-        <span>Buscar em acessos, notas e agenda</span>
+        <span>{{ t('Buscar em acessos, notas e agenda') }}</span>
         <UKbd value="Ctrl K" class="ml-auto" />
       </button>
-      <nav class="tabs" role="tablist" aria-label="Seções">
+      <nav class="tabs" role="tablist" :aria-label="t('Seções')">
         <button
-          v-for="t in tabs"
-          :key="t.id"
+          v-for="tab in tabs"
+          :key="tab.id"
           class="tab"
           role="tab"
-          :class="{ on: S.tab === t.id }"
-          :aria-selected="S.tab === t.id"
-          @click="(S.tab = t.id), (S.sheet = null)"
+          :class="{ on: S.tab === tab.id }"
+          :aria-selected="S.tab === tab.id"
+          @click="(S.tab = tab.id), (S.sheet = null)"
         >
-          <UIcon :name="t.icon" class="size-4" />
-          {{ t.label }}
-          <span v-if="t.id === 'agenda' && todayCount" class="badge" :aria-label="`${todayCount} para hoje`">{{ todayCount }}</span>
+          <UIcon :name="tab.icon" class="size-4 ticon" />
+          {{ t(tab.label) }}
+          <span v-if="tab.id === 'todo' && todoCount" class="badge soft" :aria-label="t('{n} pendentes', { n: todoCount })">{{ todoCount }}</span>
+          <span v-else-if="tab.id === 'agenda' && todayCount" class="badge" :aria-label="t('{n} para hoje', { n: todayCount })">{{ todayCount }}</span>
         </button>
       </nav>
     </div>
 
     <main class="panel">
-      <Accesses v-if="S.tab === 'accesses'" />
+      <Todo v-if="S.tab === 'todo'" />
+      <Accesses v-else-if="S.tab === 'accesses'" />
       <Notes v-else-if="S.tab === 'notes'" />
       <Agenda v-else />
 
@@ -80,6 +88,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <Templates v-else-if="S.sheet?.kind === 'templates'" />
         <Settings v-else-if="S.sheet?.kind === 'settings'" />
         <Trash v-else-if="S.sheet?.kind === 'trash'" />
+        <Leaks v-else-if="S.sheet?.kind === 'leaks'" />
+        <ThemeEditor v-else-if="S.sheet?.kind === 'theme'" :key="S.sheet.id" :id="S.sheet.id" />
       </Transition>
     </main>
 
@@ -97,6 +107,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   min-height: 0;
 }
 .top {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -121,7 +132,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 }
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   background: var(--hx-tab);
   border-radius: 11px;
@@ -138,7 +149,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
+  padding: 0 4px;
+  white-space: nowrap;
+  min-width: 0;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
 }
@@ -164,6 +178,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+/* Narrow window: four tabs fit better without their icons. */
+@container (max-width: 420px) {
+  .ticon {
+    display: none;
+  }
+}
+.badge.soft {
+  background: var(--hx-soft);
+  color: var(--hx-soft-ink);
 }
 .panel {
   position: relative;

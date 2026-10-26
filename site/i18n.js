@@ -31,7 +31,7 @@
     'demo.label': 'Posição da janela na demonstração',
 
     'sec.title': 'Suas senhas só se abrem no seu computador. Nenhum servidor vê nada.',
-    'sec.lead': 'O Hideout não tem servidor, não pede conta online e não envia nada para a internet. O cofre é um arquivo criptografado. Se ele estiver no OneDrive, que é o padrão, a nuvem só guarda bytes embaralhados.',
+    'sec.lead': 'O Hideout não tem servidor e não pede conta online. Ele só se conecta à internet se você pedir a verificação de vazamentos, e mesmo assim nenhuma senha sai do PC. O cofre é um arquivo criptografado. Se ele estiver no OneDrive, que é o padrão, a nuvem só guarda bytes embaralhados.',
     'sec.pc': 'Seu computador',
     'sec.pc.d': 'O único lugar onde o cofre é aberto, com a sua senha mestra.',
     'sec.file': 'Arquivo .vault',
@@ -200,7 +200,7 @@
     'demo.label': 'Window position in the demo',
 
     'sec.title': 'Your passwords only unlock on your computer. No server sees a thing.',
-    'sec.lead': 'Hideout has no server, needs no online account and sends nothing to the internet. The vault is an encrypted file. If it sits in OneDrive, the default, the cloud only stores scrambled bytes.',
+    'sec.lead': 'Hideout has no server and needs no online account. It only goes online if you ask for a leak check, and even then no password leaves your PC. The vault is an encrypted file. If it sits in OneDrive, the default, the cloud only stores scrambled bytes.',
     'sec.pc': 'Your computer',
     'sec.pc.d': 'The only place the vault is opened, with your master password.',
     'sec.file': '.vault file',
@@ -369,7 +369,7 @@
     'demo.label': 'Posición de la ventana en la demostración',
 
     'sec.title': 'Tus contraseñas solo se abren en tu computadora. Ningún servidor ve nada.',
-    'sec.lead': 'Hideout no tiene servidor, no pide cuenta en línea y no envía nada a internet. La bóveda es un archivo cifrado. Si está en OneDrive, que es lo predeterminado, la nube solo guarda bytes revueltos.',
+    'sec.lead': 'Hideout no tiene servidor ni pide cuenta en línea. Solo se conecta a internet si pides la verificación de filtraciones, y aun así ninguna contraseña sale de tu PC. La bóveda es un archivo cifrado. Si está en OneDrive, que es lo predeterminado, la nube solo guarda bytes revueltos.',
     'sec.pc': 'Tu computadora',
     'sec.pc.d': 'El único lugar donde se abre la bóveda, con tu contraseña maestra.',
     'sec.file': 'Archivo .vault',

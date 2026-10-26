@@ -35,7 +35,8 @@ export class MainWindow {
       icon,
       title: 'Hideout',
       alwaysOnTop: this.s.alwaysOnTop,
-      webPreferences: { preload, sandbox: true, contextIsolation: true, nodeIntegration: false, spellcheck: false }
+      // Not throttled while hidden: reminder and timer sounds play from this window.
+      webPreferences: { preload, sandbox: true, contextIsolation: true, nodeIntegration: false, spellcheck: false, backgroundThrottling: false }
     })
     this.win.on('moved', () => this.onUserMove())
     this.win.on('resized', () => this.onUserResize())

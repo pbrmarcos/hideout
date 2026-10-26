@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import type { WindowMode, WindowState } from '@shared/types'
+import { computed } from 'vue'
 import { api } from '../api'
+import { t } from '../i18n'
 import { S, lockNow } from '../store'
 import Logo from './Logo.vue'
+import TimerButton from './TimerButton.vue'
 
 defineProps<{ unlocked: boolean }>()
 
@@ -13,11 +16,11 @@ async function top(): Promise<void> {
   S.window = await api<WindowState>('win:top')
 }
 
-const modes: Array<{ m: WindowMode; label: string; icon: string }> = [
-  { m: 'left', label: 'Encaixar à esquerda', icon: 'i-lucide-panel-left' },
-  { m: 'float', label: 'Flutuar', icon: 'i-lucide-picture-in-picture-2' },
-  { m: 'right', label: 'Encaixar à direita', icon: 'i-lucide-panel-right' }
-]
+const modes = computed<Array<{ m: WindowMode; label: string; icon: string }>>(() => [
+  { m: 'left', label: t('Encaixar à esquerda'), icon: 'i-lucide-panel-left' },
+  { m: 'float', label: t('Flutuar'), icon: 'i-lucide-picture-in-picture-2' },
+  { m: 'right', label: t('Encaixar à direita'), icon: 'i-lucide-panel-right' }
+])
 </script>
 
 <template>
@@ -25,36 +28,37 @@ const modes: Array<{ m: WindowMode; label: string; icon: string }> = [
     <div class="brand">
       <Logo />
       <span>Hideout</span>
-      <span v-if="S.saving" class="saving" aria-live="polite">salvando…</span>
+      <span v-if="S.saving" class="saving" aria-live="polite">{{ t('salvando…') }}</span>
     </div>
     <div class="no-drag tools">
+      <TimerButton />
       <template v-if="unlocked">
-        <UTooltip text="Trancar agora">
-          <button class="hx-ib" aria-label="Trancar agora" @click="lockNow">
+        <UTooltip :text="t('Trancar agora')">
+          <button class="hx-ib" :aria-label="t('Trancar agora')" @click="lockNow">
             <UIcon name="i-lucide-lock" class="size-[17px]" />
           </button>
         </UTooltip>
-        <UTooltip text="Configurações">
-          <button class="hx-ib" aria-label="Configurações" @click="S.sheet = { kind: 'settings' }">
+        <UTooltip :text="t('Configurações')">
+          <button class="hx-ib" :aria-label="t('Configurações')" @click="S.sheet = { kind: 'settings' }">
             <UIcon name="i-lucide-sliders-horizontal" class="size-[17px]" />
           </button>
         </UTooltip>
       </template>
-      <div class="seg" role="group" aria-label="Posição da janela">
+      <div class="seg" role="group" :aria-label="t('Posição da janela')">
         <UTooltip v-for="x in modes" :key="x.m" :text="x.label">
           <button class="hx-ib" :class="{ on: S.window.mode === x.m }" :aria-label="x.label" :aria-pressed="S.window.mode === x.m" @click="mode(x.m)">
             <UIcon :name="x.icon" class="size-[16px]" />
           </button>
         </UTooltip>
       </div>
-      <UTooltip :text="S.window.alwaysOnTop ? 'Deixar de ficar no topo' : 'Manter sempre no topo'">
-        <button class="hx-ib" :class="{ pinned: S.window.alwaysOnTop }" aria-label="Manter sempre no topo" :aria-pressed="S.window.alwaysOnTop" @click="top">
+      <UTooltip :text="S.window.alwaysOnTop ? t('Deixar de ficar no topo') : t('Manter sempre no topo')">
+        <button class="hx-ib" :class="{ pinned: S.window.alwaysOnTop }" :aria-label="t('Manter sempre no topo')" :aria-pressed="S.window.alwaysOnTop" @click="top">
           <UIcon :name="S.window.alwaysOnTop ? 'i-lucide-pin' : 'i-lucide-pin-off'" class="size-[17px]" />
         </button>
       </UTooltip>
-      <button class="hx-ib" aria-label="Minimizar" @click="api('win:minimize')"><UIcon name="i-lucide-minus" class="size-[17px]" /></button>
-      <UTooltip text="Fechar para a bandeja">
-        <button class="hx-ib close" aria-label="Fechar para a bandeja" @click="api('win:hide')"><UIcon name="i-lucide-x" class="size-[17px]" /></button>
+      <button class="hx-ib" :aria-label="t('Minimizar')" @click="api('win:minimize')"><UIcon name="i-lucide-minus" class="size-[17px]" /></button>
+      <UTooltip :text="t('Fechar para a bandeja')">
+        <button class="hx-ib close" :aria-label="t('Fechar para a bandeja')" @click="api('win:hide')"><UIcon name="i-lucide-x" class="size-[17px]" /></button>
       </UTooltip>
     </div>
   </header>

@@ -20,7 +20,7 @@
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "dist": "electron-vite build && electron-builder --win",
-    "test": "node --no-warnings --import ./tests/register.mjs --test tests/core.test.ts",
+    "test": "node --no-warnings --import ./tests/register.mjs --test tests/core.test.ts tests/i18n.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.node.json"
   },
   "dependencies": {

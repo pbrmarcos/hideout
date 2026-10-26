@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '../i18n'
 import { strength } from '../passwords'
 
 const props = defineProps<{ value: string }>()
@@ -7,11 +8,11 @@ const s = computed(() => strength(props.value))
 </script>
 
 <template>
-  <div class="row" :aria-label="`Força: ${s.label || 'vazia'}`">
+  <div class="row" :aria-label="t('Força: {label}', { label: s.label ? t(s.label) : t('vazia') })">
     <div class="meter">
       <span v-for="i in 4" :key="i" :class="{ ok: i <= s.score, weak: s.score === 1 && i === 1 }" />
     </div>
-    <span class="lbl" :class="{ weakTxt: s.score === 1 }">{{ s.label }}</span>
+    <span class="lbl" :class="{ weakTxt: s.score === 1 }">{{ s.label ? t(s.label) : '' }}</span>
   </div>
 </template>
 

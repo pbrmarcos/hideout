@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { SignupStart } from '@shared/types'
 import { api, ApiError } from '../../api'
+import { t } from '../../i18n'
 import { S } from '../../store'
 import StrengthMeter from '../../components/StrengthMeter.vue'
 import AuthShell from './AuthShell.vue'
@@ -28,7 +29,7 @@ async function submit(): Promise<void> {
       S.auth = { name: 'totp', otpauth: r.otpauth, secret: r.secret, mode: 'recover' }
     }
   } catch (e) {
-    error.value = e instanceof ApiError ? e.message : 'Não deu certo. Confira e tente de novo.'
+    error.value = e instanceof ApiError ? e.message : t('Não deu certo. Confira e tente de novo.')
   } finally {
     busy.value = false
   }
@@ -43,36 +44,36 @@ async function back(): Promise<void> {
 <template>
   <AuthShell
     logo
-    :title="step === 'code' ? 'Recuperar acesso' : 'Crie uma nova senha mestra'"
-    :lead="step === 'code' ? 'Use o código de recuperação de 24 caracteres que você guardou no cadastro.' : 'Depois disso você vai cadastrar o 2FA de novo e criar um PIN.'"
+    :title="step === 'code' ? t('Recuperar acesso') : t('Crie uma nova senha mestra')"
+    :lead="step === 'code' ? t('Use o código de recuperação de 24 caracteres que você guardou no cadastro.') : t('Depois disso você vai cadastrar o 2FA de novo e criar um PIN.')"
   >
     <form class="form" @submit.prevent="submit">
       <template v-if="step === 'code'">
         <div class="hx-field">
-          <label class="hx-label" for="rc-user">Usuário</label>
+          <label class="hx-label" for="rc-user">{{ t('Usuário') }}</label>
           <div class="hx-in lg"><input id="rc-user" v-model="user" spellcheck="false" :autofocus="!user" /></div>
         </div>
         <div class="hx-field">
-          <label class="hx-label" for="rc-code">Código de recuperação</label>
+          <label class="hx-label" for="rc-code">{{ t('Código de recuperação') }}</label>
           <div class="hx-in lg"><input id="rc-code" v-model="code" class="mono" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off" :autofocus="!!user" /></div>
-          <span class="hx-hint">Hífens e letras minúsculas não fazem diferença.</span>
+          <span class="hx-hint">{{ t('Hífens e letras minúsculas não fazem diferença.') }}</span>
         </div>
       </template>
       <template v-else>
         <div class="hx-field">
-          <label class="hx-label" for="rc-pw">Nova senha mestra</label>
+          <label class="hx-label" for="rc-pw">{{ t('Nova senha mestra') }}</label>
           <div class="hx-in lg"><input id="rc-pw" v-model="pw" type="password" autocomplete="new-password" autofocus /></div>
           <StrengthMeter :value="pw" />
         </div>
         <div class="hx-field">
-          <label class="hx-label" for="rc-pw2">Repita a nova senha</label>
+          <label class="hx-label" for="rc-pw2">{{ t('Repita a nova senha') }}</label>
           <div class="hx-in lg"><input id="rc-pw2" v-model="pw2" type="password" autocomplete="new-password" /></div>
         </div>
       </template>
       <p v-if="error" class="hx-error" role="alert"><UIcon name="i-lucide-circle-alert" class="size-[15px]" />{{ error }}</p>
       <span class="grow" />
-      <button class="hx-btn lg hx-primary" type="submit" :disabled="!valid || busy">{{ busy ? 'Conferindo…' : 'Continuar' }}</button>
-      <button type="button" class="hx-link center" @click="back">Voltar para o login</button>
+      <button class="hx-btn lg hx-primary" type="submit" :disabled="!valid || busy">{{ busy ? t('Conferindo…') : t('Continuar') }}</button>
+      <button type="button" class="hx-link center" @click="back">{{ t('Voltar para o login') }}</button>
     </form>
   </AuthShell>
 </template>

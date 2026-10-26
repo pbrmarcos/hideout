@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n'
 import Logo from '../../components/Logo.vue'
 
 defineProps<{ title: string; lead?: string; step?: number; logo?: boolean }>()
@@ -12,9 +13,9 @@ defineProps<{ title: string; lead?: string; step?: number; logo?: boolean }>()
         <span class="name">Hideout</span>
       </template>
       <span class="sp" />
-      <div v-if="step" class="step" :aria-label="`Passo ${step} de 4`">
+      <div v-if="step" class="step" :aria-label="t('Passo {step} de 4', { step })">
         <i v-for="i in 4" :key="i" :class="{ on: i <= step }" />
-        <span>Passo {{ step }} de 4</span>
+        <span>{{ t('Passo {step} de 4', { step }) }}</span>
       </div>
     </div>
     <div class="intro">

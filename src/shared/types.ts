@@ -3,7 +3,28 @@ export type Repeat = 'none' | 'daily' | 'weekly' | 'monthly'
 export type ThemeId =
   | 'salvia' | 'lavanda' | 'areia' | 'nevoa' | 'noite'
   | 'oceano' | 'rubi' | 'matrix'
+  | 'custom1' | 'custom2' | 'custom3'
 export type WindowMode = 'float' | 'left' | 'right'
+export type Lang = 'pt' | 'en' | 'es'
+export type SortMode = 'manual' | 'name' | 'used' | 'recent'
+
+/** Colors a user can set in a custom theme. Missing ones are derived (see completeTheme). */
+export interface CustomTheme {
+  name: string
+  dark: boolean
+  mono: boolean
+  bg: string
+  surface: string
+  ink: string
+  muted: string
+  line: string
+  primary: string
+  onPrimary: string
+  soft: string
+  softInk: string
+  warn: string
+  danger: string
+}
 
 export interface Field {
   id: string
@@ -46,6 +67,10 @@ export interface Access extends Base {
   fields: Field[]
   attachments: AttachmentRef[]
   history: PasswordHistory[]
+  /** Position inside its category when sorting by "my order" (added in 0.2). */
+  order?: number
+  useCount?: number
+  lastUsedAt?: string | null
 }
 
 export interface Note extends Base {
@@ -64,6 +89,8 @@ export interface Task extends Base {
   done: boolean
   doneAt?: string | null
   snoozedUntil?: string | null
+  /** Position in the TO DO list (added in 0.2). */
+  order?: number
 }
 
 /** Accesses refer to their category by name; renaming a category renames it on every access. */
@@ -100,6 +127,41 @@ export interface Settings {
   startWithWindows: boolean
   autoType: boolean
   themes: Record<string, ThemeId>
+  /** null follows the Windows language. */
+  lang: Lang | null
+  customThemes: Partial<Record<'custom1' | 'custom2' | 'custom3', CustomTheme>>
+  alerts: AlertSettings
+}
+
+export type SoundId = 'chime' | 'bell' | 'soft' | 'pop' | 'marimba' | 'digital' | 'windows' | 'none'
+
+export interface AlertSettings {
+  /** Windows notification for Agenda reminders */
+  agendaNotify: boolean
+  /** Minutes before the due time (0 = on time) */
+  agendaLead: number
+  agendaSound: SoundId
+  /** Daily summary of pending TO DO items at "HH:MM", or null */
+  todoDaily: string | null
+  todoSound: SoundId
+  timerSound: SoundId
+  /** 0 to 1 */
+  volume: number
+}
+
+export interface TimerState {
+  running: boolean
+  /** epoch ms when it ends (running) */
+  endsAt: number | null
+  /** ms left (paused or idle) */
+  remaining: number
+  /** length it was started with */
+  total: number
+}
+
+export interface LeakResult {
+  id: string
+  count: number
 }
 
 export interface AppState {
@@ -107,6 +169,8 @@ export interface AppState {
   users: string[]
   sessions: string[]
   version: string
+  /** Windows display language, used when settings.lang is null. */
+  systemLang: Lang
 }
 
 export interface WindowState {
@@ -147,4 +211,11 @@ export interface ScheduledTask {
   title: string
   due: string
   snoozedUntil?: string | null
+}
+
+/** What the main process can read while the vault is locked (titles and times only). */
+export interface Schedule {
+  tasks: ScheduledTask[]
+  /** open TO DO items without a date, for the daily summary */
+  pendingTodos: number
 }

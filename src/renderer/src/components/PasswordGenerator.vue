@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
+import { t } from '../i18n'
 import { generate, type GenOptions } from '../passwords'
 import StrengthMeter from './StrengthMeter.vue'
 
@@ -10,29 +11,29 @@ const value = defineModel<string>({ required: true })
 const regen = (): void => emit('use', generate(o))
 watch(o, regen)
 
-const chips: Array<{ k: keyof Omit<GenOptions, 'length'>; label: string }> = [
+const chips = computed<Array<{ k: keyof Omit<GenOptions, 'length'>; label: string }>>(() => [
   { k: 'upper', label: 'A–Z' },
   { k: 'digits', label: '0–9' },
   { k: 'symbols', label: '!@#' },
-  { k: 'noAmbiguous', label: 'Sem ambíguos' }
-]
+  { k: 'noAmbiguous', label: t('Sem ambíguos') }
+])
 </script>
 
 <template>
   <div class="gen">
     <div class="row">
-      <span class="ttl">Gerar senha</span>
+      <span class="ttl">{{ t('Gerar senha') }}</span>
       <span class="grow" />
       <StrengthMeter :value="value" class="w-[170px]" />
     </div>
     <div class="row">
-      <span class="hx-hint len">{{ o.length }} caracteres</span>
-      <USlider v-model="o.length" :min="8" :max="64" class="flex-1" aria-label="Tamanho" />
+      <span class="hx-hint len">{{ t('{n} caracteres', { n: o.length }) }}</span>
+      <USlider v-model="o.length" :min="8" :max="64" class="flex-1" :aria-label="t('Tamanho')" />
     </div>
     <div class="row wrap">
       <button v-for="c in chips" :key="c.k" type="button" class="chip" :class="{ on: o[c.k] }" :aria-pressed="o[c.k]" @click="o[c.k] = !o[c.k]">{{ c.label }}</button>
       <span class="grow" />
-      <button type="button" class="chip" @click="regen"><UIcon name="i-lucide-refresh-cw" class="size-[14px]" />Outra</button>
+      <button type="button" class="chip" @click="regen"><UIcon name="i-lucide-refresh-cw" class="size-[14px]" />{{ t('Outra') }}</button>
     </div>
   </div>
 </template>

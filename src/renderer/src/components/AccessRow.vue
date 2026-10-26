@@ -4,10 +4,12 @@ import { template } from '@shared/model'
 import type { Access } from '@shared/types'
 import { api } from '../api'
 import { useCopy } from '../copy'
-import { S, categoryList, moveAccess, trash, upsertAccess } from '../store'
+import { t } from '../i18n'
+import { S, catName, categoryList, markUsed, moveAccess, trash, upsertAccess } from '../store'
 import PasswordSeal from './PasswordSeal.vue'
 
-const props = defineProps<{ a: Access }>()
+const props = defineProps<{ a: Access; before?: boolean }>()
+const emit = defineEmits<{ dragstart: []; dragover: [e: DragEvent]; drop: [] }>()
 const shown = ref(false)
 const { copy, fail } = useCopy()
 
@@ -17,84 +19,92 @@ const hue = computed(() => {
   for (const ch of props.a.title) h = (h * 31 + ch.charCodeAt(0)) >>> 0
   return h % HUES
 })
-const t = computed(() => template(props.a.type))
-const subtitle = computed(() => props.a.username || (props.a.url ? props.a.url.replace(/^https?:\/\//, '') : t.value.label))
+const tpl = computed(() => template(props.a.type))
+const userLabel = computed(() => t(tpl.value.usernameLabel ?? 'Usuário'))
+const passLabel = computed(() => t(tpl.value.passwordLabel ?? 'Senha'))
+const subtitle = computed(() => props.a.username || (props.a.url ? props.a.url.replace(/^https?:\/\//, '') : t(tpl.value.label)))
 
 function open(): void {
   S.sheet = { kind: 'access', id: props.a.id }
 }
-
 function copyPassword(): void {
-  copy(props.a.password, { key: props.a.id, secret: true, label: t.value.passwordLabel ?? 'Senha' }).catch(fail)
+  copy(props.a.password, { key: props.a.id, secret: true, label: passLabel.value }).then(() => markUsed(props.a.id), fail)
 }
 function copyUser(): void {
-  copy(props.a.username, { label: t.value.usernameLabel ?? 'Usuário' }).catch(fail)
+  copy(props.a.username, { label: userLabel.value }).then(() => markUsed(props.a.id), fail)
 }
 function openUrl(): void {
-  api('shell:open', props.a.url).catch(fail)
+  api('shell:open', props.a.url).then(() => markUsed(props.a.id), fail)
 }
 
 const menu = computed(() => [
   [
-    { label: 'Editar', icon: 'i-lucide-pencil', onSelect: open },
-    ...(props.a.password ? [{ label: `Copiar ${t.value.passwordLabel?.toLowerCase() ?? 'senha'}`, icon: 'i-lucide-key-round', onSelect: copyPassword }] : []),
-    ...(props.a.username ? [{ label: `Copiar ${t.value.usernameLabel?.toLowerCase() ?? 'usuário'}`, icon: 'i-lucide-user', onSelect: copyUser }] : []),
-    ...(props.a.url ? [{ label: 'Abrir link', icon: 'i-lucide-external-link', onSelect: openUrl }] : [])
+    { label: t('Editar'), icon: 'i-lucide-pencil', onSelect: open },
+    ...(props.a.password ? [{ label: t('Copiar {what}', { what: passLabel.value.toLowerCase() }), icon: 'i-lucide-key-round', onSelect: copyPassword }] : []),
+    ...(props.a.username ? [{ label: t('Copiar {what}', { what: userLabel.value.toLowerCase() }), icon: 'i-lucide-user', onSelect: copyUser }] : []),
+    ...(props.a.url ? [{ label: t('Abrir link'), icon: 'i-lucide-external-link', onSelect: openUrl }] : [])
   ],
   [
     {
-      label: 'Mover para',
+      label: t('Mover para'),
       icon: 'i-lucide-folder-input',
       children: [
-        categoryList().map((c) => ({
-          label: c.name,
-          icon: c.icon,
-          disabled: c.name === props.a.category,
-          onSelect: () => moveAccess(props.a.id, c.name)
-        })),
-        [{ label: 'Nova categoria…', icon: 'i-lucide-folder-plus', onSelect: () => (S.categoryDialog = { id: null }) }]
+        categoryList().map((c) => ({ label: catName(c.name), icon: c.icon, disabled: c.name === props.a.category, onSelect: () => moveAccess(props.a.id, c.name) })),
+        [{ label: t('Nova categoria…'), icon: 'i-lucide-folder-plus', onSelect: () => (S.categoryDialog = { id: null }) }]
       ]
     },
     {
-      label: props.a.favorite ? 'Tirar dos favoritos' : 'Adicionar aos favoritos',
+      label: props.a.favorite ? t('Tirar dos favoritos') : t('Adicionar aos favoritos'),
       icon: 'i-lucide-star',
       onSelect: () => upsertAccess({ ...props.a, favorite: !props.a.favorite })
     }
   ],
-  [{ label: 'Excluir', icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => trash('accesses', props.a.id) }]
+  [{ label: t('Excluir'), icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => trash('accesses', props.a.id) }]
 ])
 
 function onDragStart(e: DragEvent): void {
-  e.dataTransfer?.setData('application/x-hideout-access', props.a.id)
+  e.dataTransfer?.setData('text/plain', props.a.title)
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+  emit('dragstart')
 }
 </script>
 
 <template>
   <UContextMenu :items="menu">
-  <div class="row" draggable="true" @dragstart="onDragStart" @click="open" @keydown.enter.self="open" tabindex="0" :aria-label="`Abrir ${a.title}`">
-    <div class="av" :class="`h${hue}`" aria-hidden="true">
-      <UIcon v-if="a.type !== 'login'" :name="t.icon" class="size-[17px]" />
-      <template v-else>{{ (a.title || '?')[0].toUpperCase() }}</template>
-    </div>
-    <div class="txt">
-      <span class="t">{{ a.title || 'Sem nome' }}</span>
-      <button v-if="a.username" class="u" :title="`Copiar ${t.usernameLabel?.toLowerCase() ?? 'usuário'}`" @click.stop="copyUser">{{ subtitle }}</button>
-      <span v-else class="u plain">{{ subtitle }}</span>
-    </div>
-    <template v-if="a.password">
-      <PasswordSeal :copy-key="a.id" :value="a.password" :shown="shown" :label="t.passwordLabel?.toLowerCase()" @copy="copyPassword" />
-      <UTooltip :text="shown ? 'Ocultar' : 'Mostrar'">
-        <button class="hx-ib" :aria-label="shown ? 'Ocultar senha' : 'Mostrar senha'" @click.stop="shown = !shown">
-          <UIcon :name="shown ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-[17px]" />
-        </button>
+    <div
+      class="row"
+      :class="{ before }"
+      draggable="true"
+      tabindex="0"
+      :aria-label="t('Abrir {name}', { name: a.title })"
+      @dragstart="onDragStart"
+      @dragover="emit('dragover', $event)"
+      @drop.prevent.stop="emit('drop')"
+      @click="open"
+      @keydown.enter.self="open"
+    >
+      <div class="av" :class="`h${hue}`" aria-hidden="true">
+        <UIcon v-if="a.type !== 'login'" :name="tpl.icon" class="size-[17px]" />
+        <template v-else>{{ (a.title || '?')[0].toUpperCase() }}</template>
+      </div>
+      <div class="txt">
+        <span class="t">{{ a.title || t('Sem nome') }}</span>
+        <button v-if="a.username" class="u" :title="t('Copiar {what}', { what: userLabel.toLowerCase() })" @click.stop="copyUser">{{ subtitle }}</button>
+        <span v-else class="u plain">{{ subtitle }}</span>
+      </div>
+      <template v-if="a.password">
+        <PasswordSeal :copy-key="a.id" :value="a.password" :shown="shown" :label="passLabel.toLowerCase()" @copy="copyPassword" />
+        <UTooltip :text="shown ? t('Ocultar') : t('Mostrar')">
+          <button class="hx-ib" :aria-label="shown ? t('Ocultar senha') : t('Mostrar senha')" @click.stop="shown = !shown">
+            <UIcon :name="shown ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-[17px]" />
+          </button>
+        </UTooltip>
+      </template>
+      <UTooltip v-if="a.url" :text="t('Abrir link')">
+        <button class="hx-ib" :aria-label="t('Abrir link')" @click.stop="openUrl"><UIcon name="i-lucide-external-link" class="size-[17px]" /></button>
       </UTooltip>
-    </template>
-    <UTooltip v-if="a.url" text="Abrir link">
-      <button class="hx-ib" aria-label="Abrir link" @click.stop="openUrl"><UIcon name="i-lucide-external-link" class="size-[17px]" /></button>
-    </UTooltip>
-    <span v-else-if="a.password" class="spacer" />
-  </div>
+      <span v-else-if="a.password" class="spacer" />
+    </div>
   </UContextMenu>
 </template>
 
@@ -110,6 +120,9 @@ function onDragStart(e: DragEvent): void {
 }
 .row:hover {
   background: var(--hx-bg);
+}
+.row.before {
+  box-shadow: inset 0 3px 0 var(--hx-primary);
 }
 .av {
   width: 34px;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { t } from '../i18n'
 
 defineProps<{ title: string; back?: boolean }>()
 const emit = defineEmits<{ close: [] }>()
@@ -19,7 +20,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <section ref="root" class="sheet" role="dialog" :aria-label="title">
     <div class="head">
-      <button class="hx-ib" :aria-label="back ? 'Voltar' : 'Fechar'" @click="emit('close')">
+      <button class="hx-ib" :aria-label="back ? t('Voltar') : t('Fechar')" @click="emit('close')">
         <UIcon :name="back ? 'i-lucide-chevron-left' : 'i-lucide-x'" class="size-[18px]" />
       </button>
       <h1>{{ title }}</h1>

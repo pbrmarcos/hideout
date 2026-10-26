@@ -38,7 +38,9 @@ export default defineConfig({
               'lucide:folder', 'lucide:briefcase', 'lucide:house', 'lucide:shopping-bag', 'lucide:gamepad-2', 'lucide:graduation-cap',
               'lucide:heart-pulse', 'lucide:plane', 'lucide:code', 'lucide:mail', 'lucide:users', 'lucide:tv', 'lucide:car',
               'lucide:building-2', 'lucide:star', 'lucide:folder-input', 'lucide:folder-plus', 'lucide:ellipsis',
-              'lucide:arrow-up', 'lucide:arrow-down', 'lucide:chevron-up', 'lucide:pencil', 'lucide:trash-2'
+              'lucide:arrow-up', 'lucide:arrow-down', 'lucide:chevron-up', 'lucide:pencil', 'lucide:trash-2',
+              // TO DO tab, timer and alerts
+              'lucide:list-todo', 'lucide:timer', 'lucide:play', 'lucide:pause', 'lucide:rotate-ccw', 'lucide:volume-2'
             ]
           }
         },

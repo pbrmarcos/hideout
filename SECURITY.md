@@ -17,6 +17,7 @@ Você recebe uma resposta assim que possível. Quando a correção sair, o relat
 - Criptografia do cofre (`src/main/crypto.ts`, `src/main/vault.ts`, `src/main/vaultfile.ts`)
 - Desbloqueio por senha, PIN, 2FA e código de recuperação
 - Área de transferência, digitação automática e anexos
+- Verificação de vazamentos (`src/main/leaks.ts`): só os 5 primeiros caracteres do SHA-1 de cada senha podem sair do computador
 - Isolamento entre a interface e o processo principal (`src/preload`, IPC)
 
 ## O que já se sabe e não é falha

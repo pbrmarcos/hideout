@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { copied } from '../copy'
+import { t } from '../i18n'
 
 const props = defineProps<{ copyKey: string; value: string; shown?: boolean; label?: string }>()
 const emit = defineEmits<{ copy: [] }>()
 
 const tick = ref(Date.now())
-const t = setInterval(() => (tick.value = Date.now()), 250)
-onBeforeUnmount(() => clearInterval(t))
+const timer = setInterval(() => (tick.value = Date.now()), 250)
+onBeforeUnmount(() => clearInterval(timer))
 
 const isCopied = computed(() => copied.key === props.copyKey)
 const left = computed(() => {
@@ -22,12 +23,12 @@ const seconds = computed(() => Math.ceil((left.value * copied.ms) / 1000))
     class="seal"
     :data-seal="copyKey"
     :class="{ copied: isCopied, shown: shown && !isCopied }"
-    :aria-label="isCopied ? `Copiada, sai da área de transferência em ${seconds} segundos` : `Copiar ${label ?? 'senha'}`"
-    :title="isCopied ? `Limpa em ${seconds} s` : 'Clique para copiar'"
+    :aria-label="isCopied ? t('Copiada, sai da área de transferência em {seconds} segundos', { seconds }) : t('Copiar {what}', { what: label ?? t('senha') })"
+    :title="isCopied ? t('Limpa em {seconds} s', { seconds }) : t('Clique para copiar')"
     @click.stop="emit('copy')"
   >
     <template v-if="isCopied">
-      <UIcon name="i-lucide-check" class="size-[14px]" />Copiada
+      <UIcon name="i-lucide-check" class="size-[14px]" />{{ t('Copiada') }}
       <span class="drain" :style="{ width: `${left * 100}%` }" />
     </template>
     <span v-else-if="shown" class="mono txt">{{ value }}</span>

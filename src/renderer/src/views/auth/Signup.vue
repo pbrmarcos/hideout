@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { normalizeUser } from '@shared/model'
 import type { SignupStart } from '@shared/types'
 import { api, ApiError } from '../../api'
+import { t } from '../../i18n'
 import { S } from '../../store'
 import StrengthMeter from '../../components/StrengthMeter.vue'
 import AuthShell from './AuthShell.vue'
@@ -27,7 +28,7 @@ async function submit(): Promise<void> {
     const r = await api<SignupStart>('signup:begin', user.value, pw.value)
     S.auth = { name: 'totp', otpauth: r.otpauth, secret: r.secret, mode: 'signup' }
   } catch (e) {
-    error.value = e instanceof ApiError ? e.message : 'Não foi possível criar a conta.'
+    error.value = e instanceof ApiError ? e.message : t('Não foi possível criar a conta.')
   } finally {
     busy.value = false
   }
@@ -35,34 +36,34 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <AuthShell logo :step="1" title="Crie sua conta" lead="A senha mestra tranca o cofre inteiro. Nem o Hideout nem a Microsoft conseguem ver o que tem dentro.">
+  <AuthShell logo :step="1" :title="t('Crie sua conta')" :lead="t('A senha mestra tranca o cofre inteiro. Nem o Hideout nem a Microsoft conseguem ver o que tem dentro.')">
     <form class="form" @submit.prevent="submit">
       <div class="hx-field">
-        <label class="hx-label" for="su-user">Usuário</label>
+        <label class="hx-label" for="su-user">{{ t('Usuário') }}</label>
         <div class="hx-in lg"><input id="su-user" v-model="user" autocomplete="username" autofocus spellcheck="false" /></div>
-        <span v-if="slug" class="hx-hint">O cofre fica em {{ folder }}\{{ slug }}.vault</span>
+        <span v-if="slug" class="hx-hint">{{ t('O cofre fica em {path}', { path: `${folder}\\${slug}.vault` }) }}</span>
       </div>
       <div class="hx-field">
-        <label class="hx-label" for="su-pw">Senha mestra</label>
+        <label class="hx-label" for="su-pw">{{ t('Senha mestra') }}</label>
         <div class="hx-in lg">
           <input id="su-pw" v-model="pw" :type="show ? 'text' : 'password'" autocomplete="new-password" />
-          <button type="button" class="hx-ib" :aria-label="show ? 'Ocultar senha' : 'Mostrar senha'" @click="show = !show">
+          <button type="button" class="hx-ib" :aria-label="show ? t('Ocultar senha') : t('Mostrar senha')" @click="show = !show">
             <UIcon :name="show ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-[17px]" />
           </button>
         </div>
         <StrengthMeter :value="pw" />
-        <span class="hx-hint">Dica: 4 ou mais palavras soltas são fáceis de lembrar e difíceis de adivinhar. Mínimo de 12 caracteres.</span>
+        <span class="hx-hint">{{ t('Dica: 4 ou mais palavras soltas são fáceis de lembrar e difíceis de adivinhar. Mínimo de 12 caracteres.') }}</span>
       </div>
       <div class="hx-field">
-        <label class="hx-label" for="su-pw2">Repita a senha mestra</label>
+        <label class="hx-label" for="su-pw2">{{ t('Repita a senha mestra') }}</label>
         <div class="hx-in lg"><input id="su-pw2" v-model="pw2" :type="show ? 'text' : 'password'" autocomplete="new-password" /></div>
-        <span v-if="matches" class="ok"><UIcon name="i-lucide-check" class="size-[14px]" />As senhas conferem</span>
-        <span v-else-if="pw2 && pw2.length >= pw.length" class="hx-error">As senhas não conferem</span>
+        <span v-if="matches" class="ok"><UIcon name="i-lucide-check" class="size-[14px]" />{{ t('As senhas conferem') }}</span>
+        <span v-else-if="pw2 && pw2.length >= pw.length" class="hx-error">{{ t('As senhas não conferem') }}</span>
       </div>
       <p v-if="error" class="hx-error" role="alert"><UIcon name="i-lucide-circle-alert" class="size-[15px]" />{{ error }}</p>
       <span class="grow" />
-      <button class="hx-btn lg hx-primary" type="submit" :disabled="!valid || busy">{{ busy ? 'Protegendo o cofre…' : 'Continuar' }}</button>
-      <p class="alt">Já tem conta nesta pasta? <button type="button" class="hx-link" @click="S.auth = { name: 'login' }">Entrar</button></p>
+      <button class="hx-btn lg hx-primary" type="submit" :disabled="!valid || busy">{{ busy ? t('Protegendo o cofre…') : t('Continuar') }}</button>
+      <p class="alt">{{ t('Já tem conta nesta pasta?') }} <button type="button" class="hx-link" @click="S.auth = { name: 'login' }">{{ t('Entrar') }}</button></p>
     </form>
   </AuthShell>
 </template>

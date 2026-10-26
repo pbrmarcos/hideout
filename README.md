@@ -81,7 +81,7 @@ Todos os atalhos e cada opção das Configurações, com animações, estão em 
 | 2FA (TOTP) | Pedido ao entrar num computador novo |
 | PIN de 6 dígitos | Só no computador onde foi criado, protegido pelo DPAPI do Windows. Cinco erros pedem a senha mestra |
 | Código de recuperação | 24 caracteres, mostrado uma única vez |
-| Rede | Nenhuma conexão. Sem servidor e sem telemetria |
+| Rede | Sem servidor e sem telemetria. A única conexão é a verificação de vazamentos, e só quando você pede (só 5 caracteres de um hash saem do PC) |
 | Sincronização | Se dois PCs mudarem o cofre ao mesmo tempo, as alterações são juntadas item por item. Os 5 últimos backups ficam ao lado do arquivo |
 
 **Limites que você precisa conhecer:**
@@ -148,7 +148,7 @@ Toda ajuda é bem-vinda, de um relato de erro a uma tradução.
 
 > **Passwords, notes and reminders one click away, in a vault only you can open.**
 
-Hideout is a free, open source Windows app that docks at the edge of your screen (30% of its width, left, right or floating). It keeps logins, Wi-Fi, cards, documents, notes and reminders in a single AES-256-GCM encrypted file, unlocked by a master password, TOTP on new computers and a local 6-digit PIN. There is no server, no account and no telemetry; if the file lives in OneDrive, the cloud only stores scrambled bytes. One click copies a password, which is cleared from the clipboard after 30 seconds and kept out of Win+V history.
+Hideout is a free, open source Windows app that docks at the edge of your screen (30% of its width, left, right or floating). It keeps logins, Wi-Fi, cards, documents, notes and reminders in a single AES-256-GCM encrypted file, unlocked by a master password, TOTP on new computers and a local 6-digit PIN. There is no server, no account and no telemetry (the only network call is an optional leak check that sends 5 characters of a hash); if the file lives in OneDrive, the cloud only stores scrambled bytes. One click copies a password, which is cleared from the clipboard after 30 seconds and kept out of Win+V history.
 
 [**Download for Windows**](https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe) · [Website](https://pbrmarcos.github.io/hideout/en/) · [Shortcuts and settings](https://pbrmarcos.github.io/hideout/en/guia.html)
 

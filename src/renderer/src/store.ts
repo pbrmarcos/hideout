@@ -1,11 +1,15 @@
 import { reactive, watch } from 'vue'
 import { DEFAULT_CATEGORY, findCategory, newCategory, newNote, newTask, nextOccurrence, normalizeData, now } from '@shared/model'
-import type { Access, AppState, Category, ItemType, Note, Task, ThemeId, UnlockInfo, VaultData, WindowState } from '@shared/types'
+import type { Access, AppState, Category, CustomTheme, ItemType, Lang, Note, SortMode, SoundId, Task, ThemeId, TimerState, UnlockInfo, VaultData, WindowState } from '@shared/types'
 import { api, onMain } from './api'
+import type { CustomId } from '@shared/themes'
+import { lang, t } from './i18n'
+import { playSound } from './sounds'
 import { applyTheme } from './theme'
 
 export type Phase = 'loading' | 'auth' | 'app'
-export type Tab = 'accesses' | 'notes' | 'agenda'
+export type Tab = 'todo' | 'accesses' | 'notes' | 'agenda'
+const TABS: Tab[] = ['todo', 'accesses', 'notes', 'agenda']
 export type AuthStep =
   | { name: 'lock'; user: string }
   | { name: 'login'; needTotp?: boolean; user?: string }
@@ -23,11 +27,36 @@ export type Sheet =
   | { kind: 'templates' }
   | { kind: 'settings' }
   | { kind: 'trash' }
+  | { kind: 'leaks' }
+  | { kind: 'theme'; id: CustomId }
 
 export interface FiredTask {
   user: string
   id: string
   title: string
+}
+
+export interface ListView {
+  sort: SortMode
+  /** null = all, 'fav' = favorites, otherwise a category id */
+  filter: string | null
+}
+
+function loadView(): ListView {
+  try {
+    return { sort: 'manual', filter: null, ...JSON.parse(localStorage.getItem('hx-view') ?? '{}') }
+  } catch {
+    return { sort: 'manual', filter: null }
+  }
+}
+
+function loadTab(): Tab {
+  try {
+    const v = localStorage.getItem('hx-tab') as Tab | null
+    return v && TABS.includes(v) ? v : 'todo'
+  } catch {
+    return 'todo'
+  }
 }
 
 export const S = reactive({
@@ -37,13 +66,18 @@ export const S = reactive({
   user: null as string | null,
   data: null as VaultData | null,
   deviceId: '',
-  tab: 'accesses' as Tab,
+  tab: loadTab(),
   sheet: null as Sheet | null,
   search: false,
   autoType: null as { title: string; ids: string[] } | null,
   /** Category editor: `id` null creates a new one. */
   categoryDialog: null as { id: string | null } | null,
+  /** How the access list is shown on this computer. */
+  view: loadView(),
+  /** Last leak check, kept until the vault locks. */
+  leaks: null as { at: string; found: Array<{ id: string; count: number }> } | null,
   window: { mode: 'float', alwaysOnTop: false } as WindowState,
+  timer: { running: false, endsAt: null, remaining: 15 * 60_000, total: 15 * 60_000 } as TimerState,
   theme: 'salvia' as ThemeId,
   fired: [] as FiredTask[],
   saving: false,
@@ -51,11 +85,24 @@ export const S = reactive({
   lockReason: null as string | null
 })
 
+watch(
+  () => S.tab,
+  (tab) => {
+    try {
+      localStorage.setItem('hx-tab', tab)
+    } catch {
+      /* per-computer convenience only */
+    }
+  }
+)
+
 // --- startup & auth -------------------------------------------------------------
 
 export async function boot(): Promise<void> {
   S.app = await api<AppState>('app:state')
   S.window = await api<WindowState>('win:state')
+  S.timer = await api<TimerState>('timer:get')
+  syncLang()
   const last = S.app.settings.lastUser
   setTheme(last ? S.app.settings.themes[last] : null, false)
   if (last && S.app.sessions.includes(last)) S.auth = { name: 'lock', user: last }
@@ -72,6 +119,11 @@ export async function boot(): Promise<void> {
       if (!S.fired.some((x) => x.id === f.id)) S.fired.push(f)
     }
   })
+  onMain('tab:open', (tab: Tab) => {
+    if (S.phase === 'app') (S.tab = tab), (S.sheet = null)
+  })
+  onMain('timer:state', (st: TimerState) => (S.timer = st))
+  onMain('sound:play', (p: { sound: SoundId; volume: number }) => playSound(p.sound, p.volume))
   onMain('autotype:choose', (p: { title: string; ids: string[] }) => (S.autoType = p))
 }
 
@@ -98,6 +150,7 @@ function onLocked(reason: string): void {
   S.search = false
   S.autoType = null
   S.fired = []
+  S.leaks = null
   S.lockReason = reason
   S.auth = { name: 'lock', user }
   S.phase = 'auth'
@@ -122,10 +175,27 @@ export async function logout(): Promise<void> {
 // --- theme --------------------------------------------------------------------------
 
 export function setTheme(id: string | null | undefined, persist = true): void {
-  S.theme = applyTheme(id).id
+  S.theme = applyTheme(id, S.app?.settings.customThemes).id
   if (persist && S.user && S.app) {
     void api<AppState>('settings:set', { themes: { ...S.app.settings.themes, [S.user]: S.theme } }).then((a) => (S.app = a))
   }
+}
+
+/** Saves a custom theme slot and shows it. */
+export async function saveCustomTheme(id: CustomId, theme: CustomTheme): Promise<void> {
+  S.app = await api<AppState>('settings:set', { customThemes: { ...S.app!.settings.customThemes, [id]: theme } })
+  setTheme(id)
+}
+
+// --- language ---------------------------------------------------------------------------
+
+function syncLang(): void {
+  if (S.app) lang.value = S.app.settings.lang ?? S.app.systemLang
+}
+
+export async function setLang(l: Lang | null): Promise<void> {
+  S.app = await api<AppState>('settings:set', { lang: l })
+  syncLang()
 }
 
 // --- saving -----------------------------------------------------------------------
@@ -258,8 +328,30 @@ export function snooze(id: string, minutes = 10): void {
 
 export function quickTask(title: string, due: string | null): Task {
   const t = newTask(title, due)
+  if (!due) t.order = todoList().reduce((m, x) => Math.min(m, x.order ?? 0), 0) - 1
   upsertTask(t)
   return t
+}
+
+/** Open tasks without a date, in the user's order (new ones on top). */
+export function todoList(): Task[] {
+  return live(S.data?.tasks ?? [])
+    .filter((x) => !x.done && !x.due)
+    .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || b.createdAt.localeCompare(a.createdAt))
+}
+
+/** Drops a TO DO item before `beforeId` (or at the end), renumbering the list. */
+export function placeTask(id: string, beforeId: string | null): void {
+  if (id === beforeId) return
+  const moving = S.data!.tasks.find((x) => x.id === id)
+  if (!moving) return
+  const list = todoList().filter((x) => x.id !== id)
+  const at = beforeId ? list.findIndex((x) => x.id === beforeId) : -1
+  list.splice(at < 0 ? list.length : at, 0, moving)
+  const t = now()
+  list.forEach((x, i) => {
+    if (x.order !== i) Object.assign(x, { order: i, updatedAt: t })
+  })
 }
 
 // --- categories --------------------------------------------------------------------------
@@ -267,6 +359,11 @@ export function quickTask(title: string, due: string | null): Task {
 /** Live categories in the user's order. */
 export function categoryList(): Category[] {
   return live(S.data?.categories ?? []).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, 'pt-BR'))
+}
+
+/** "Geral" is stored in Portuguese; show it in the UI language. User-created names stay as typed. */
+export function catName(name: string): string {
+  return name === DEFAULT_CATEGORY ? t(DEFAULT_CATEGORY) : name
 }
 
 export function categories(): string[] {
@@ -335,5 +432,61 @@ export function moveCategory(id: string, delta: -1 | 1): void {
 
 export function moveAccess(accessId: string, category: string): void {
   const a = S.data!.accesses.find((x) => x.id === accessId)
-  if (a) upsertAccess({ ...a, category })
+  if (!a) return
+  const last = live(S.data!.accesses).filter((x) => x.category === category).reduce((m, x) => Math.max(m, x.order ?? 0), -1)
+  upsertAccess({ ...a, category, order: a.category === category ? a.order : last + 1 })
+}
+
+/** Drops an access before `beforeId` (or at the end of `category` when null), renumbering that category. */
+export function placeAccess(accessId: string, category: string, beforeId: string | null): void {
+  const d = S.data!
+  const moving = d.accesses.find((x) => x.id === accessId)
+  if (!moving || accessId === beforeId) return
+  const list = live(d.accesses)
+    .filter((x) => x.category === category && x.id !== accessId)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  const at = beforeId ? list.findIndex((x) => x.id === beforeId) : -1
+  list.splice(at < 0 ? list.length : at, 0, moving)
+  const t = now()
+  list.forEach((x, i) => {
+    if (x.order !== i || x.category !== category) Object.assign(x, { order: i, category, updatedAt: t })
+  })
+}
+
+/** Drops a category before `beforeId` (or at the end). */
+export function placeCategory(id: string, beforeId: string | null): void {
+  if (id === beforeId) return
+  const list = categoryList().filter((c) => c.id !== id)
+  const moving = S.data!.categories.find((c) => c.id === id)
+  if (!moving) return
+  const at = beforeId ? list.findIndex((c) => c.id === beforeId) : -1
+  list.splice(at < 0 ? list.length : at, 0, moving)
+  const t = now()
+  list.forEach((c, i) => {
+    if (c.order !== i) Object.assign(c, { order: i, updatedAt: t })
+  })
+}
+
+/** Counts a copy / open so "most used" sorting has something to go on. */
+export function markUsed(accessId: string): void {
+  const a = S.data?.accesses.find((x) => x.id === accessId)
+  if (a) Object.assign(a, { useCount: (a.useCount ?? 0) + 1, lastUsedAt: now(), updatedAt: now() })
+}
+
+export function setView(patch: Partial<ListView>): void {
+  Object.assign(S.view, patch)
+  try {
+    localStorage.setItem('hx-view', JSON.stringify(S.view))
+  } catch {
+    /* per-computer convenience only */
+  }
+}
+
+export function sortAccesses(list: Access[], mode: SortMode): Access[] {
+  const byName = (a: Access, b: Access): number => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
+  const copy = [...list]
+  if (mode === 'name') return copy.sort(byName)
+  if (mode === 'used') return copy.sort((a, b) => (b.useCount ?? 0) - (a.useCount ?? 0) || byName(a, b))
+  if (mode === 'recent') return copy.sort((a, b) => (b.lastUsedAt ?? b.updatedAt).localeCompare(a.lastUsedAt ?? a.updatedAt))
+  return copy.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || byName(a, b))
 }

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { THEMES } from '@shared/themes'
-import type { AppState, Settings, SignupStart, VaultData } from '@shared/types'
+import { LANGS } from '@shared/i18n'
+import { CUSTOM_IDS, THEMES, completeTheme, type CustomId } from '@shared/themes'
+import type { AlertSettings, AppState, Lang, Settings, SignupStart, SoundId, VaultData } from '@shared/types'
 import { api, ApiError } from '../api'
 import { useCopy } from '../copy'
 import { relDate } from '../format'
-import { S, logout, setTheme } from '../store'
+import { t } from '../i18n'
+import { SOUND_IDS, SOUND_LABEL, playSound } from '../sounds'
+import { S, logout, setLang, setTheme } from '../store'
 import CodeInput from '../components/CodeInput.vue'
 import PinPad from '../components/PinPad.vue'
 import QrCode from '../components/QrCode.vue'
@@ -23,18 +26,56 @@ async function set(patch: Partial<Settings>): Promise<void> {
   }
 }
 
-const lockItems = [1, 2, 5, 10, 15, 30, 60].map((m) => ({ label: m === 60 ? '1 hora' : `${m} minuto${m > 1 ? 's' : ''}`, value: m }))
-const clipItems = [10, 20, 30, 45, 60, 90].map((s) => ({ label: `${s} segundos`, value: s }))
+const lockItems = computed(() => [1, 2, 5, 10, 15, 30, 60].map((m) => ({ label: m === 60 ? t('1 hora') : m === 1 ? t('1 minuto') : t('{n} minutos', { n: m }), value: m })))
+const clipItems = computed(() => [10, 20, 30, 45, 60, 90].map((s) => ({ label: t('{n} segundos', { n: s }), value: s })))
+const langItems = computed(() => [
+  { label: t('Igual ao Windows'), value: 'auto' },
+  ...LANGS.map((l) => ({ label: l.label, value: l.id }))
+])
+// --- alerts -------------------------------------------------------------------------
+const soundItems = computed(() => SOUND_IDS.map((id) => ({ label: t(SOUND_LABEL[id]), value: id })))
+const leadItems = computed(() =>
+  [0, 5, 10, 15, 30, 60].map((m) => ({ label: m === 0 ? t('Na hora') : m === 60 ? t('1 hora antes') : t('{n} min antes', { n: m }), value: m }))
+)
+const al = computed(() => st.value.alerts)
+
+function setAlerts(patch: Partial<AlertSettings>): void {
+  void set({ alerts: { ...al.value, ...patch } })
+}
+function testSound(id: SoundId): void {
+  if (id === 'windows') void api('sound:test', id).catch(fail)
+  else playSound(id, al.value.volume)
+}
+let volTimer: ReturnType<typeof setTimeout> | null = null
+function setVolume(v: number | undefined): void {
+  if (v === undefined) return
+  if (volTimer) clearTimeout(volTimer)
+  volTimer = setTimeout(() => {
+    setAlerts({ volume: v / 100 })
+    playSound('pop', v / 100)
+  }, 250)
+}
+
 const devices = computed(() => [...S.data!.devices].sort((a, b) => b.lastSeen.localeCompare(a.lastSeen)))
+
+const customs = computed(() =>
+  CUSTOM_IDS.map((id, i) => {
+    const c = st.value.customThemes[id]
+    return { id, n: i + 1, theme: c ? completeTheme(id, c) : null }
+  })
+)
+function editCustom(id: CustomId): void {
+  S.sheet = { kind: 'theme', id }
+}
 
 async function pickDir(): Promise<void> {
   S.app = await api<AppState>('settings:pickDir')
-  info('Pasta alterada', 'Saia e entre de novo para usar um cofre desta pasta.')
+  info(t('Pasta alterada'), t('Saia e entre de novo para usar um cofre desta pasta.'))
 }
 
 async function backup(): Promise<void> {
   try {
-    if (await api<boolean>('backup:export')) info('Backup salvo', 'O arquivo continua criptografado com sua senha mestra.')
+    if (await api<boolean>('backup:export')) info(t('Backup salvo'), t('O arquivo continua criptografado com sua senha mestra.'))
   } catch (e) {
     fail(e)
   }
@@ -43,7 +84,7 @@ async function backup(): Promise<void> {
 async function removeDevice(id: string): Promise<void> {
   try {
     S.data = await api<VaultData>('account:removeDevice', id)
-    info('Computador removido', 'Ele vai pedir usuário, senha e 2FA na próxima vez.')
+    info(t('Computador removido'), t('Ele vai pedir usuário, senha e 2FA na próxima vez.'))
   } catch (e) {
     fail(e)
   }
@@ -73,7 +114,7 @@ async function run(fn: () => Promise<void>): Promise<void> {
   try {
     await fn()
   } catch (e) {
-    err.value = e instanceof ApiError ? e.message : 'Não deu certo.'
+    err.value = e instanceof ApiError ? e.message : t('Não deu certo.')
   } finally {
     busy.value = false
   }
@@ -81,10 +122,10 @@ async function run(fn: () => Promise<void>): Promise<void> {
 
 const changePassword = (): Promise<void> =>
   run(async () => {
-    if (f.value.next !== f.value.next2) throw new ApiError('As senhas novas não conferem.')
+    if (f.value.next !== f.value.next2) throw new ApiError(t('As senhas novas não conferem.'))
     await api('account:password', f.value.current, f.value.next)
     dialog.value = null
-    info('Senha mestra alterada', 'Use a nova senha nos outros computadores também.')
+    info(t('Senha mestra alterada'), t('Use a nova senha nos outros computadores também.'))
   })
 
 function onPin(p: string): void {
@@ -94,7 +135,7 @@ function onPin(p: string): void {
     return
   }
   if (p !== f.value.pinFirst) {
-    err.value = 'Os PINs não conferem. Comece de novo.'
+    err.value = t('Os PINs não conferem. Comece de novo.')
     f.value.pin = ''
     f.value.pinFirst = ''
     return
@@ -102,7 +143,7 @@ function onPin(p: string): void {
   void run(async () => {
     await api('account:pin', p)
     dialog.value = null
-    info('PIN alterado')
+    info(t('PIN alterado'))
   })
 }
 
@@ -111,130 +152,191 @@ const totpConfirm = (code: string): Promise<void> =>
   run(async () => {
     await api('account:totpConfirm', code)
     dialog.value = null
-    info('2FA atualizado', 'O código antigo do autenticador não funciona mais. Pode apagá-lo do celular.')
+    info(t('2FA atualizado'), t('O código antigo do autenticador não funciona mais. Pode apagá-lo do celular.'))
   })
 const recovery = (): Promise<void> => run(async () => void (newCode.value = await api<string>('account:recovery', f.value.current)))
 
 const dialogTitle = computed(
-  () => ({ password: 'Trocar senha mestra', pin: 'Trocar PIN', totp: 'Novo QR Code do 2FA', recovery: 'Novo código de recuperação' })[dialog.value ?? 'password']
+  () => ({ password: t('Trocar senha mestra'), pin: t('Trocar PIN'), totp: t('Novo QR Code do 2FA'), recovery: t('Novo código de recuperação') })[dialog.value ?? 'password']
 )
 </script>
 
 <template>
-  <Sheet title="Configurações" back @close="S.sheet = null">
+  <Sheet :title="t('Configurações')" back @close="S.sheet = null">
     <section>
-      <h2>Aparência</h2>
-      <div class="themes" role="radiogroup" aria-label="Tema">
-        <button v-for="t in THEMES" :key="t.id" class="th" role="radio" :aria-checked="S.theme === t.id" :class="{ on: S.theme === t.id }" @click="setTheme(t.id)">
-          <span class="chipc" :style="{ background: t.bg, boxShadow: `inset 0 0 0 1px ${t.line}` }"><i :style="{ background: t.primary }" /></span>
-          {{ t.name }}
+      <h2>{{ t('Aparência') }}</h2>
+      <div class="themes" role="radiogroup" :aria-label="t('Tema')">
+        <button v-for="th in THEMES" :key="th.id" class="th" role="radio" :aria-checked="S.theme === th.id" :class="{ on: S.theme === th.id }" @click="setTheme(th.id)">
+          <span class="chipc" :style="{ background: th.bg, boxShadow: `inset 0 0 0 1px ${th.line}` }"><i :style="{ background: th.primary }" /></span>
+          {{ th.name }}
         </button>
       </div>
+      <h3 class="sub">{{ t('Seus temas') }}</h3>
+      <div class="customs">
+        <div v-for="c in customs" :key="c.id" class="custom" :class="{ on: S.theme === c.id }">
+          <button v-if="c.theme" class="pick" role="radio" :aria-checked="S.theme === c.id" @click="setTheme(c.id)">
+            <span class="chipc" :style="{ background: c.theme.bg, boxShadow: `inset 0 0 0 1px ${c.theme.line}` }"><i :style="{ background: c.theme.primary }" /></span>
+            <span class="cname">{{ c.theme.name }}</span>
+          </button>
+          <button v-else class="pick empty" @click="editCustom(c.id)">
+            <span class="chipc dashed"><UIcon name="i-lucide-plus" class="size-4" /></span>
+            <span class="cname">{{ t('Personalizado {n}', { n: c.n }) }}</span>
+          </button>
+          <UTooltip :text="c.theme ? t('Editar cores') : t('Criar tema')">
+            <button class="hx-ib edit" :aria-label="c.theme ? t('Editar cores') : t('Criar tema')" @click="editCustom(c.id)"><UIcon name="i-lucide-pencil" class="size-4" /></button>
+          </UTooltip>
+        </div>
+      </div>
+      <p class="hx-hint pad">{{ t('Crie até 3 temas com as suas cores. Dá para pedir as cores a uma IA e colar a resposta.') }}</p>
+      <div class="r"><span class="l">{{ t('Idioma') }}</span><USelect :model-value="st.lang ?? 'auto'" :items="langItems" class="w-44" @update:model-value="(v) => setLang(v === 'auto' ? null : (v as Lang))" /></div>
     </section>
 
     <section>
-      <h2>Segurança</h2>
-      <div class="r"><span class="l">Trancar depois de ficar parado</span><USelect :model-value="st.autoLockMinutes" :items="lockItems" class="w-36" @update:model-value="(v) => set({ autoLockMinutes: Number(v) })" /></div>
-      <div class="r"><span class="l">Trancar quando o Windows for bloqueado</span><USwitch :model-value="st.lockOnWindowsLock" aria-label="Trancar com o Windows" @update:model-value="(v) => set({ lockOnWindowsLock: v })" /></div>
-      <div class="r"><span class="l">Apagar senha copiada depois de</span><USelect :model-value="st.clipboardSeconds" :items="clipItems" class="w-36" @update:model-value="(v) => set({ clipboardSeconds: Number(v) })" /></div>
-      <p class="hx-hint pad">Senhas copiadas não entram no histórico da área de transferência do Windows (Win+V) nem na sincronização na nuvem.</p>
+      <h2>{{ t('Segurança') }}</h2>
+      <div class="r"><span class="l">{{ t('Trancar depois de ficar parado') }}</span><USelect :model-value="st.autoLockMinutes" :items="lockItems" class="w-36" @update:model-value="(v) => set({ autoLockMinutes: Number(v) })" /></div>
+      <div class="r"><span class="l">{{ t('Trancar quando o Windows for bloqueado') }}</span><USwitch :model-value="st.lockOnWindowsLock" :aria-label="t('Trancar com o Windows')" @update:model-value="(v) => set({ lockOnWindowsLock: v })" /></div>
+      <div class="r"><span class="l">{{ t('Apagar senha copiada depois de') }}</span><USelect :model-value="st.clipboardSeconds" :items="clipItems" class="w-36" @update:model-value="(v) => set({ clipboardSeconds: Number(v) })" /></div>
+      <p class="hx-hint pad">{{ t('Senhas copiadas não entram no histórico da área de transferência do Windows (Win+V) nem na sincronização na nuvem.') }}</p>
+      <button class="act" @click="S.sheet = { kind: 'leaks' }"><UIcon name="i-lucide-shield-alert" class="size-4" />{{ t('Verificar vazamentos') }}</button>
     </section>
 
     <section>
-      <h2>Janela</h2>
-      <div class="r"><span class="l">Abrir junto com o Windows (fica na bandeja)</span><USwitch :model-value="st.startWithWindows" aria-label="Iniciar com o Windows" @update:model-value="(v) => set({ startWithWindows: v })" /></div>
-      <div class="r"><span class="l">Mostrar e esconder de qualquer lugar</span><UKbd value="Ctrl" /><UKbd value="Alt" /><UKbd value="V" /></div>
-      <p class="hx-hint pad">Os botões no topo encaixam a janela na esquerda ou na direita, com 30% da largura e altura total. Arrastar a barra solta a janela.</p>
+      <h2>{{ t('Alertas') }}</h2>
+      <div class="subt">{{ t('Agenda') }}</div>
+      <div class="r"><span class="l">{{ t('Notificar lembretes') }}</span><USwitch :model-value="al.agendaNotify" :aria-label="t('Notificar lembretes')" @update:model-value="(v) => setAlerts({ agendaNotify: v })" /></div>
+      <template v-if="al.agendaNotify">
+        <div class="r"><span class="l">{{ t('Avisar') }}</span><USelect :model-value="al.agendaLead" :items="leadItems" class="w-40" @update:model-value="(v) => setAlerts({ agendaLead: Number(v) })" /></div>
+        <div class="r">
+          <span class="l">{{ t('Som') }}</span>
+          <USelect :model-value="al.agendaSound" :items="soundItems" class="w-40" @update:model-value="(v) => setAlerts({ agendaSound: v as SoundId })" />
+          <button class="hx-ib" :aria-label="t('Testar som')" :disabled="al.agendaSound === 'none'" @click="testSound(al.agendaSound)"><UIcon name="i-lucide-play" class="size-4" /></button>
+        </div>
+      </template>
+      <div class="subt">{{ t('TO DO') }}</div>
+      <div class="r">
+        <span class="l">{{ t('Resumo diário dos pendentes') }}<span class="s">{{ t('Uma notificação por dia, no horário escolhido') }}</span></span>
+        <USwitch :model-value="!!al.todoDaily" :aria-label="t('Resumo diário dos pendentes')" @update:model-value="(v) => setAlerts({ todoDaily: v ? '09:00' : null })" />
+      </div>
+      <template v-if="al.todoDaily">
+        <div class="r">
+          <span class="l">{{ t('Horário') }}</span>
+          <div class="hx-in w-40"><input type="time" :value="al.todoDaily" :aria-label="t('Horário do resumo')" @change="(e) => (e.target as HTMLInputElement).value && setAlerts({ todoDaily: (e.target as HTMLInputElement).value })" /></div>
+        </div>
+        <div class="r">
+          <span class="l">{{ t('Som') }}</span>
+          <USelect :model-value="al.todoSound" :items="soundItems" class="w-40" @update:model-value="(v) => setAlerts({ todoSound: v as SoundId })" />
+          <button class="hx-ib" :aria-label="t('Testar som')" :disabled="al.todoSound === 'none'" @click="testSound(al.todoSound)"><UIcon name="i-lucide-play" class="size-4" /></button>
+        </div>
+      </template>
+      <div class="subt">{{ t('Temporizador') }}</div>
+      <div class="r">
+        <span class="l">{{ t('Som ao terminar') }}</span>
+        <USelect :model-value="al.timerSound" :items="soundItems" class="w-40" @update:model-value="(v) => setAlerts({ timerSound: v as SoundId })" />
+        <button class="hx-ib" :aria-label="t('Testar som')" :disabled="al.timerSound === 'none'" @click="testSound(al.timerSound)"><UIcon name="i-lucide-play" class="size-4" /></button>
+      </div>
+      <div class="r">
+        <span class="l">{{ t('Volume dos sons') }}</span>
+        <UIcon name="i-lucide-volume-2" class="size-4 shrink-0 text-(--hx-muted)" />
+        <USlider :default-value="Math.round(al.volume * 100)" :min="0" :max="100" :step="5" class="w-36" :aria-label="t('Volume dos sons')" @update:model-value="(v) => setVolume(v as number)" />
+      </div>
+      <p class="hx-hint pad">{{ t('O temporizador fica no ícone de relógio, no topo da janela.') }}</p>
     </section>
 
     <section>
-      <h2>Recursos</h2>
+      <h2>{{ t('Janela') }}</h2>
+      <div class="r"><span class="l">{{ t('Abrir junto com o Windows (fica na bandeja)') }}</span><USwitch :model-value="st.startWithWindows" :aria-label="t('Iniciar com o Windows')" @update:model-value="(v) => set({ startWithWindows: v })" /></div>
+      <div class="r"><span class="l">{{ t('Mostrar e esconder de qualquer lugar') }}</span><UKbd value="Ctrl" /><UKbd value="Alt" /><UKbd value="V" /></div>
+      <p class="hx-hint pad">{{ t('Os botões no topo encaixam a janela na esquerda ou na direita, com 30% da largura e altura total. Arrastar a barra solta a janela.') }}</p>
+    </section>
+
+    <section>
+      <h2>{{ t('Recursos') }}</h2>
       <div class="feat">
         <div class="fh">
-          <UIcon name="i-lucide-keyboard" class="size-[18px] ic" />Digitar login automático<span class="grow" />
-          <USwitch :model-value="st.autoType" aria-label="Ativar digitação automática" @update:model-value="(v) => set({ autoType: v })" />
+          <UIcon name="i-lucide-keyboard" class="size-[18px] ic" />{{ t('Digitar login automático') }}<span class="grow" />
+          <USwitch :model-value="st.autoType" :aria-label="t('Ativar digitação automática')" @update:model-value="(v) => set({ autoType: v })" />
         </div>
-        <p>Clique no campo de usuário de qualquer site ou programa e aperte <UKbd value="Ctrl" /> <UKbd value="Alt" /> <UKbd value="A" />. O Hideout acha o acesso pelo nome da janela e digita usuário, Tab, senha e Enter. Se houver mais de um, ele pergunta qual.</p>
+        <p>{{ t('Clique no campo de usuário de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela e digita usuário, Tab, senha e Enter. Se houver mais de um, ele pergunta qual.') }}</p>
       </div>
       <div class="feat">
-        <div class="fh"><UIcon name="i-lucide-paperclip" class="size-[18px] ic" />Anexos criptografados</div>
-        <p>Arraste PDFs, fotos de documentos ou certificados para dentro de um acesso ou nota. Eles ficam trancados junto com o cofre, até 10 MB cada.</p>
+        <div class="fh"><UIcon name="i-lucide-paperclip" class="size-[18px] ic" />{{ t('Anexos criptografados') }}</div>
+        <p>{{ t('Arraste PDFs, fotos de documentos ou certificados para dentro de um acesso ou nota. Eles ficam trancados junto com o cofre, até 10 MB cada.') }}</p>
       </div>
       <div class="feat">
-        <div class="fh"><UIcon name="i-lucide-layout-grid" class="size-[18px] ic" />Modelos prontos</div>
-        <p>Em "Novo", escolha o tipo: acesso, cartão, Wi-Fi, documento, conta bancária ou servidor. Cada um vem com os campos certos, e o Wi-Fi gera um QR Code para o celular conectar.</p>
+        <div class="fh"><UIcon name="i-lucide-layout-grid" class="size-[18px] ic" />{{ t('Modelos prontos') }}</div>
+        <p>{{ t('Em "Novo", escolha o tipo: acesso, cartão, Wi-Fi, documento, conta bancária ou servidor. Cada um vem com os campos certos, e o Wi-Fi gera um QR Code para o celular conectar.') }}</p>
       </div>
     </section>
 
     <section>
-      <h2>Conta: {{ S.user }}</h2>
-      <div class="r"><span class="l">Senha mestra</span><button class="hx-btn hx-soft sm" @click="openDialog('password')">Trocar</button></div>
-      <div class="r"><span class="l">PIN do dia a dia<span class="s">6 dígitos, 5 tentativas</span></span><button class="hx-btn hx-soft sm" @click="openDialog('pin')">Trocar</button></div>
-      <div class="r"><span class="l">Verificação em duas etapas</span><span class="ok">Ativa</span><button class="hx-btn hx-soft sm" @click="openDialog('totp')">Novo QR Code</button></div>
-      <div class="r"><span class="l">Código de recuperação</span><button class="hx-btn hx-soft sm" @click="openDialog('recovery')">Gerar novo</button></div>
-      <div class="sub">Computadores conhecidos</div>
+      <h2>{{ t('Conta: {user}', { user: S.user ?? '' }) }}</h2>
+      <div class="r"><span class="l">{{ t('Senha mestra') }}</span><button class="hx-btn hx-soft sm" @click="openDialog('password')">{{ t('Trocar') }}</button></div>
+      <div class="r"><span class="l">{{ t('PIN do dia a dia') }}<span class="s">{{ t('6 dígitos, 5 tentativas') }}</span></span><button class="hx-btn hx-soft sm" @click="openDialog('pin')">{{ t('Trocar') }}</button></div>
+      <div class="r"><span class="l">{{ t('Verificação em duas etapas') }}</span><span class="ok">{{ t('Ativa') }}</span><button class="hx-btn hx-soft sm" @click="openDialog('totp')">{{ t('Novo QR Code') }}</button></div>
+      <div class="r"><span class="l">{{ t('Código de recuperação') }}</span><button class="hx-btn hx-soft sm" @click="openDialog('recovery')">{{ t('Gerar novo') }}</button></div>
+      <div class="subt">{{ t('Computadores conhecidos') }}</div>
       <div v-for="d in devices" :key="d.id" class="r dev">
         <UIcon name="i-lucide-monitor" class="size-4 shrink-0" />
-        <span class="l">{{ d.name }}<span class="s">{{ d.id === S.deviceId ? 'Este computador' : `Visto: ${relDate(d.lastSeen)}` }}</span></span>
-        <button v-if="d.id !== S.deviceId" class="hx-btn hx-danger sm" @click="removeDevice(d.id)">Remover</button>
+        <span class="l">{{ d.name }}<span class="s">{{ d.id === S.deviceId ? t('Este computador') : t('Visto: {when}', { when: relDate(d.lastSeen) }) }}</span></span>
+        <button v-if="d.id !== S.deviceId" class="hx-btn hx-danger sm" @click="removeDevice(d.id)">{{ t('Remover') }}</button>
       </div>
-      <button class="hx-btn hx-danger out" @click="logout"><UIcon name="i-lucide-log-out" class="size-4" />Sair da conta neste computador</button>
+      <button class="hx-btn hx-danger out" @click="logout"><UIcon name="i-lucide-log-out" class="size-4" />{{ t('Sair da conta neste computador') }}</button>
     </section>
 
     <section>
-      <h2>Dados</h2>
-      <div class="r top"><span class="l">Pasta dos cofres<span class="s path">{{ st.vaultDir }}</span></span><button class="hx-btn hx-soft sm" @click="pickDir">Alterar</button></div>
+      <h2>{{ t('Dados') }}</h2>
+      <div class="r top"><span class="l">{{ t('Pasta dos cofres') }}<span class="s path">{{ st.vaultDir }}</span></span><button class="hx-btn hx-soft sm" @click="pickDir">{{ t('Alterar') }}</button></div>
       <div class="acts">
-        <button class="act" @click="backup"><UIcon name="i-lucide-download" class="size-4" />Exportar backup criptografado</button>
-        <button class="act" @click="S.sheet = { kind: 'trash' }"><UIcon name="i-lucide-trash-2" class="size-4" />Lixeira (30 dias)</button>
+        <button class="act" @click="backup"><UIcon name="i-lucide-download" class="size-4" />{{ t('Exportar backup criptografado') }}</button>
+        <button class="act" @click="S.sheet = { kind: 'trash' }"><UIcon name="i-lucide-trash-2" class="size-4" />{{ t('Lixeira (30 dias)') }}</button>
       </div>
-      <p class="hx-hint pad">Hideout {{ S.app?.version }}. Código aberto, licença MIT.</p>
+      <p class="hx-hint pad">{{ t('Hideout {version}. Código aberto, licença MIT.', { version: S.app?.version ?? '' }) }}</p>
     </section>
 
-  <UModal :open="!!dialog" :title="dialogTitle" :close="{ 'aria-label': 'Fechar' }" @update:open="(o) => !o && (dialog = null)">
+  <UModal :open="!!dialog" :title="dialogTitle" :close="{ 'aria-label': t('Fechar') }" @update:open="(o) => !o && (dialog = null)">
     <template #body>
       <form v-if="dialog === 'password'" class="dlg" @submit.prevent="changePassword">
-        <div class="hx-field"><label class="hx-label" for="d-cur">Senha atual</label><div class="hx-in"><input id="d-cur" v-model="f.current" type="password" autofocus /></div></div>
-        <div class="hx-field"><label class="hx-label" for="d-new">Nova senha</label><div class="hx-in"><input id="d-new" v-model="f.next" type="password" /></div><StrengthMeter :value="f.next" /></div>
-        <div class="hx-field"><label class="hx-label" for="d-new2">Repita a nova senha</label><div class="hx-in"><input id="d-new2" v-model="f.next2" type="password" /></div></div>
+        <div class="hx-field"><label class="hx-label" for="d-cur">{{ t('Senha atual') }}</label><div class="hx-in"><input id="d-cur" v-model="f.current" type="password" autofocus /></div></div>
+        <div class="hx-field"><label class="hx-label" for="d-new">{{ t('Nova senha') }}</label><div class="hx-in"><input id="d-new" v-model="f.next" type="password" /></div><StrengthMeter :value="f.next" /></div>
+        <div class="hx-field"><label class="hx-label" for="d-new2">{{ t('Repita a nova senha') }}</label><div class="hx-in"><input id="d-new2" v-model="f.next2" type="password" /></div></div>
         <p v-if="err" class="hx-error" role="alert">{{ err }}</p>
-        <button class="hx-btn hx-primary" :disabled="busy || f.next.length < 12 || !f.current">Trocar senha</button>
+        <button class="hx-btn hx-primary" :disabled="busy || f.next.length < 12 || !f.current">{{ t('Trocar senha') }}</button>
       </form>
 
       <div v-else-if="dialog === 'pin'" class="dlg center">
-        <span class="hx-label">{{ f.pinFirst ? 'Repita o novo PIN' : 'Digite o novo PIN de 6 dígitos' }}</span>
+        <span class="hx-label">{{ f.pinFirst ? t('Repita o novo PIN') : t('Digite o novo PIN de 6 dígitos') }}</span>
         <PinPad v-model="f.pin" :disabled="busy" @complete="onPin" />
         <p v-if="err" class="hx-error" role="alert">{{ err }}</p>
       </div>
 
       <div v-else-if="dialog === 'totp'" class="dlg">
         <form v-if="!otp" class="dlg" @submit.prevent="totpBegin">
-          <p class="hx-hint">Use isto se trocou de celular. Confirme com a senha mestra.</p>
-          <div class="hx-field"><label class="hx-label" for="d-tp">Senha mestra</label><div class="hx-in"><input id="d-tp" v-model="f.current" type="password" autofocus /></div></div>
+          <p class="hx-hint">{{ t('Use isto se trocou de celular. Confirme com a senha mestra.') }}</p>
+          <div class="hx-field"><label class="hx-label" for="d-tp">{{ t('Senha mestra') }}</label><div class="hx-in"><input id="d-tp" v-model="f.current" type="password" autofocus /></div></div>
           <p v-if="err" class="hx-error" role="alert">{{ err }}</p>
-          <button class="hx-btn hx-primary" :disabled="busy || !f.current">Continuar</button>
+          <button class="hx-btn hx-primary" :disabled="busy || !f.current">{{ t('Continuar') }}</button>
         </form>
         <template v-else>
-          <div class="qr"><QrCode :value="otp.otpauth" :size="160" label="Novo QR Code do autenticador" /></div>
-          <span class="hx-label">Código que aparece no app</span>
-          <CodeInput v-model="f.code" label="Código do autenticador" autofocus @complete="totpConfirm" />
+          <div class="qr"><QrCode :value="otp.otpauth" :size="160" :label="t('Novo QR Code do autenticador')" /></div>
+          <span class="hx-label">{{ t('Código que aparece no app') }}</span>
+          <CodeInput v-model="f.code" :label="t('Código do autenticador')" autofocus @complete="totpConfirm" />
           <p v-if="err" class="hx-error" role="alert">{{ err }}</p>
         </template>
       </div>
 
       <div v-else-if="dialog === 'recovery'" class="dlg">
         <form v-if="!newCode" class="dlg" @submit.prevent="recovery">
-          <p class="hx-hint">O código antigo deixa de funcionar. Confirme com a senha mestra.</p>
-          <div class="hx-field"><label class="hx-label" for="d-rc">Senha mestra</label><div class="hx-in"><input id="d-rc" v-model="f.current" type="password" autofocus /></div></div>
+          <p class="hx-hint">{{ t('O código antigo deixa de funcionar. Confirme com a senha mestra.') }}</p>
+          <div class="hx-field"><label class="hx-label" for="d-rc">{{ t('Senha mestra') }}</label><div class="hx-in"><input id="d-rc" v-model="f.current" type="password" autofocus /></div></div>
           <p v-if="err" class="hx-error" role="alert">{{ err }}</p>
-          <button class="hx-btn hx-primary" :disabled="busy || !f.current">Gerar código</button>
+          <button class="hx-btn hx-primary" :disabled="busy || !f.current">{{ t('Gerar código') }}</button>
         </form>
         <template v-else>
           <div class="code mono">{{ newCode }}</div>
-          <p class="hx-hint">Anote num lugar seguro, fora deste computador. Ele não será mostrado de novo.</p>
+          <p class="hx-hint">{{ t('Anote num lugar seguro, fora deste computador. Ele não será mostrado de novo.') }}</p>
           <div class="row">
-            <button class="hx-btn hx-soft" @click="copy(newCode, { label: 'Código', secret: true })"><UIcon name="i-lucide-copy" class="size-4" />Copiar</button>
-            <button class="hx-btn hx-primary" @click="dialog = null">Guardei</button>
+            <button class="hx-btn hx-soft" @click="copy(newCode, { label: t('Código'), secret: true })"><UIcon name="i-lucide-copy" class="size-4" />{{ t('Copiar') }}</button>
+            <button class="hx-btn hx-primary" @click="dialog = null">{{ t('Guardei') }}</button>
           </div>
         </template>
       </div>
@@ -257,6 +359,12 @@ section:last-child {
 h2 {
   margin: 0 0 6px;
   font-size: 13px;
+  font-weight: 700;
+  color: var(--hx-muted);
+}
+h3.sub {
+  margin: 12px 0 6px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--hx-muted);
 }
@@ -290,6 +398,10 @@ h2 {
   border-radius: 17px;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .chipc i {
   position: absolute;
@@ -297,6 +409,55 @@ h2 {
   top: 0;
   bottom: 0;
   width: 50%;
+}
+.chipc.dashed {
+  border: 1.5px dashed var(--hx-muted);
+  color: var(--hx-muted);
+}
+.customs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.custom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: var(--hx-bg);
+  padding: 6px 6px 6px 8px;
+}
+.custom.on {
+  border-color: var(--hx-primary);
+  background: var(--hx-soft);
+}
+.pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hx-ink);
+  cursor: pointer;
+  text-align: left;
+}
+.pick.empty {
+  color: var(--hx-muted);
+}
+.cname {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.edit {
+  width: 30px;
+  height: 30px;
 }
 .r {
   display: flex;
@@ -339,7 +500,7 @@ h2 {
 .pad {
   margin: 4px 0 6px;
 }
-.sub {
+.subt {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--hx-muted);

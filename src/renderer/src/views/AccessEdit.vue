@@ -4,7 +4,8 @@ import { newAccess, template, uid } from '@shared/model'
 import type { Access, ItemType } from '@shared/types'
 import { api } from '../api'
 import { useCopy } from '../copy'
-import { S, categories, trash, upsertAccess } from '../store'
+import { locale, t } from '../i18n'
+import { S, catName, categories, trash, upsertAccess } from '../store'
 import Attachments from '../components/Attachments.vue'
 import PasswordGenerator from '../components/PasswordGenerator.vue'
 import QrCode from '../components/QrCode.vue'
@@ -16,7 +17,7 @@ const { copy, fail, info } = useCopy()
 const original = props.id ? S.data!.accesses.find((a) => a.id === props.id) : null
 const a = reactive<Access>(original ? (JSON.parse(JSON.stringify(original)) as Access) : newAccess(props.type ?? 'login', props.category ?? 'Geral'))
 const isNew = !original
-const t = computed(() => template(a.type))
+const tpl = computed(() => template(a.type))
 const showPw = ref(isNew)
 const showGen = ref(isNew && a.type === 'login')
 const showHistory = ref(false)
@@ -50,18 +51,18 @@ function save(): void {
 function remove(): void {
   if (!original) return
   trash('accesses', original.id)
-  info('Movido para a lixeira', 'Fica lá por 30 dias. Recupere em Configurações.')
+  info(t('Movido para a lixeira'), t('Fica lá por 30 dias. Recupere em Configurações.'))
   S.sheet = null
 }
 
-const fmtDate = (iso: string): string => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+const fmtDate = (iso: string): string => new Date(iso).toLocaleDateString(locale.value, { day: '2-digit', month: 'short', year: 'numeric' })
 </script>
 
 <template>
-  <Sheet :title="isNew ? `Novo: ${t.label.toLowerCase()}` : a.title || t.label" back @close="S.sheet = null">
+  <Sheet :title="isNew ? t('Novo: {type}', { type: t(tpl.label).toLowerCase() }) : a.title || t(tpl.label)" back @close="S.sheet = null">
     <template #actions>
-      <UTooltip :text="a.favorite ? 'Tirar dos favoritos' : 'Mostrar em Favoritos'">
-        <button class="hx-ib" :class="{ fav: a.favorite }" :aria-pressed="a.favorite" aria-label="Favorito" @click="a.favorite = !a.favorite">
+      <UTooltip :text="a.favorite ? t('Tirar dos favoritos') : t('Mostrar em Favoritos')">
+        <button class="hx-ib" :class="{ fav: a.favorite }" :aria-pressed="a.favorite" :aria-label="t('Favorito')" @click="a.favorite = !a.favorite">
           <UIcon :name="a.favorite ? 'i-lucide-star' : 'i-lucide-star'" class="size-[18px]" />
         </button>
       </UTooltip>
@@ -69,83 +70,83 @@ const fmtDate = (iso: string): string => new Date(iso).toLocaleDateString('pt-BR
 
     <form class="form" @submit.prevent="save">
       <div class="hx-field">
-        <label class="hx-label" for="ae-title">Nome</label>
-        <div class="hx-in"><input id="ae-title" v-model="a.title" :placeholder="t.type === 'login' ? 'Ex.: Gmail, Banco, Painel do site' : t.label" autofocus /></div>
+        <label class="hx-label" for="ae-title">{{ t('Nome') }}</label>
+        <div class="hx-in"><input id="ae-title" v-model="a.title" :placeholder="tpl.type === 'login' ? t('Ex.: Gmail, Banco, Painel do site') : t(tpl.label)" autofocus /></div>
       </div>
 
-      <div v-if="t.hasUrl" class="hx-field">
-        <label class="hx-label" for="ae-url">Link</label>
+      <div v-if="tpl.hasUrl" class="hx-field">
+        <label class="hx-label" for="ae-url">{{ t('Link') }}</label>
         <div class="hx-in">
           <input id="ae-url" v-model="a.url" placeholder="https://" spellcheck="false" />
-          <button v-if="a.url" type="button" class="hx-ib" aria-label="Abrir link" @click="api('shell:open', a.url).catch(fail)"><UIcon name="i-lucide-external-link" class="size-4" /></button>
+          <button v-if="a.url" type="button" class="hx-ib" :aria-label="t('Abrir link')" @click="api('shell:open', a.url).catch(fail)"><UIcon name="i-lucide-external-link" class="size-4" /></button>
         </div>
       </div>
 
       <div class="two">
-        <div v-if="t.usernameLabel" class="hx-field">
-          <label class="hx-label" for="ae-user">{{ t.usernameLabel }}</label>
+        <div v-if="tpl.usernameLabel" class="hx-field">
+          <label class="hx-label" for="ae-user">{{ t(tpl.usernameLabel!) }}</label>
           <div class="hx-in">
             <input id="ae-user" v-model="a.username" spellcheck="false" />
-            <button v-if="a.username" type="button" class="hx-ib" :aria-label="`Copiar ${t.usernameLabel}`" @click="copy(a.username, { label: t.usernameLabel! })"><UIcon name="i-lucide-copy" class="size-4" /></button>
+            <button v-if="a.username" type="button" class="hx-ib" :aria-label="t('Copiar {what}', { what: t(tpl.usernameLabel!) })" @click="copy(a.username, { label: t(tpl.usernameLabel!) })"><UIcon name="i-lucide-copy" class="size-4" /></button>
           </div>
         </div>
         <div class="hx-field">
-          <label class="hx-label" for="ae-cat">Categoria</label>
+          <label class="hx-label" for="ae-cat">{{ t('Categoria') }}</label>
           <UInputMenu
             id="ae-cat"
             v-model="a.category"
             :items="categoryItems"
             create-item
-            placeholder="Geral"
+            :placeholder="catName('Geral')"
             :ui="{ base: 'h-10 rounded-[10px]' }"
             @create="onCreateCategory"
           />
         </div>
       </div>
 
-      <div v-if="t.passwordLabel" class="hx-field">
-        <label class="hx-label" for="ae-pw">{{ t.passwordLabel }}</label>
+      <div v-if="tpl.passwordLabel" class="hx-field">
+        <label class="hx-label" for="ae-pw">{{ t(tpl.passwordLabel!) }}</label>
         <div class="hx-in">
           <input id="ae-pw" v-model="a.password" :type="showPw ? 'text' : 'password'" class="mono" spellcheck="false" autocomplete="off" />
-          <button type="button" class="hx-ib" :aria-label="showPw ? 'Ocultar' : 'Mostrar'" @click="showPw = !showPw"><UIcon :name="showPw ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-4" /></button>
-          <button v-if="a.password" type="button" class="hx-ib" aria-label="Copiar" @click="copy(a.password, { label: t.passwordLabel!, secret: true, key: a.id })"><UIcon name="i-lucide-copy" class="size-4" /></button>
-          <UTooltip v-if="a.type !== 'card'" text="Gerar senha">
-            <button type="button" class="hx-ib" :class="{ on: showGen }" aria-label="Gerar senha" @click="showGen = !showGen"><UIcon name="i-lucide-wand-sparkles" class="size-4" /></button>
+          <button type="button" class="hx-ib" :aria-label="showPw ? t('Ocultar') : t('Mostrar')" @click="showPw = !showPw"><UIcon :name="showPw ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-4" /></button>
+          <button v-if="a.password" type="button" class="hx-ib" :aria-label="t('Copiar')" @click="copy(a.password, { label: t(tpl.passwordLabel!), secret: true, key: a.id })"><UIcon name="i-lucide-copy" class="size-4" /></button>
+          <UTooltip v-if="a.type !== 'card'" :text="t('Gerar senha')">
+            <button type="button" class="hx-ib" :class="{ on: showGen }" :aria-label="t('Gerar senha')" @click="showGen = !showGen"><UIcon name="i-lucide-wand-sparkles" class="size-4" /></button>
           </UTooltip>
         </div>
         <PasswordGenerator v-if="showGen" v-model="a.password" @use="(p) => ((a.password = p), (showPw = true))" />
       </div>
 
       <div v-if="wifiQr" class="wifi">
-        <QrCode :value="wifiQr" :size="120" :label="`QR Code para conectar ao Wi-Fi ${a.username}`" />
-        <span class="hx-hint">Aponte a câmera do celular para conectar sem digitar a senha.</span>
+        <QrCode :value="wifiQr" :size="120" :label="t('QR Code para conectar ao Wi-Fi {name}', { name: a.username })" />
+        <span class="hx-hint">{{ t('Aponte a câmera do celular para conectar sem digitar a senha.') }}</span>
       </div>
 
       <div v-for="(f, i) in a.fields" :key="f.id" class="hx-field">
         <div class="flabel">
-          <input v-model="f.label" class="label-in" placeholder="Nome do campo" :aria-label="`Nome do campo ${i + 1}`" />
-          <UTooltip :text="f.secret ? 'Campo secreto: fica oculto' : 'Marcar como secreto'">
-            <button type="button" class="mini" :class="{ on: f.secret }" :aria-pressed="f.secret" aria-label="Secreto" @click="f.secret = !f.secret">
-              <UIcon :name="f.secret ? 'i-lucide-lock' : 'i-lucide-lock-open'" class="size-3" /><template v-if="f.secret">Secreto</template>
+          <input v-model="f.label" class="label-in" :placeholder="t('Nome do campo')" :aria-label="t('Nome do campo {n}', { n: i + 1 })" />
+          <UTooltip :text="f.secret ? t('Campo secreto: fica oculto') : t('Marcar como secreto')">
+            <button type="button" class="mini" :class="{ on: f.secret }" :aria-pressed="f.secret" :aria-label="t('Secreto')" @click="f.secret = !f.secret">
+              <UIcon :name="f.secret ? 'i-lucide-lock' : 'i-lucide-lock-open'" class="size-3" /><template v-if="f.secret">{{ t('Secreto') }}</template>
             </button>
           </UTooltip>
-          <button type="button" class="mini" aria-label="Remover campo" @click="a.fields.splice(i, 1)"><UIcon name="i-lucide-x" class="size-3" /></button>
+          <button type="button" class="mini" :aria-label="t('Remover campo')" @click="a.fields.splice(i, 1)"><UIcon name="i-lucide-x" class="size-3" /></button>
         </div>
         <div class="hx-in">
-          <input v-model="f.value" :type="f.secret && !revealed[f.id] ? 'password' : 'text'" :class="{ mono: f.secret }" spellcheck="false" :aria-label="f.label || 'Valor'" />
-          <button v-if="f.secret" type="button" class="hx-ib" :aria-label="revealed[f.id] ? 'Ocultar' : 'Mostrar'" @click="revealed[f.id] = !revealed[f.id]"><UIcon :name="revealed[f.id] ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-4" /></button>
-          <button v-if="f.value" type="button" class="hx-ib" aria-label="Copiar" @click="copy(f.value, { label: f.label || 'Campo', secret: f.secret, key: f.secret ? f.id : undefined })"><UIcon name="i-lucide-copy" class="size-4" /></button>
+          <input v-model="f.value" :type="f.secret && !revealed[f.id] ? 'password' : 'text'" :class="{ mono: f.secret }" spellcheck="false" :aria-label="f.label ? t(f.label) : t('Valor')" />
+          <button v-if="f.secret" type="button" class="hx-ib" :aria-label="revealed[f.id] ? t('Ocultar') : t('Mostrar')" @click="revealed[f.id] = !revealed[f.id]"><UIcon :name="revealed[f.id] ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="size-4" /></button>
+          <button v-if="f.value" type="button" class="hx-ib" :aria-label="t('Copiar')" @click="copy(f.value, { label: f.label ? t(f.label) : t('Campo'), secret: f.secret, key: f.secret ? f.id : undefined })"><UIcon name="i-lucide-copy" class="size-4" /></button>
         </div>
       </div>
-      <button type="button" class="hx-link add" @click="addField"><UIcon name="i-lucide-plus" class="size-4" />Adicionar campo (PIN, pergunta de segurança, chave Pix…)</button>
+      <button type="button" class="hx-link add" @click="addField"><UIcon name="i-lucide-plus" class="size-4" />{{ t('Adicionar campo (PIN, pergunta de segurança, chave Pix…)') }}</button>
 
       <div class="hx-field">
-        <span class="hx-label">Etiquetas</span>
-        <UInputTags v-model="a.tags" placeholder="Adicionar" :ui="{ root: 'min-h-10 rounded-[10px]' }" />
+        <span class="hx-label">{{ t('Etiquetas') }}</span>
+        <UInputTags v-model="a.tags" :placeholder="t('Adicionar')" :ui="{ root: 'min-h-10 rounded-[10px]' }" />
       </div>
 
       <div class="hx-field">
-        <label class="hx-label" for="ae-notes">Observações</label>
+        <label class="hx-label" for="ae-notes">{{ t('Observações') }}</label>
         <div class="hx-in"><textarea id="ae-notes" v-model="a.notes" rows="3" /></div>
       </div>
 
@@ -153,23 +154,23 @@ const fmtDate = (iso: string): string => new Date(iso).toLocaleDateString('pt-BR
 
       <div v-if="a.history.length" class="hx-field">
         <button type="button" class="hx-link add" @click="showHistory = !showHistory">
-          <UIcon name="i-lucide-history" class="size-4" />Senhas anteriores ({{ a.history.length }})
+          <UIcon name="i-lucide-history" class="size-4" />{{ t('Senhas anteriores ({n})', { n: a.history.length }) }}
         </button>
         <div v-if="showHistory" class="history">
           <div v-for="h in a.history" :key="h.changedAt" class="hrow">
-            <span class="hx-hint">até {{ fmtDate(h.changedAt) }}</span>
+            <span class="hx-hint">{{ t('até {date}', { date: fmtDate(h.changedAt) }) }}</span>
             <span class="grow" />
-            <button type="button" class="hx-btn hx-soft sm" @click="copy(h.password, { label: 'Senha anterior', secret: true })"><UIcon name="i-lucide-copy" class="size-4" />Copiar</button>
+            <button type="button" class="hx-btn hx-soft sm" @click="copy(h.password, { label: t('Senha anterior'), secret: true })"><UIcon name="i-lucide-copy" class="size-4" />{{ t('Copiar') }}</button>
           </div>
         </div>
       </div>
     </form>
 
     <template #footer>
-      <button v-if="!isNew" class="hx-btn hx-danger" @click="remove"><UIcon name="i-lucide-trash-2" class="size-4" />Excluir</button>
+      <button v-if="!isNew" class="hx-btn hx-danger" @click="remove"><UIcon name="i-lucide-trash-2" class="size-4" />{{ t('Excluir') }}</button>
       <span class="grow" />
-      <button class="hx-btn hx-ghost" @click="S.sheet = null">Cancelar</button>
-      <button class="hx-btn hx-primary" :disabled="!valid" @click="save">Salvar</button>
+      <button class="hx-btn hx-ghost" @click="S.sheet = null">{{ t('Cancelar') }}</button>
+      <button class="hx-btn hx-primary" :disabled="!valid" @click="save">{{ t('Salvar') }}</button>
     </template>
   </Sheet>
 </template>

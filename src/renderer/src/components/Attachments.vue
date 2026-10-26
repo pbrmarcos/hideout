@@ -3,12 +3,13 @@ import { ref } from 'vue'
 import type { AttachmentRef } from '@shared/types'
 import { api } from '../api'
 import { useCopy } from '../copy'
+import { locale, t } from '../i18n'
 
 const list = defineModel<AttachmentRef[]>({ required: true })
 const { fail } = useCopy()
 const over = ref(false)
 
-const size = (n: number): string => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB`)
+const size = (n: number): string => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toLocaleString(locale.value, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MB`)
 
 async function pick(): Promise<void> {
   try {
@@ -35,18 +36,18 @@ const remove = (id: string): void => void (list.value = list.value.filter((a) =>
 
 <template>
   <div class="hx-field">
-    <span class="hx-label">Anexos</span>
+    <span class="hx-label">{{ t('Anexos') }}</span>
     <div class="drop" :class="{ over }" @dragover.prevent="over = true" @dragleave="over = false" @drop.prevent="drop">
       <div v-for="a in list" :key="a.id" class="att">
         <UIcon :name="a.mime.startsWith('image/') ? 'i-lucide-image' : a.mime === 'application/pdf' ? 'i-lucide-file-text' : 'i-lucide-file'" class="size-[17px] shrink-0" />
-        <button type="button" class="name" :title="`Abrir ${a.name}`" @click="api('att:open', a.id, a.name).catch(fail)">{{ a.name }}</button>
+        <button type="button" class="name" :title="t('Abrir {name}', { name: a.name })" @click="api('att:open', a.id, a.name).catch(fail)">{{ a.name }}</button>
         <span class="hx-hint">{{ size(a.size) }}</span>
-        <button type="button" class="hx-ib" aria-label="Salvar uma cópia" @click="api('att:save', a.id, a.name).catch(fail)"><UIcon name="i-lucide-download" class="size-4" /></button>
-        <button type="button" class="hx-ib" aria-label="Remover anexo" @click="remove(a.id)"><UIcon name="i-lucide-x" class="size-4" /></button>
+        <button type="button" class="hx-ib" :aria-label="t('Salvar uma cópia')" @click="api('att:save', a.id, a.name).catch(fail)"><UIcon name="i-lucide-download" class="size-4" /></button>
+        <button type="button" class="hx-ib" :aria-label="t('Remover anexo')" @click="remove(a.id)"><UIcon name="i-lucide-x" class="size-4" /></button>
       </div>
       <button type="button" class="add" @click="pick">
         <UIcon name="i-lucide-paperclip" class="size-4" />
-        Arraste arquivos aqui ou clique para anexar (até 10 MB cada)
+        {{ t('Arraste arquivos aqui ou clique para anexar (até 10 MB cada)') }}
       </button>
     </div>
   </div>

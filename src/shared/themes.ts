@@ -1,4 +1,4 @@
-import type { ThemeId } from './types'
+import type { CustomTheme, ThemeId } from './types'
 
 export interface Theme {
   id: ThemeId
@@ -36,6 +36,151 @@ export const THEMES: Theme[] = [
   { id: 'matrix', name: 'Matrix', dark: true, mono: true, bg: '#050A06', surface: '#0B140D', ink: '#C8FFD4', muted: '#6FBF84', line: '#163A1E', tab: '#0F1E12', primary: '#00FF41', onPrimary: '#001A07', soft: '#0F2A16', softInk: '#39FF6A', dot: '#00FF41', warn: '#FFD166', warnSoft: '#2A2A0F', danger: '#FF6B6B', dangerSoft: '#2A1212', glow: '0 0 12px rgba(0,255,65,.55)' }
 ]
 
-export function themeById(id: string | undefined | null): Theme {
+export const CUSTOM_IDS = ['custom1', 'custom2', 'custom3'] as const
+export type CustomId = (typeof CUSTOM_IDS)[number]
+
+export function themeById(id: string | undefined | null, custom: Partial<Record<CustomId, CustomTheme>> = {}): Theme {
+  if (id && (CUSTOM_IDS as readonly string[]).includes(id)) {
+    const c = custom[id as CustomId]
+    if (c) return completeTheme(id as CustomId, c)
+  }
   return THEMES.find((t) => t.id === id) ?? THEMES[0]
+}
+
+// --- colors ----------------------------------------------------------------------
+
+const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i
+
+export function normalizeHex(v: string): string | null {
+  const m = v.trim().match(HEX)
+  if (!m) return null
+  const h = m[1].length === 3 ? m[1].split('').map((c) => c + c).join('') : m[1]
+  return `#${h.toUpperCase()}`
+}
+
+function rgb(hex: string): [number, number, number] {
+  const n = Number.parseInt(hex.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+function luminance(hex: string): number {
+  const [r, g, b] = rgb(hex).map((c) => {
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/** WCAG contrast ratio between two hex colors (1 to 21). */
+export function contrast(a: string, b: string): number {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p)
+  return (x + 0.05) / (y + 0.05)
+}
+
+/** Mixes `a` into `b`; amount 0 = b, 1 = a. */
+export function mix(a: string, b: string, amount: number): string {
+  const [ra, ga, ba] = rgb(a), [rb, gb, bb] = rgb(b)
+  const c = (x: number, y: number): string => Math.round(x * amount + y * (1 - amount)).toString(16).padStart(2, '0')
+  return `#${c(ra, rb)}${c(ga, gb)}${c(ba, bb)}`.toUpperCase()
+}
+
+/** Fills the colors a custom theme does not set (tabs, dots, soft status backgrounds). */
+export function completeTheme(id: CustomId, c: CustomTheme): Theme {
+  return {
+    id,
+    name: c.name || 'Personalizado',
+    dark: c.dark,
+    mono: c.mono,
+    bg: c.bg,
+    surface: c.surface,
+    ink: c.ink,
+    muted: c.muted,
+    line: c.line,
+    tab: mix(c.ink, c.bg, 0.06),
+    primary: c.primary,
+    onPrimary: c.onPrimary,
+    soft: c.soft,
+    softInk: c.softInk,
+    dot: c.primary,
+    warn: c.warn,
+    warnSoft: mix(c.warn, c.surface, 0.16),
+    danger: c.danger,
+    dangerSoft: mix(c.danger, c.surface, 0.14),
+    glow: 'none'
+  }
+}
+
+export function customFrom(t: Theme, name: string): CustomTheme {
+  const { dark, mono, bg, surface, ink, muted, line, primary, onPrimary, soft, softInk, warn, danger } = t
+  return { name, dark, mono, bg, surface, ink, muted, line, primary, onPrimary, soft, softInk, warn, danger }
+}
+
+/** Editable colors, in the order shown to the user. Code keys stay in English so any AI can fill them. */
+export const COLOR_KEYS = ['bg', 'surface', 'ink', 'muted', 'line', 'primary', 'onPrimary', 'soft', 'softInk', 'warn', 'danger'] as const
+export type ColorKey = (typeof COLOR_KEYS)[number]
+
+/** Plain-text theme code: one `key: value` per line, easy to paste into or out of an AI chat. */
+export function themeToCode(c: CustomTheme): string {
+  return [
+    '# Hideout theme',
+    `name: ${c.name}`,
+    `dark: ${c.dark ? 'yes' : 'no'}`,
+    `mono: ${c.mono ? 'yes' : 'no'}`,
+    ...COLOR_KEYS.map((k) => `${k}: ${c[k]}`)
+  ].join('\n')
+}
+
+const ALIASES: Record<string, keyof CustomTheme> = {
+  name: 'name', nome: 'name', nombre: 'name',
+  dark: 'dark', escuro: 'dark', oscuro: 'dark',
+  mono: 'mono',
+  bg: 'bg', background: 'bg', fundo: 'bg', fondo: 'bg',
+  surface: 'surface', superficie: 'surface', 'superfície': 'surface',
+  ink: 'ink', text: 'ink', texto: 'ink',
+  muted: 'muted', secondary: 'muted', secundario: 'muted', 'secundário': 'muted',
+  line: 'line', lines: 'line', border: 'line', linha: 'line', 'línea': 'line', linea: 'line',
+  primary: 'primary', accent: 'primary', destaque: 'primary', 'acento': 'primary',
+  onprimary: 'onPrimary', 'on-primary': 'onPrimary', 'on_primary': 'onPrimary',
+  soft: 'soft', softink: 'softInk', 'soft-ink': 'softInk', 'soft_ink': 'softInk',
+  warn: 'warn', warning: 'warn', aviso: 'warn',
+  danger: 'danger', error: 'danger', perigo: 'danger', peligro: 'danger'
+}
+
+/**
+ * Reads a theme from text: `key: value` lines (any order, comments allowed) or JSON.
+ * Unknown keys are ignored; missing colors keep the values from `base`.
+ */
+export function parseThemeCode(text: string, base: CustomTheme): { theme: CustomTheme; read: number; errors: string[] } {
+  const out: CustomTheme = { ...base }
+  const errors: string[] = []
+  let read = 0
+  let pairs: Array<[string, string]> = []
+  const json = text.match(/\{[\s\S]*\}/)
+  if (json) {
+    try {
+      pairs = Object.entries(JSON.parse(json[0])).map(([k, v]) => [k, String(v)])
+    } catch {
+      /* not JSON: fall back to lines */
+    }
+  }
+  if (!pairs.length) {
+    pairs = text.split(/\r?\n/).map((l) => l.replace(/^[\s>*`-]+|[`,;]+$/g, '')).filter((l) => /^[^#].*[:=]/.test(l)).map((l) => {
+      const i = l.search(/[:=]/)
+      return [l.slice(0, i), l.slice(i + 1)] as [string, string]
+    })
+  }
+  for (const [rawKey, rawValue] of pairs) {
+    const key = ALIASES[rawKey.trim().replace(/["']/g, '').toLowerCase()]
+    const value = rawValue.trim().replace(/^["']|["']$/g, '')
+    if (!key) continue
+    if (key === 'name') out.name = value.slice(0, 30) || out.name
+    else if (key === 'dark' || key === 'mono') out[key] = /^(yes|sim|si|sí|true|1)$/i.test(value)
+    else {
+      const hex = normalizeHex(value)
+      if (hex) out[key] = hex
+      else errors.push(`${rawKey.trim()}: ${value}`)
+    }
+    read++
+  }
+  return { theme: out, read, errors }
 }

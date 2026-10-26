@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { t } from '../i18n'
 
 const pin = defineModel<string>({ required: true })
 const props = defineProps<{ disabled?: boolean; error?: boolean }>()
@@ -33,14 +34,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
 <template>
   <div class="wrap">
-    <div class="pins" :class="{ shake: error }" role="status" :aria-label="`${pin.length} de 6 dígitos`">
+    <div class="pins" :class="{ shake: error }" role="status" :aria-label="t('{n} de 6 dígitos', { n: pin.length })">
       <span v-for="i in 6" :key="i" :class="{ f: i <= pin.length }" />
     </div>
     <div class="pad">
       <button v-for="n in ['1', '2', '3', '4', '5', '6', '7', '8', '9']" :key="n" class="k" :disabled="disabled" @click="press(n)">{{ n }}</button>
-      <button class="k n" :disabled="disabled" @click="clear">Limpar</button>
+      <button class="k n" :disabled="disabled" @click="clear">{{ t('Limpar') }}</button>
       <button class="k" :disabled="disabled" @click="press('0')">0</button>
-      <button class="k n" :disabled="disabled" aria-label="Apagar" @click="back"><UIcon name="i-lucide-delete" class="size-[22px]" /></button>
+      <button class="k n" :disabled="disabled" :aria-label="t('Apagar')" @click="back"><UIcon name="i-lucide-delete" class="size-[22px]" /></button>
     </div>
   </div>
 </template>

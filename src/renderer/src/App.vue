@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { pt_br } from '@nuxt/ui/locale'
+import { onMounted, watchEffect } from 'vue'
 import { S, boot } from './store'
+import { lang, uiLocale } from './i18n'
+import { localeOf } from '@shared/i18n'
 import TitleBar from './components/TitleBar.vue'
 import AuthFlow from './views/auth/AuthFlow.vue'
 import MainShell from './views/MainShell.vue'
 
 onMounted(boot)
+watchEffect(() => (document.documentElement.lang = localeOf(lang.value)))
 </script>
 
 <template>
-  <UApp :locale="pt_br" :toaster="{ position: 'bottom-center', duration: 2500, max: 2 }" :tooltip="{ delayDuration: 400 }">
+  <UApp :locale="uiLocale" :toaster="{ position: 'bottom-center', duration: 2500, max: 2 }" :tooltip="{ delayDuration: 400 }">
     <div class="frame">
       <TitleBar :unlocked="S.phase === 'app'" />
       <AuthFlow v-if="S.phase === 'auth'" />

@@ -1,5 +1,6 @@
 import { Notification } from 'electron'
-import type { ScheduledTask } from '@shared/types'
+import { tr } from '@shared/i18n'
+import type { AlertSettings, Schedule, SoundId } from '@shared/types'
 
 const TICK = 20_000
 const LATE_GRACE = 10 * 60_000
@@ -12,18 +13,21 @@ export interface Fired {
 
 /**
  * Fires Windows notifications from the per-user schedules, which stay readable
- * while the vault is locked (they hold only titles and times).
+ * while the vault is locked (they hold only titles and times), plus the daily TO DO summary.
  */
 export class Reminders {
   private fired = new Set<string>()
   private first = true
   private timer: NodeJS.Timeout | null = null
+  private lastDigest = ''
   pending: Fired[] = []
 
   constructor(
-    private source: () => Promise<Array<{ user: string; tasks: ScheduledTask[] }>>,
-    private onClick: (f: Fired) => void,
+    private source: () => Promise<Array<{ user: string } & Schedule>>,
+    private alerts: () => AlertSettings,
+    private onClick: (f: Fired | 'todo' | null) => void,
     private onFire: (f: Fired) => void,
+    private play: (sound: SoundId) => void,
     private icon: string
   ) {}
 
@@ -37,33 +41,57 @@ export class Reminders {
   }
 
   async tick(): Promise<void> {
+    const a = this.alerts()
     const t = Date.now()
+    const lead = a.agendaLead * 60_000
     let late = 0
-    for (const { user, tasks } of await this.source()) {
+    const schedules = await this.source()
+    for (const { user, tasks } of schedules) {
       for (const task of tasks) {
-        const when = Date.parse(task.snoozedUntil && task.snoozedUntil > task.due ? task.snoozedUntil : task.due)
-        const key = `${user}|${task.id}|${when}`
+        const due = Date.parse(task.snoozedUntil && task.snoozedUntil > task.due ? task.snoozedUntil : task.due)
+        const when = due - lead
+        const key = `${user}|${task.id}|${due}`
         if (when > t || this.fired.has(key)) continue
         this.fired.add(key)
-        if (this.first && t - when > LATE_GRACE) {
+        if (this.first && t - due > LATE_GRACE) {
           late++
           continue
         }
-        this.notify({ user, id: task.id, title: task.title }, 'Lembrete do Hideout')
+        const f = { user, id: task.id, title: task.title }
+        this.pending.push(f)
+        this.onFire(f)
+        if (!a.agendaNotify) continue
+        const minutes = Math.round((due - t) / 60_000)
+        const body = minutes > 0 ? tr('{title}, em {n} min', { title: task.title, n: minutes }) : task.title
+        this.notify(tr('Lembrete do Hideout'), body, a.agendaSound, () => this.onClick(f))
       }
     }
-    if (late > 0) {
-      new Notification({ title: 'Hideout', body: late === 1 ? 'Você tem 1 tarefa atrasada.' : `Você tem ${late} tarefas atrasadas.`, icon: this.icon }).show()
+    if (late > 0 && a.agendaNotify) {
+      this.notify('Hideout', late === 1 ? tr('Você tem 1 tarefa atrasada.') : tr('Você tem {n} tarefas atrasadas.', { n: late }), a.agendaSound, () => this.onClick(null))
     }
     this.first = false
+    this.digest(a, schedules)
   }
 
-  private notify(f: Fired, title: string): void {
-    const n = new Notification({ title, body: f.title, icon: this.icon, timeoutType: 'never' })
-    n.on('click', () => this.onClick(f))
+  /** Once a day at the chosen time: "You have N items in TO DO". */
+  private digest(a: AlertSettings, schedules: Array<{ user: string } & Schedule>): void {
+    if (!a.todoDaily) return
+    const now = new Date()
+    const today = now.toDateString()
+    const [h, m] = a.todoDaily.split(':').map(Number)
+    if (this.lastDigest === today || now.getHours() * 60 + now.getMinutes() < h * 60 + m) return
+    this.lastDigest = today
+    const n = schedules.reduce((sum, s) => sum + s.pendingTodos, 0)
+    if (!n) return
+    this.notify(tr('TO DO'), n === 1 ? tr('Você tem 1 item pendente no TO DO.') : tr('Você tem {n} itens pendentes no TO DO.', { n }), a.todoSound, () => this.onClick('todo'))
+  }
+
+  /** Our own sound plays from the window; "windows" uses the system notification sound. */
+  notify(title: string, body: string, sound: SoundId, onClick?: () => void): void {
+    const n = new Notification({ title, body, icon: this.icon, silent: sound !== 'windows', timeoutType: 'never' })
+    if (onClick) n.on('click', onClick)
     n.show()
-    this.pending.push(f)
-    this.onFire(f)
+    if (sound !== 'windows' && sound !== 'none') this.play(sound)
   }
 
   take(user: string): Fired[] {

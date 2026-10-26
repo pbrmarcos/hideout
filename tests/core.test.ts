@@ -7,7 +7,9 @@ import {
 import { parseBrowserPasswords } from '../src/main/csv.ts'
 import { matchWindow } from '../src/main/autotype.ts'
 import { emptyData, mergeData, newAccess, nextOccurrence, normalizeData } from '../src/shared/model.ts'
-import { parseQuick } from '../src/renderer/src/format.ts'
+import { clock, parseDuration, parseQuick } from '../src/renderer/src/format.ts'
+import { langState } from '../src/renderer/src/langState.ts'
+import { THEMES, contrast, customFrom, parseThemeCode, themeToCode } from '../src/shared/themes.ts'
 
 test('AES-GCM round trip, wrong key and tampering are rejected', () => {
   const key = randomBytes(32)
@@ -97,6 +99,48 @@ test('auto-type matches the browser tab to the right access', () => {
   assert.equal(matchWindow('Bloco de Notas', [inter, gmail]).length, 0)
 })
 
+test('theme code: round trip, AI answers with chatter, JSON and bad values', () => {
+  const base = customFrom(THEMES[0], 'Base')
+  const back = parseThemeCode(themeToCode(base), base)
+  assert.deepEqual(back.theme, base)
+
+  const ai = 'Claro! Aqui está um tema azul petróleo:\n\n```\n# Hideout theme\nname: Petróleo\ndark: yes\nbg: #0F2027\nsurface: #16303A\nink: #E6F1F3\nprimary: #2EC4B6\nonPrimary: #002B26\nwarn: laranja\n```\nEspero que goste!'
+  const r = parseThemeCode(ai, base)
+  assert.equal(r.theme.name, 'Petróleo')
+  assert.equal(r.theme.dark, true)
+  assert.equal(r.theme.bg, '#0F2027')
+  assert.equal(r.theme.muted, base.muted, 'missing keys keep the base value')
+  assert.deepEqual(r.errors, ['warn: laranja'])
+
+  const json = parseThemeCode('{"fundo": "#abc", "texto": "#123456"}', base)
+  assert.equal(json.theme.bg, '#AABBCC')
+  assert.equal(json.theme.ink, '#123456')
+})
+
+test('contrast ratio matches WCAG reference values', () => {
+  assert.equal(contrast('#000000', '#FFFFFF').toFixed(1), '21.0')
+  assert.equal(contrast('#777777', '#FFFFFF').toFixed(2), '4.48')
+  assert.ok(contrast(THEMES[0].ink, THEMES[0].surface) >= 4.5)
+})
+
+test('quick add understands English and Spanish too', () => {
+  langState.lang = 'en'
+  const en = parseQuick('pay rent tomorrow 9am')
+  assert.equal(en.title, 'pay rent')
+  assert.equal(new Date(en.due!).getHours(), 9)
+  const pm = parseQuick('call mom friday 2:30pm')
+  assert.equal(pm.title, 'call mom')
+  assert.equal(new Date(pm.due!).getDay(), 5)
+  assert.equal(new Date(pm.due!).getHours(), 14)
+  assert.equal(new Date(parseQuick('dentist 12/25 8am').due!).getMonth(), 11)
+  langState.lang = 'es'
+  const es = parseQuick('pagar la luz mañana 9h')
+  assert.equal(es.title, 'pagar la luz')
+  assert.equal(new Date(es.due!).getDate(), new Date(Date.now() + 86_400_000).getDate())
+  assert.equal(new Date(parseQuick('cita viernes 10:30').due!).getDay(), 5)
+  langState.lang = 'pt'
+})
+
 test('quick add understands Portuguese dates', () => {
   const a = parseQuick('pagar boleto amanhã 9h')
   assert.equal(a.title, 'pagar boleto')
@@ -110,4 +154,20 @@ test('quick add understands Portuguese dates', () => {
   assert.equal(parseQuick('comprar cabo HDMI').due, null)
   const c = parseQuick('aniversário 25/12 8h')
   assert.equal(new Date(c.due!).getMonth(), 11)
+})
+
+test('timer length: minutes, clock forms and unit suffixes', () => {
+  const min = 60_000
+  assert.equal(parseDuration('25'), 25 * min)
+  assert.equal(parseDuration('2,5'), 2.5 * min)
+  assert.equal(parseDuration('25:30'), 25 * min + 30_000)
+  assert.equal(parseDuration('1:30:00'), 90 * min)
+  assert.equal(parseDuration('1h30'), 90 * min)
+  assert.equal(parseDuration('90s'), 90_000)
+  assert.equal(parseDuration('5m30'), 5 * min + 30_000)
+  assert.equal(parseDuration('2h'), 120 * min)
+  for (const bad of ['', 'abc', '10:75', '0', '25h', 's30']) assert.equal(parseDuration(bad), null, bad)
+  assert.equal(clock(15 * min), '15:00')
+  assert.equal(clock(65 * min + 1), '1:05:01')
+  assert.equal(clock(400), '00:01')
 })

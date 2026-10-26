@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import type { UnlockInfo } from '@shared/types'
 import { enterVault } from '../../store'
 import { useCopy } from '../../copy'
+import { t } from '../../i18n'
 import AuthShell from './AuthShell.vue'
 
 const props = defineProps<{ code: string; info?: UnlockInfo; step?: number }>()
@@ -26,26 +27,26 @@ async function finish(): Promise<void> {
 <template>
   <AuthShell
     :step="step ?? (info ? 4 : undefined)"
-    title="Guarde seu código de recuperação"
-    lead="Se você esquecer a senha mestra ou perder o celular do 2FA, só este código devolve o acesso ao cofre. Ele aparece apenas agora."
+    :title="t('Guarde seu código de recuperação')"
+    :lead="t('Se você esquecer a senha mestra ou perder o celular do 2FA, só este código devolve o acesso ao cofre. Ele aparece apenas agora.')"
   >
-    <div class="code printable" aria-label="Código de recuperação">
+    <div class="code printable" :aria-label="t('Código de recuperação')">
       <span v-for="g in groups" :key="g" class="mono">{{ g }}</span>
     </div>
     <div class="row">
-      <button class="hx-btn hx-soft" @click="copy(code, { label: 'Código', secret: true })"><UIcon name="i-lucide-copy" class="size-4" />Copiar</button>
-      <button class="hx-btn hx-soft" @click="print"><UIcon name="i-lucide-printer" class="size-4" />Imprimir</button>
+      <button class="hx-btn hx-soft" @click="copy(code, { label: t('Código'), secret: true })"><UIcon name="i-lucide-copy" class="size-4" />{{ t('Copiar') }}</button>
+      <button class="hx-btn hx-soft" @click="print"><UIcon name="i-lucide-printer" class="size-4" />{{ t('Imprimir') }}</button>
     </div>
     <div class="warn">
       <UIcon name="i-lucide-triangle-alert" class="size-[18px] shrink-0" />
-      <span>Não salve o código no OneDrive junto com o cofre. Anote no papel ou guarde num lugar fora deste computador.</span>
+      <span>{{ t('Não salve o código no OneDrive junto com o cofre. Anote no papel ou guarde num lugar fora deste computador.') }}</span>
     </div>
     <span class="grow" />
     <label class="ck">
       <input v-model="saved" type="checkbox" />
-      <span>Guardei o código num lugar seguro e sei que, sem ele e sem a senha mestra, ninguém consegue abrir o cofre.</span>
+      <span>{{ t('Guardei o código num lugar seguro e sei que, sem ele e sem a senha mestra, ninguém consegue abrir o cofre.') }}</span>
     </label>
-    <button class="hx-btn lg hx-primary" :disabled="!saved" @click="finish">{{ info ? 'Abrir meu cofre' : 'Pronto' }}</button>
+    <button class="hx-btn lg hx-primary" :disabled="!saved" @click="finish">{{ info ? t('Abrir meu cofre') : t('Pronto') }}</button>
   </AuthShell>
 </template>
 

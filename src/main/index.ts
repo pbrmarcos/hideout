@@ -4,9 +4,12 @@ import {
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { langFromLocale, setMainLang, tr } from '@shared/i18n'
 import { themeById } from '@shared/themes'
-import type { AppState, Settings, VaultData, WindowMode } from '@shared/types'
+import type { AppState, Settings, SoundId, VaultData, WindowMode } from '@shared/types'
 import { matchWindow } from './autotype'
+import { checkLeaks } from './leaks'
+import { Timer } from './timer'
 import { parseBrowserPasswords } from './csv'
 import { Reminders, type Fired } from './reminders'
 import { loadSettings, remove, saveSettings } from './storage'
@@ -42,13 +45,13 @@ function handle<A extends unknown[]>(channel: string, fn: (...args: A) => unknow
     } catch (err) {
       if (err instanceof VaultError) return { ok: false, error: err.message, code: err.code }
       console.error(channel, err)
-      return { ok: false, error: 'Algo deu errado. Tente de novo.', code: 'internal' }
+      return { ok: false, error: tr('Algo deu errado. Tente de novo.'), code: 'internal' }
     }
   })
 }
 
 function state(): AppState {
-  return { settings, users: vault.users(), sessions: vault.sessions(), version: app.getVersion() }
+  return { settings, users: vault.users(), sessions: vault.sessions(), version: app.getVersion(), systemLang: langFromLocale(app.getLocale()) }
 }
 
 function lock(reason: 'idle' | 'manual' | 'windows' = 'manual'): void {
@@ -86,7 +89,7 @@ async function autoType(): Promise<void> {
   if (!fg || fg.pid === process.pid || main.win.isFocused()) return
   const data = vault.current
   if (!data) {
-    new Notification({ title: 'Hideout trancado', body: 'Abra o Hideout com o PIN e tente o atalho de novo.', icon: resource('icon.png') }).show()
+    new Notification({ title: tr('Hideout trancado'), body: tr('Abra o Hideout com o PIN e tente o atalho de novo.'), icon: resource('icon.png') }).show()
     main.show()
     return
   }
@@ -118,20 +121,30 @@ function registerShortcuts(): void {
   if (settings.autoType) globalShortcut.register('Control+Alt+A', () => void autoType())
 }
 
+/** Language for notifications, the tray and error messages: the user's choice or Windows'. */
+function applyLang(): void {
+  setMainLang(settings.lang ?? langFromLocale(app.getLocale()))
+  if (tray) trayMenu()
+}
+
+function trayMenu(): void {
+  tray!.setContextMenu(Menu.buildFromTemplate([
+    { label: tr('Mostrar / esconder  (Ctrl+Alt+V)'), click: () => main.toggleVisible() },
+    { label: tr('Trancar agora'), click: () => lock('manual') },
+    { type: 'separator' },
+    { label: tr('Sair do Hideout'), click: () => { quitting = true; app.quit() } }
+  ]))
+}
+
 function createTray(): void {
   tray = new Tray(nativeImage.createFromPath(resource('tray.png')))
   tray.setToolTip('Hideout')
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Mostrar / esconder  (Ctrl+Alt+V)', click: () => main.toggleVisible() },
-    { label: 'Trancar agora', click: () => lock('manual') },
-    { type: 'separator' },
-    { label: 'Sair do Hideout', click: () => { quitting = true; app.quit() } }
-  ]))
+  trayMenu()
   tray.on('click', () => main.toggleVisible())
 }
 
 function createWindow(): void {
-  const theme = themeById(settings.lastUser ? settings.themes[settings.lastUser] : null)
+  const theme = themeById(settings.lastUser ? settings.themes[settings.lastUser] : null, settings.customThemes)
   main = new MainWindow(join(__dirname, '../preload/index.js'), resource('icon.png'), theme.bg)
   const wc = main.win.webContents
   wc.setWindowOpenHandler(({ url }) => {
@@ -161,10 +174,29 @@ function registerIpc(): void {
     saveSettings(settings)
     applyLoginItem()
     registerShortcuts()
+    applyLang()
     return state()
   })
+  handle('timer:get', () => timer.state())
+  handle('timer:start', (ms?: number) => timer.start(ms))
+  handle('timer:add', (ms: number) => timer.add(ms))
+  handle('timer:set', (ms: number) => timer.set(ms))
+  handle('timer:pause', () => timer.pause())
+  handle('timer:reset', () => timer.reset())
+  handle('sound:test', (sound: SoundId) =>
+    sound === 'windows' ? reminders.notify('Hideout', tr('Som de teste'), sound) : playSound(sound)
+  )
+  handle('leaks:check', async () => {
+    const data = vault.current
+    if (!data) throw new VaultError('locked', tr('O cofre está trancado.'))
+    try {
+      return await checkLeaks(data.accesses, (done, total) => send('leaks:progress', { done, total }))
+    } catch {
+      throw new VaultError('offline', tr('Não consegui falar com o serviço de vazamentos. Confira a internet e tente de novo.'))
+    }
+  })
   handle('settings:pickDir', async () => {
-    const r = await dialog.showOpenDialog(main.win, { title: 'Pasta dos cofres', defaultPath: settings.vaultDir, properties: ['openDirectory', 'createDirectory'] })
+    const r = await dialog.showOpenDialog(main.win, { title: tr('Pasta dos cofres'), defaultPath: settings.vaultDir, properties: ['openDirectory', 'createDirectory'] })
     if (r.canceled || !r.filePaths[0]) return state()
     settings = { ...settings, vaultDir: r.filePaths[0] }
     saveSettings(settings)
@@ -210,7 +242,7 @@ function registerIpc(): void {
   handle('clip:copy', (text: string, secret: boolean) => copy(text, secret))
   handle('shell:open', (url: string) => {
     const full = /^[a-z]+:\/\//i.test(url) ? url : `https://${url}`
-    if (!/^https?:\/\//i.test(full)) throw new VaultError('bad_url', 'Só abro links http ou https.')
+    if (!/^https?:\/\//i.test(full)) throw new VaultError('bad_url', tr('Só abro links http ou https.'))
     return shell.openExternal(full)
   })
 
@@ -221,7 +253,7 @@ function registerIpc(): void {
   handle('win:hide', () => main.win.hide())
 
   handle('att:pick', async () => {
-    const r = await dialog.showOpenDialog(main.win, { title: 'Anexar arquivos', properties: ['openFile', 'multiSelections'] })
+    const r = await dialog.showOpenDialog(main.win, { title: tr('Anexar arquivos'), properties: ['openFile', 'multiSelections'] })
     return r.canceled ? [] : r.filePaths.map(addAttachmentFromPath)
   })
   handle('att:addPaths', (paths: string[]) => paths.map(addAttachmentFromPath))
@@ -230,27 +262,27 @@ function registerIpc(): void {
     const path = join(tempDir, `${id.slice(0, 8)}-${basename(name)}`)
     writeFileSync(path, vault.readAttachment(id))
     const err = await shell.openPath(path)
-    if (err) throw new VaultError('open_failed', 'Não consegui abrir o anexo.')
+    if (err) throw new VaultError('open_failed', tr('Não consegui abrir o anexo.'))
   })
   handle('att:save', async (id: string, name: string) => {
-    const r = await dialog.showSaveDialog(main.win, { title: 'Salvar anexo', defaultPath: basename(name) })
+    const r = await dialog.showSaveDialog(main.win, { title: tr('Salvar anexo'), defaultPath: basename(name) })
     if (!r.canceled && r.filePath) writeFileSync(r.filePath, vault.readAttachment(id))
   })
 
   handle('csv:import', async () => {
-    const r = await dialog.showOpenDialog(main.win, { title: 'Importar senhas (CSV do Chrome, Edge ou Brave)', filters: [{ name: 'CSV', extensions: ['csv'] }], properties: ['openFile'] })
+    const r = await dialog.showOpenDialog(main.win, { title: tr('Importar senhas (CSV do Chrome, Edge ou Brave)'), filters: [{ name: 'CSV', extensions: ['csv'] }], properties: ['openFile'] })
     if (r.canceled || !r.filePaths[0]) return []
     try {
       return parseBrowserPasswords(readFileSync(r.filePaths[0], 'utf8'))
     } catch (e) {
-      throw new VaultError('bad_csv', (e as Error).message)
+      throw new VaultError('bad_csv', tr((e as Error).message))
     }
   })
   handle('backup:export', async () => {
     const src = vault.vaultFilePath()
-    if (!src) throw new VaultError('locked', 'O cofre está trancado.')
+    if (!src) throw new VaultError('locked', tr('O cofre está trancado.'))
     const stamp = new Date().toISOString().slice(0, 10)
-    const r = await dialog.showSaveDialog(main.win, { title: 'Salvar backup criptografado', defaultPath: `${basename(src, '.vault')}-backup-${stamp}.vault`, filters: [{ name: 'Cofre Hideout', extensions: ['vault'] }] })
+    const r = await dialog.showSaveDialog(main.win, { title: tr('Salvar backup criptografado'), defaultPath: `${basename(src, '.vault')}-backup-${stamp}.vault`, filters: [{ name: tr('Cofre Hideout'), extensions: ['vault'] }] })
     if (!r.canceled && r.filePath) copyFileSync(src, r.filePath)
     return !r.canceled
   })
@@ -272,14 +304,30 @@ function addAttachmentFromPath(path: string) {
 
 const reminders = new Reminders(
   () => vault.schedules(),
-  (f: Fired) => {
+  () => settings.alerts,
+  (f) => {
     main.show()
-    send('task:open', f)
+    if (f === 'todo') send('tab:open', 'todo')
+    else if (f) send('task:open', f)
   },
   (f: Fired) => {
     if (vault.unlockedUser === f.user) send('task:fired', f)
   },
+  (sound) => playSound(sound),
   join(app.getAppPath(), 'resources', 'icon.png')
+)
+
+/** Sounds are synthesized in the window (Web Audio), which keeps running while hidden. */
+function playSound(sound: SoundId): void {
+  send('sound:play', { sound, volume: settings.alerts.volume })
+}
+
+const timer = new Timer(
+  (s) => send('timer:state', s),
+  (total) => {
+    const minutes = Math.round(total / 60_000)
+    reminders.notify(tr('Tempo esgotado'), minutes ? tr('O temporizador de {n} min terminou.', { n: minutes }) : tr('O temporizador terminou.'), settings.alerts.timerSound, () => main.show())
+  }
 )
 
 function watchIdle(): void {
@@ -307,6 +355,7 @@ app.on('window-all-closed', () => {})
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null)
   settings = loadSettings()
+  applyLang()
   await vault.init()
   registerIpc()
   createWindow()

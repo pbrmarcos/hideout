@@ -1,6 +1,7 @@
 import { reactive } from 'vue'
 import { useToast } from '@nuxt/ui/composables'
 import { api, ApiError } from './api'
+import { t } from './i18n'
 import { S } from './store'
 
 /** Which secret is currently on the clipboard, to draw the draining bar on its seal. */
@@ -25,15 +26,15 @@ export function useCopy() {
       if (document.querySelector(`[data-seal="${CSS.escape(opts.key)}"]`)) return
     }
     toast.add({
-      title: `${opts.label} copiad${/senha|chave/i.test(opts.label) ? 'a' : 'o'}`,
-      description: secret ? `Sai da área de transferência em ${secs} segundos.` : undefined,
+      title: t('{what} copiado', { what: opts.label }),
+      description: secret ? t('Sai da área de transferência em {secs} segundos.', { secs }) : undefined,
       icon: 'i-lucide-check',
       duration: 2500
     })
   }
 
   function fail(e: unknown): void {
-    toast.add({ title: e instanceof ApiError ? e.message : 'Algo deu errado.', color: 'error', icon: 'i-lucide-circle-alert', duration: 4000 })
+    toast.add({ title: e instanceof ApiError ? e.message : t('Algo deu errado.'), color: 'error', icon: 'i-lucide-circle-alert', duration: 4000 })
   }
 
   function info(title: string, description?: string): void {
