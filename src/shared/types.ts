@@ -66,6 +66,14 @@ export interface Task extends Base {
   snoozedUntil?: string | null
 }
 
+/** Accesses refer to their category by name; renaming a category renames it on every access. */
+export interface Category extends Base {
+  name: string
+  icon: string
+  color: string
+  order: number
+}
+
 export interface Device {
   id: string
   name: string
@@ -79,6 +87,8 @@ export interface VaultData {
   notes: Note[]
   tasks: Task[]
   devices: Device[]
+  /** Added in 0.2; vaults from 0.1 get it on first open (see normalizeData). */
+  categories: Category[]
 }
 
 export interface Settings {

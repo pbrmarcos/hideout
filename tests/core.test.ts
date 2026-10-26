@@ -6,7 +6,7 @@ import {
 } from '../src/main/crypto.ts'
 import { parseBrowserPasswords } from '../src/main/csv.ts'
 import { matchWindow } from '../src/main/autotype.ts'
-import { emptyData, mergeData, newAccess, nextOccurrence } from '../src/shared/model.ts'
+import { emptyData, mergeData, newAccess, nextOccurrence, normalizeData } from '../src/shared/model.ts'
 import { parseQuick } from '../src/renderer/src/format.ts'
 
 test('AES-GCM round trip, wrong key and tampering are rejected', () => {
@@ -59,6 +59,20 @@ test('merge keeps the newest copy of each item and drops old trash', () => {
   assert.equal(m.accesses.length, 2)
   assert.equal(m.accesses.find((i) => i.id === x.id)!.title, 'Gmail pessoal')
   assert.ok(m.accesses.some((i) => i.id === y.id))
+})
+
+test('older vaults gain categories; duplicates from two PCs collapse', () => {
+  const d = emptyData() as ReturnType<typeof emptyData> & { categories?: unknown }
+  delete (d as { categories?: unknown }).categories
+  d.accesses = [{ ...newAccess('login', 'Trabalho'), title: 'A' }, { ...newAccess('login', ''), title: 'B' }]
+  const n = normalizeData(d)
+  assert.deepEqual(n.categories.map((c) => c.name).sort(), ['Geral', 'Trabalho'])
+  assert.equal(normalizeData(n).categories.length, 2, 'running twice adds nothing')
+
+  const pc1 = normalizeData(emptyData())
+  const pc2 = normalizeData(emptyData())
+  const merged = normalizeData(mergeData(pc1, pc2))
+  assert.equal(merged.categories.filter((c) => !c.deletedAt).length, 1, 'one "Geral" survives')
 })
 
 test('repeating tasks move to the next future date', () => {

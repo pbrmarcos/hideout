@@ -5,6 +5,7 @@ import Accesses from './Accesses.vue'
 import AccessEdit from './AccessEdit.vue'
 import Agenda from './Agenda.vue'
 import AutoTypePicker from './AutoTypePicker.vue'
+import CategoryDialog from '../components/CategoryDialog.vue'
 import NoteEdit from './NoteEdit.vue'
 import Notes from './Notes.vue'
 import SearchPalette from './SearchPalette.vue'
@@ -84,6 +85,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
     <SearchPalette />
     <AutoTypePicker />
+    <CategoryDialog />
   </div>
 </template>
 

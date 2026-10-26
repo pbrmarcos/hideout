@@ -1,4 +1,4 @@
-import type { Access, Field, ItemType, Note, Repeat, Task, VaultData } from './types'
+import type { Access, Category, Field, ItemType, Note, Repeat, Task, VaultData } from './types'
 
 export const TRASH_DAYS = 30
 const DAY = 86_400_000
@@ -11,8 +11,55 @@ export function now(): string {
   return new Date().toISOString()
 }
 
+export const DEFAULT_CATEGORY = 'Geral'
+
+export const CATEGORY_ICONS = [
+  'i-lucide-folder', 'i-lucide-briefcase', 'i-lucide-house', 'i-lucide-landmark', 'i-lucide-shopping-bag', 'i-lucide-gamepad-2',
+  'i-lucide-graduation-cap', 'i-lucide-heart-pulse', 'i-lucide-plane', 'i-lucide-server', 'i-lucide-code', 'i-lucide-mail',
+  'i-lucide-users', 'i-lucide-tv', 'i-lucide-car', 'i-lucide-wifi', 'i-lucide-building-2', 'i-lucide-star'
+]
+
+export const CATEGORY_COLORS = ['sage', 'mist', 'lav', 'sand', 'rose', 'gray']
+
 export function emptyData(): VaultData {
-  return { v: 1, accesses: [], notes: [], tasks: [], devices: [] }
+  return { v: 1, accesses: [], notes: [], tasks: [], devices: [], categories: [] }
+}
+
+export function newCategory(name: string, order: number, icon = CATEGORY_ICONS[0], color = 'sage'): Category {
+  const t = now()
+  return { id: uid(), name: name.trim(), icon, color, order, createdAt: t, updatedAt: t, deletedAt: null }
+}
+
+const sameName = (a: string, b: string): boolean => a.trim().localeCompare(b.trim(), 'pt-BR', { sensitivity: 'base' }) === 0
+
+/**
+ * Brings older vaults up to date: every category name used by an access gets a Category,
+ * and there is always at least "Geral". Returns the same object (mutated) for convenience.
+ */
+export function normalizeData(d: VaultData): VaultData {
+  d.categories ??= []
+  // Two PCs may have created the same name independently: keep the oldest.
+  const byName = new Map<string, Category>()
+  for (const c of [...d.categories].filter((x) => !x.deletedAt).sort((x, y) => x.createdAt.localeCompare(y.createdAt))) {
+    const key = c.name.trim().toLocaleLowerCase('pt-BR')
+    if (byName.has(key)) {
+      c.deletedAt = now()
+      c.updatedAt = now()
+    } else byName.set(key, c)
+  }
+  const live = d.categories.filter((c) => !c.deletedAt)
+  const names = new Set<string>()
+  for (const a of d.accesses) if (!a.deletedAt) names.add(a.category?.trim() || DEFAULT_CATEGORY)
+  if (!live.length) names.add(DEFAULT_CATEGORY)
+  let order = live.reduce((m, c) => Math.max(m, c.order), -1)
+  for (const name of [...names].sort((a, b) => (a === DEFAULT_CATEGORY ? -1 : b === DEFAULT_CATEGORY ? 1 : a.localeCompare(b, 'pt-BR')))) {
+    if (!d.categories.some((c) => !c.deletedAt && sameName(c.name, name))) d.categories.push(newCategory(name, ++order, name === DEFAULT_CATEGORY ? 'i-lucide-folder' : CATEGORY_ICONS[0]))
+  }
+  return d
+}
+
+export function findCategory(d: VaultData, name: string): Category | undefined {
+  return d.categories.find((c) => !c.deletedAt && sameName(c.name, name))
 }
 
 export interface Template {
@@ -93,7 +140,8 @@ export function mergeData(a: VaultData, b: VaultData): VaultData {
     accesses: mergeList(a.accesses, b.accesses, cutoff),
     notes: mergeList(a.notes, b.notes, cutoff),
     tasks: mergeList(a.tasks, b.tasks, cutoff),
-    devices: [...devices.values()]
+    devices: [...devices.values()],
+    categories: mergeList(a.categories ?? [], b.categories ?? [], cutoff)
   }
 }
 

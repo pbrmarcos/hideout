@@ -4,7 +4,7 @@ import { template } from '@shared/model'
 import type { Access } from '@shared/types'
 import { api } from '../api'
 import { useCopy } from '../copy'
-import { S } from '../store'
+import { S, categoryList, moveAccess, trash, upsertAccess } from '../store'
 import PasswordSeal from './PasswordSeal.vue'
 
 const props = defineProps<{ a: Access }>()
@@ -33,10 +33,46 @@ function copyUser(): void {
 function openUrl(): void {
   api('shell:open', props.a.url).catch(fail)
 }
+
+const menu = computed(() => [
+  [
+    { label: 'Editar', icon: 'i-lucide-pencil', onSelect: open },
+    ...(props.a.password ? [{ label: `Copiar ${t.value.passwordLabel?.toLowerCase() ?? 'senha'}`, icon: 'i-lucide-key-round', onSelect: copyPassword }] : []),
+    ...(props.a.username ? [{ label: `Copiar ${t.value.usernameLabel?.toLowerCase() ?? 'usuário'}`, icon: 'i-lucide-user', onSelect: copyUser }] : []),
+    ...(props.a.url ? [{ label: 'Abrir link', icon: 'i-lucide-external-link', onSelect: openUrl }] : [])
+  ],
+  [
+    {
+      label: 'Mover para',
+      icon: 'i-lucide-folder-input',
+      children: [
+        categoryList().map((c) => ({
+          label: c.name,
+          icon: c.icon,
+          disabled: c.name === props.a.category,
+          onSelect: () => moveAccess(props.a.id, c.name)
+        })),
+        [{ label: 'Nova categoria…', icon: 'i-lucide-folder-plus', onSelect: () => (S.categoryDialog = { id: null }) }]
+      ]
+    },
+    {
+      label: props.a.favorite ? 'Tirar dos favoritos' : 'Adicionar aos favoritos',
+      icon: 'i-lucide-star',
+      onSelect: () => upsertAccess({ ...props.a, favorite: !props.a.favorite })
+    }
+  ],
+  [{ label: 'Excluir', icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => trash('accesses', props.a.id) }]
+])
+
+function onDragStart(e: DragEvent): void {
+  e.dataTransfer?.setData('application/x-hideout-access', props.a.id)
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+}
 </script>
 
 <template>
-  <div class="row" @click="open" @keydown.enter.self="open" tabindex="0" :aria-label="`Abrir ${a.title}`">
+  <UContextMenu :items="menu">
+  <div class="row" draggable="true" @dragstart="onDragStart" @click="open" @keydown.enter.self="open" tabindex="0" :aria-label="`Abrir ${a.title}`">
     <div class="av" :class="`h${hue}`" aria-hidden="true">
       <UIcon v-if="a.type !== 'login'" :name="t.icon" class="size-[17px]" />
       <template v-else>{{ (a.title || '?')[0].toUpperCase() }}</template>
@@ -59,6 +95,7 @@ function openUrl(): void {
     </UTooltip>
     <span v-else-if="a.password" class="spacer" />
   </div>
+  </UContextMenu>
 </template>
 
 <style scoped>

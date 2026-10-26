@@ -33,7 +33,12 @@ export default defineConfig({
               'lucide:sticky-note', 'lucide:bell', 'lucide:circle', 'lucide:user', 'lucide:user-plus', 'lucide:check',
               'lucide:circle-alert', 'lucide:pin', 'lucide:pin-off', 'lucide:eye', 'lucide:eye-off', 'lucide:image',
               'lucide:file-text', 'lucide:file', 'lucide:list-checks', 'lucide:pencil', 'lucide:panel-left', 'lucide:panel-right',
-              'lucide:picture-in-picture-2', 'lucide:chevron-left', 'lucide:x', 'lucide:lock', 'lucide:lock-open'
+              'lucide:picture-in-picture-2', 'lucide:chevron-left', 'lucide:x', 'lucide:lock', 'lucide:lock-open',
+              // category icons (src/shared/model.ts) and menus
+              'lucide:folder', 'lucide:briefcase', 'lucide:house', 'lucide:shopping-bag', 'lucide:gamepad-2', 'lucide:graduation-cap',
+              'lucide:heart-pulse', 'lucide:plane', 'lucide:code', 'lucide:mail', 'lucide:users', 'lucide:tv', 'lucide:car',
+              'lucide:building-2', 'lucide:star', 'lucide:folder-input', 'lucide:folder-plus', 'lucide:ellipsis',
+              'lucide:arrow-up', 'lucide:arrow-down', 'lucide:chevron-up', 'lucide:pencil', 'lucide:trash-2'
             ]
           }
         },
