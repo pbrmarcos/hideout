@@ -7,7 +7,7 @@ import { createInterface } from 'node:readline'
 /**
  * One long-lived Windows PowerShell process (STA) that does what Electron cannot:
  * - put text on the clipboard flagged so Windows clipboard history (Win+V) and cloud sync skip it;
- * - read the foreground window (for auto-type) and send keystrokes to it.
+ * - read the foreground window and the focused field (for auto-type) and type into it.
  * Commands and replies are one JSON object per line; text travels base64-encoded.
  */
 const SCRIPT = String.raw`
@@ -15,15 +15,72 @@ $ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = [Text.Encoding]::UTF8
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName UIAutomationClient
+Add-Type -AssemblyName UIAutomationTypes
 Add-Type @"
 using System;
 using System.Text;
+using System.Threading;
 using System.Runtime.InteropServices;
 public static class HxWin {
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);
+  [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint a, uint b, bool attach);
+  [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+  [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vk);
   [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+
+  [StructLayout(LayoutKind.Sequential)] struct KEYBDINPUT { public ushort wVk; public ushort wScan; public uint dwFlags; public uint time; public IntPtr extra; }
+  [StructLayout(LayoutKind.Sequential)] struct MOUSEINPUT { public int dx; public int dy; public uint data; public uint flags; public uint time; public IntPtr extra; }
+  [StructLayout(LayoutKind.Explicit)] struct UNION { [FieldOffset(0)] public MOUSEINPUT mi; [FieldOffset(0)] public KEYBDINPUT ki; }
+  [StructLayout(LayoutKind.Sequential)] struct INPUT { public uint type; public UNION u; }
+  [DllImport("user32.dll", SetLastError = true)] static extern uint SendInput(uint n, INPUT[] inputs, int size);
+
+  static void Send(ushort vk, ushort scan, uint flags) {
+    var i = new INPUT { type = 1 };
+    i.u.ki = new KEYBDINPUT { wVk = vk, wScan = scan, dwFlags = flags };
+    SendInput(1, new[] { i }, Marshal.SizeOf(typeof(INPUT)));
+  }
+  // KEYEVENTF_UNICODE types the character itself, whatever the keyboard layout (ABNT2, US, dead keys).
+  public static void Text(string s) {
+    foreach (char c in s) { Send(0, c, 4); Send(0, c, 4 | 2); Thread.Sleep(6); }
+  }
+  public static void Key(ushort vk, bool shift) {
+    if (shift) Send(0x10, 0, 0);
+    Send(vk, 0, 0); Send(vk, 0, 2);
+    if (shift) Send(0x10, 0, 2);
+  }
+
+  // The shortcut fires while Ctrl+Alt are still down; typing then would turn Tab into Ctrl+Tab (next browser tab).
+  public static bool WaitKeysUp(int ms) {
+    int[] keys = { 0x10, 0x11, 0x12, 0x5B, 0x5C };
+    for (int t = 0; t < ms; t += 20) {
+      bool down = false;
+      foreach (int k in keys) if ((GetAsyncKeyState(k) & 0x8000) != 0) down = true;
+      if (!down) { Thread.Sleep(40); return true; }
+      Thread.Sleep(20);
+    }
+    return false;
+  }
+
+  // Windows refuses SetForegroundWindow from a background process unless it shares input with the foreground thread.
+  public static bool Focus(IntPtr h) {
+    if (GetForegroundWindow() == h) return true;
+    if (IsIconic(h)) ShowWindow(h, 9);
+    uint pid;
+    uint fg = GetWindowThreadProcessId(GetForegroundWindow(), out pid);
+    uint me = GetCurrentThreadId();
+    bool attached = fg != me && AttachThreadInput(me, fg, true);
+    BringWindowToTop(h);
+    SetForegroundWindow(h);
+    if (attached) AttachThreadInput(me, fg, false);
+    for (int i = 0; i < 25; i++) { if (GetForegroundWindow() == h) return true; Thread.Sleep(20); }
+    return false;
+  }
   [DllImport("user32.dll", SetLastError = true)] public static extern bool OpenClipboard(IntPtr owner);
   [DllImport("user32.dll")] public static extern bool EmptyClipboard();
   [DllImport("user32.dll")] public static extern bool CloseClipboard();
@@ -41,7 +98,23 @@ public static class HxWin {
 function B64([string]$s) { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($s)) }
 function Zero() { New-Object IO.MemoryStream (,[byte[]](0,0,0,0)) }
 function Reply($id, $ok, $value) { [Console]::Out.WriteLine((@{ id = $id; ok = $ok; value = $value } | ConvertTo-Json -Compress)) }
-function Esc([string]$t) { ($t.ToCharArray() | ForEach-Object { if ('+^%~(){}[]'.Contains($_)) { '{' + $_ + '}' } else { [string]$_ } }) -join '' }
+# What has keyboard focus: password, text (an editable field), address (browser address bar), other or unknown.
+function FocusKind {
+  try {
+    $e = [Windows.Automation.AutomationElement]::FocusedElement
+    if (-not $e) { return 'unknown' }
+    $cur = $e.Current
+    if ($cur.IsPassword) { return 'password' }
+    if ([string]$cur.ClassName -match 'Omnibox|LocationBar' -or [string]$cur.AutomationId -in @('urlbar-input', 'addressEditBox')) { return 'address' }
+    $ct = $cur.ControlType
+    if ($ct -eq [Windows.Automation.ControlType]::Edit -or $ct -eq [Windows.Automation.ControlType]::ComboBox) {
+      $vp = $null
+      if ($e.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern, [ref]$vp) -and $vp.Current.IsReadOnly) { return 'other' }
+      return 'text'
+    }
+    return 'other'
+  } catch { return 'unknown' }
+}
 [Console]::Out.WriteLine('{"ready":true}')
 while ($true) {
   $line = [Console]::In.ReadLine()
@@ -75,12 +148,31 @@ while ($true) {
         try { $name = (Get-Process -Id $procId).ProcessName } catch {}
         Reply $c.id $true @{ hwnd = $h.ToInt64(); title = $sb.ToString(); process = $name; pid = $procId }
       }
-      'type' {
-        if ($c.hwnd) { [void][HxWin]::SetForegroundWindow([IntPtr][long]$c.hwnd); Start-Sleep -Milliseconds 150 }
+      'prepare' {
+        $released = [HxWin]::WaitKeysUp(3000)
+        $focused = [HxWin]::Focus([IntPtr][long]$c.hwnd)
+        $kind = 'unknown'
+        if ($focused) {
+          Start-Sleep -Milliseconds 60
+          $kind = FocusKind
+          # Chromium builds its accessibility tree on the first request, and a window that just came back
+          # to the front restores its focused field a moment later: ask again for up to about a second.
+          for ($i = 0; $i -lt 5 -and ($kind -eq 'other' -or $kind -eq 'unknown'); $i++) { Start-Sleep -Milliseconds 220; $kind = FocusKind }
+        }
+        Reply $c.id $true @{ released = $released; focused = $focused; kind = $kind }
+      }
+      'kind' {
+        Reply $c.id $true (FocusKind)
+      }
+      'keys' {
         foreach ($s in $c.steps) {
-          if ($s.key) { [Windows.Forms.SendKeys]::SendWait('{' + $s.key + '}') }
-          else { [Windows.Forms.SendKeys]::SendWait((Esc (B64 $s.text))) }
-          Start-Sleep -Milliseconds 40
+          switch ($s.key) {
+            'TAB' { [HxWin]::Key(0x09, $false) }
+            'SHIFT_TAB' { [HxWin]::Key(0x09, $true) }
+            'ENTER' { [HxWin]::Key(0x0D, $false) }
+            default { [HxWin]::Text((B64 $s.text)) }
+          }
+          Start-Sleep -Milliseconds 60
         }
         Reply $c.id $true $null
       }
@@ -99,7 +191,13 @@ export interface ForegroundWindow {
   pid: number
 }
 
-export type TypeStep = { text: string } | { key: 'TAB' | 'ENTER' }
+export type TypeStep = { text: string } | { key: 'TAB' | 'SHIFT_TAB' | 'ENTER' }
+export type FocusKind = 'password' | 'text' | 'address' | 'other' | 'unknown'
+export interface Prepared {
+  released: boolean
+  focused: boolean
+  kind: FocusKind
+}
 
 class WinHelper {
   private proc: ChildProcessWithoutNullStreams | null = null
@@ -164,9 +262,18 @@ class WinHelper {
     return this.call('fg')
   }
 
-  type(hwnd: number | null, steps: TypeStep[]): Promise<void> {
+  /** Waits for the shortcut keys to be released, brings `hwnd` to the front and says what field has focus. */
+  prepare(hwnd: number): Promise<Prepared> {
+    return this.call('prepare', { hwnd })
+  }
+
+  focusKind(): Promise<FocusKind> {
+    return this.call('kind')
+  }
+
+  keys(steps: TypeStep[]): Promise<void> {
     const encoded = steps.map((s) => ('text' in s ? { text: Buffer.from(s.text).toString('base64') } : s))
-    return this.call('type', { hwnd, steps: encoded })
+    return this.call('keys', { steps: encoded })
   }
 
   dispose(): void {

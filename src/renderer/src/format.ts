@@ -10,7 +10,13 @@ export const NOTE_COLORS = [
   { id: 'lav', hex: '#B9A9DA', label: 'Lilás' },
   { id: 'sand', hex: '#D7BE8E', label: 'Areia' },
   { id: 'rose', hex: '#DBA3A3', label: 'Rosa' },
-  { id: 'gray', hex: '#C9D2CB', label: 'Cinza' }
+  { id: 'gray', hex: '#C9D2CB', label: 'Cinza' },
+  { id: 'sky', hex: '#8EC5E8', label: 'Céu' },
+  { id: 'mint', hex: '#9ED9C3', label: 'Menta' },
+  { id: 'lemon', hex: '#E6D57E', label: 'Amarelo' },
+  { id: 'peach', hex: '#F1B98C', label: 'Pêssego' },
+  { id: 'coral', hex: '#E8968A', label: 'Coral' },
+  { id: 'orchid', hex: '#D3A4D6', label: 'Orquídea' }
 ]
 
 const dayStart = (d: Date): number => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()

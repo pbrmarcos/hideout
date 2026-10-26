@@ -66,6 +66,10 @@ textarea,
   outline: 2px solid var(--hx-primary);
   outline-offset: 2px;
 }
+/* Search fields inside dialogs already show focus with their underline; an outside outline gets clipped by the rounded corners. */
+[role='dialog'] input:focus-visible {
+  outline: 0;
+}
 
 ::-webkit-scrollbar {
   width: 10px;

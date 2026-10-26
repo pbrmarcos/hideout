@@ -96,7 +96,6 @@ const es: Record<string, string> = {
   "Chave Pix": "Clave Pix",
   "Cinza": "Gris",
   "Clique em uma senha para copiar. Ela some da área de transferência sozinha depois de alguns segundos.": "Haz clic en una contraseña para copiarla. Se borra sola del portapapeles después de unos segundos.",
-  "Clique no campo de usuário de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela e digita usuário, Tab, senha e Enter. Se houver mais de um, ele pergunta qual.": "Haz clic en el campo de usuario de cualquier sitio o programa y presiona Ctrl+Alt+A. Hideout encuentra el acceso por el nombre de la ventana y escribe usuario, Tab, contraseña y Enter. Si hay más de uno, te pregunta cuál.",
   "Clique para copiar": "Haz clic para copiar",
   "CNH, RG, passaporte": "Licencia, identificación, pasaporte",
   "Código": "Código",
@@ -585,6 +584,20 @@ const es: Record<string, string> = {
   "Procurar atualizações": "Buscar actualizaciones",
   "Reiniciar e atualizar": "Reiniciar y actualizar",
   "Reiniciar": "Reiniciar",
-  "Você está na versão mais recente.": "Tienes la versión más reciente."
+  "Você está na versão mais recente.": "Tienes la versión más reciente.",
+  "Solte as teclas do atalho logo depois de apertar e tente de novo.": "Suelta las teclas del atajo justo después de pulsarlas e inténtalo de nuevo.",
+  "Não consegui voltar para a janela. Clique no campo de login e aperte Ctrl+Alt+A.": "No pude volver a la ventana. Haz clic en el campo de inicio de sesión y pulsa Ctrl+Alt+A.",
+  "O cursor está na barra de endereço. Clique no campo de usuário do site e aperte Ctrl+Alt+A.": "El cursor está en la barra de direcciones. Haz clic en el campo de usuario del sitio y pulsa Ctrl+Alt+A.",
+  "Clique no campo de usuário ou de senha e aperte Ctrl+Alt+A de novo.": "Haz clic en el campo de usuario o de contraseña y vuelve a pulsar Ctrl+Alt+A.",
+  "Usuário digitado. Quando o campo de senha aparecer, clique nele e aperte Ctrl+Alt+A.": "Usuario escrito. Cuando aparezca el campo de contraseña, haz clic en él y pulsa Ctrl+Alt+A.",
+  "Não deu para digitar agora. Tente de novo.": "No se pudo escribir ahora. Inténtalo de nuevo.",
+  "Clique no campo de usuário (ou de senha) de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela, confere em que campo o cursor está e digita só o que cabe ali. Em logins de duas etapas, como o do Google, ele espera a página da senha. Se houver mais de um acesso, ele pergunta qual.": "Haz clic en el campo de usuario (o de contraseña) de cualquier sitio o programa y pulsa Ctrl+Alt+A. Hideout encuentra el acceso por el título de la ventana, revisa en qué campo está el cursor y escribe solo lo que corresponde. En inicios de sesión de dos pasos, como el de Google, espera la página de la contraseña. Si hay más de un acceso, pregunta cuál.",
+  "O atalho {keys} já está sendo usado por outro programa (ou outra cópia do Hideout aberta).": "El atajo {keys} ya lo usa otro programa (u otra copia de Hideout abierta).",
+  "Céu": "Cielo",
+  "Menta": "Menta",
+  "Amarelo": "Amarillo",
+  "Pêssego": "Melocotón",
+  "Coral": "Coral",
+  "Orquídea": "Orquídea"
 }
 export default es

@@ -19,7 +19,7 @@ export const CATEGORY_ICONS = [
   'i-lucide-users', 'i-lucide-tv', 'i-lucide-car', 'i-lucide-wifi', 'i-lucide-building-2', 'i-lucide-star'
 ]
 
-export const CATEGORY_COLORS = ['sage', 'mist', 'lav', 'sand', 'rose', 'gray']
+export const CATEGORY_COLORS = ['sage', 'mist', 'lav', 'sand', 'rose', 'gray', 'sky', 'mint', 'lemon', 'peach', 'coral', 'orchid']
 
 export function emptyData(): VaultData {
   return { v: 1, accesses: [], notes: [], tasks: [], devices: [], categories: [] }

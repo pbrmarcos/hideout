@@ -130,7 +130,11 @@ onBeforeUnmount(() => {
 .colors {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+  /* room for the selection ring */
+  padding: 4px;
+  margin: -4px;
 }
 .c {
   width: 20px;
@@ -173,7 +177,9 @@ onBeforeUnmount(() => {
 }
 .read {
   flex-grow: 1;
+  flex-shrink: 0;
   min-height: 200px;
+  overflow-wrap: anywhere;
   font-size: 14.5px;
   line-height: 1.6;
   user-select: text;

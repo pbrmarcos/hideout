@@ -96,7 +96,6 @@ const en: Record<string, string> = {
   "Chave Pix": "Pix key",
   "Cinza": "Gray",
   "Clique em uma senha para copiar. Ela some da área de transferência sozinha depois de alguns segundos.": "Click a password to copy it. It clears from the clipboard on its own after a few seconds.",
-  "Clique no campo de usuário de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela e digita usuário, Tab, senha e Enter. Se houver mais de um, ele pergunta qual.": "Click the username field on any site or app and press Ctrl+Alt+A. Hideout finds the login by the window title and types username, Tab, password, and Enter. If there's more than one, it asks which.",
   "Clique para copiar": "Click to copy",
   "CNH, RG, passaporte": "Driver's license, ID card, passport",
   "Código": "Code",
@@ -585,6 +584,20 @@ const en: Record<string, string> = {
   "Procurar atualizações": "Check for updates",
   "Reiniciar e atualizar": "Restart and update",
   "Reiniciar": "Restart",
-  "Você está na versão mais recente.": "You're on the latest version."
+  "Você está na versão mais recente.": "You're on the latest version.",
+  "Solte as teclas do atalho logo depois de apertar e tente de novo.": "Release the shortcut keys right after pressing them and try again.",
+  "Não consegui voltar para a janela. Clique no campo de login e aperte Ctrl+Alt+A.": "Couldn't switch back to the window. Click the login field and press Ctrl+Alt+A.",
+  "O cursor está na barra de endereço. Clique no campo de usuário do site e aperte Ctrl+Alt+A.": "The cursor is in the address bar. Click the site's username field and press Ctrl+Alt+A.",
+  "Clique no campo de usuário ou de senha e aperte Ctrl+Alt+A de novo.": "Click the username or password field and press Ctrl+Alt+A again.",
+  "Usuário digitado. Quando o campo de senha aparecer, clique nele e aperte Ctrl+Alt+A.": "Username typed. When the password field shows up, click it and press Ctrl+Alt+A.",
+  "Não deu para digitar agora. Tente de novo.": "Couldn't type right now. Try again.",
+  "Clique no campo de usuário (ou de senha) de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela, confere em que campo o cursor está e digita só o que cabe ali. Em logins de duas etapas, como o do Google, ele espera a página da senha. Se houver mais de um acesso, ele pergunta qual.": "Click the username (or password) field of any site or app and press Ctrl+Alt+A. Hideout finds the login from the window title, checks which field the cursor is in and types only what belongs there. On two-step logins, like Google, it waits for the password page. If more than one login matches, it asks which one.",
+  "O atalho {keys} já está sendo usado por outro programa (ou outra cópia do Hideout aberta).": "The {keys} shortcut is already used by another program (or another copy of Hideout that is open).",
+  "Céu": "Sky",
+  "Menta": "Mint",
+  "Amarelo": "Yellow",
+  "Pêssego": "Peach",
+  "Coral": "Coral",
+  "Orquídea": "Orchid"
 }
 export default en

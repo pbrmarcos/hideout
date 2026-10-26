@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os'
 import { langFromLocale, setMainLang, tr } from '@shared/i18n'
 import { themeById } from '@shared/themes'
 import type { AppState, Settings, SoundId, VaultData, WindowMode } from '@shared/types'
-import { matchWindow } from './autotype'
+import { matchWindow, sureMatch } from './autotype'
 import { checkLeaks } from './leaks'
 import { Timer } from './timer'
 import { DOWNLOAD_PAGE, Updater } from './updater'
@@ -112,20 +112,70 @@ async function autoType(): Promise<void> {
     main.show()
     return
   }
+  const sure = sureMatch(fg.title, data.accesses)
+  if (sure) return typeInto(fg.hwnd, sure.id)
   const matches = matchWindow(fg.title, data.accesses)
-  if (matches.length === 1) return typeInto(fg.hwnd, matches[0].id)
   autoTypeTarget = fg.hwnd
   main.show()
   send('autotype:choose', { title: fg.title, ids: matches.map((m) => m.id) })
 }
 
+function autoTypeHint(body: string): void {
+  new Notification({ title: tr('Digitar login'), body, icon: resource('icon.png') }).show()
+}
+
+const pause = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
+
+/** Polls the focused field, e.g. while a two-step login loads its password page. */
+async function waitForPassword(ms: number): Promise<boolean> {
+  for (let t = 0; t < ms; t += 250) {
+    if ((await winHelper.focusKind()) === 'password') return true
+    await pause(250)
+  }
+  return false
+}
+
+/**
+ * Types into the field that has focus instead of blindly sending user, Tab, password, Enter:
+ * - password field: only the password, then Enter;
+ * - user field: the user, then the password if Tab lands on a password field; otherwise
+ *   (two-step logins such as Google) Enter on the user field, wait for the password page, then the password;
+ * - anything else (address bar, page body): types nothing and says where to click.
+ */
 async function typeInto(hwnd: number, accessId: string): Promise<void> {
   const a = vault.current?.accesses.find((x) => x.id === accessId)
   if (!a) return
-  const steps: Array<{ text: string } | { key: 'TAB' | 'ENTER' }> = []
-  if (a.username) steps.push({ text: a.username }, { key: 'TAB' })
-  if (a.password) steps.push({ text: a.password }, { key: 'ENTER' })
-  await winHelper.type(hwnd, steps)
+  const ready = await winHelper.prepare(hwnd)
+  if (!ready.released) return autoTypeHint(tr('Solte as teclas do atalho logo depois de apertar e tente de novo.'))
+  if (!ready.focused) return autoTypeHint(tr('Não consegui voltar para a janela. Clique no campo de login e aperte Ctrl+Alt+A.'))
+  const password = (): Promise<void> => winHelper.keys([{ text: a.password }, { key: 'ENTER' }])
+
+  if (ready.kind === 'password') {
+    if (a.password) await password()
+    return
+  }
+  if (ready.kind === 'address') return autoTypeHint(tr('O cursor está na barra de endereço. Clique no campo de usuário do site e aperte Ctrl+Alt+A.'))
+  if (ready.kind === 'other') return autoTypeHint(tr('Clique no campo de usuário ou de senha e aperte Ctrl+Alt+A de novo.'))
+
+  // 'text', or 'unknown' when the app does not expose its fields to Windows accessibility.
+  if (!a.username) {
+    if (a.password) await password()
+    return
+  }
+  await winHelper.keys([{ text: a.username }])
+  if (!a.password) return
+  if (ready.kind === 'unknown') {
+    await winHelper.keys([{ key: 'TAB' }])
+    await password()
+    return
+  }
+  await winHelper.keys([{ key: 'TAB' }])
+  await pause(120)
+  if ((await winHelper.focusKind()) === 'password') return password()
+  // No password field after the user: go back and submit the user step.
+  await winHelper.keys([{ key: 'SHIFT_TAB' }, { key: 'ENTER' }])
+  if (await waitForPassword(6000)) return password()
+  autoTypeHint(tr('Usuário digitado. Quando o campo de senha aparecer, clique nele e aperte Ctrl+Alt+A.'))
 }
 
 // --- app lifecycle ------------------------------------------------------------------
@@ -134,10 +184,23 @@ function applyLoginItem(): void {
   app.setLoginItemSettings({ openAtLogin: settings.startWithWindows, args: ['--hidden'] })
 }
 
+// Automated checks use another key so they do not collide with an installed Hideout.
+const AUTOTYPE_KEY = process.env.HIDEOUT_AUTOTYPE_KEY || 'Control+Alt+A'
+const shortcutWarned = new Set<string>()
+
 function registerShortcuts(): void {
   globalShortcut.unregisterAll()
-  globalShortcut.register('Control+Alt+V', () => main.toggleVisible())
-  if (settings.autoType) globalShortcut.register('Control+Alt+A', () => void autoType())
+  const taken: string[] = []
+  if (!globalShortcut.register('Control+Alt+V', () => main.toggleVisible())) taken.push('Ctrl+Alt+V')
+  if (settings.autoType && !globalShortcut.register(AUTOTYPE_KEY, () => void autoType().catch(() => autoTypeHint(tr('Não deu para digitar agora. Tente de novo.'))))) {
+    taken.push(AUTOTYPE_KEY.replace('Control', 'Ctrl'))
+  }
+  // Another program (or a second copy of Hideout) already owns the key: say so once instead of failing silently.
+  const fresh = taken.filter((k) => !shortcutWarned.has(k))
+  if (fresh.length) {
+    fresh.forEach((k) => shortcutWarned.add(k))
+    new Notification({ title: 'Hideout', body: tr('O atalho {keys} já está sendo usado por outro programa (ou outra cópia do Hideout aberta).', { keys: fresh.join(', ') }), icon: resource('icon.png') }).show()
+  }
 }
 
 /** Language for notifications, the tray and error messages: the user's choice or Windows'. */

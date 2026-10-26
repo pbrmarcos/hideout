@@ -5,7 +5,7 @@ import {
   base32Decode, base32Encode, deriveKey, newRecoveryCode, normalizeRecoveryCode, open, seal, totpAt, verifyTotp
 } from '../src/main/crypto.ts'
 import { parseBrowserPasswords } from '../src/main/csv.ts'
-import { matchWindow } from '../src/main/autotype.ts'
+import { matchWindow, sureMatch } from '../src/main/autotype.ts'
 import { emptyData, mergeData, newAccess, nextOccurrence, normalizeData } from '../src/shared/model.ts'
 import { clock, parseDuration, parseQuick } from '../src/renderer/src/format.ts'
 import { langState } from '../src/renderer/src/langState.ts'
@@ -97,6 +97,18 @@ test('auto-type matches the browser tab to the right access', () => {
   const r = matchWindow('Gmail - Caixa de entrada - Google Chrome', [inter, gmail])
   assert.equal(r[0].id, gmail.id)
   assert.equal(matchWindow('Bloco de Notas', [inter, gmail]).length, 0)
+  // A clearly better match is typed without asking; a tie opens the picker.
+  const aurora = { ...newAccess('login'), title: 'Banco Aurora', username: 'maria', password: 'z' }
+  const edge = 'Entrar - Banco Aurora - Pessoal — Microsoft​ Edge'
+  assert.equal(sureMatch(edge, [inter, aurora])?.id, aurora.id)
+  const work = { ...newAccess('login'), title: 'Gmail', username: 'eu@empresa.com', password: 'x' }
+  assert.equal(sureMatch('Gmail - Caixa de entrada - Google Chrome', [gmail, work]), null)
+  // "Fazer login" must not match every access named after a login.* address.
+  const named = (url: string) => ({ ...newAccess('login'), title: new URL(url).host, url, username: 'eu', password: 'x' })
+  const imported = ['https://login.microsoft.com', 'https://login.oracle.com', 'https://login.globo.com', 'https://login.caixa.gov.br'].map(named)
+  assert.equal(matchWindow('Fazer login - Contas Zeta - Pessoal — Microsoft​ Edge', imported).length, 0)
+  const ms = matchWindow('Entrar na sua conta da Microsoft e mais 1 página - Pessoal — Microsoft​ Edge', imported)
+  assert.deepEqual(ms.map((a) => a.title), ['login.microsoft.com'])
 })
 
 test('theme code: round trip, AI answers with chatter, JSON and bad values', () => {

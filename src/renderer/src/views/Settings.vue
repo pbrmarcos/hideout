@@ -279,7 +279,7 @@ const dialogTitle = computed(
           <UIcon name="i-lucide-keyboard" class="size-[18px] ic" />{{ t('Digitar login automático') }}<span class="grow" />
           <USwitch :model-value="st.autoType" :aria-label="t('Ativar digitação automática')" @update:model-value="(v) => set({ autoType: v })" />
         </div>
-        <p>{{ t('Clique no campo de usuário de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela e digita usuário, Tab, senha e Enter. Se houver mais de um, ele pergunta qual.') }}</p>
+        <p>{{ t('Clique no campo de usuário (ou de senha) de qualquer site ou programa e aperte Ctrl+Alt+A. O Hideout acha o acesso pelo nome da janela, confere em que campo o cursor está e digita só o que cabe ali. Em logins de duas etapas, como o do Google, ele espera a página da senha. Se houver mais de um acesso, ele pergunta qual.') }}</p>
       </div>
       <div class="feat">
         <div class="fh"><UIcon name="i-lucide-paperclip" class="size-[18px] ic" />{{ t('Anexos criptografados') }}</div>
