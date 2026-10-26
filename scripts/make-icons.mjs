@@ -21,23 +21,31 @@ function inKeyhole(x, y) {
   return Math.abs(x - 12) <= half
 }
 
-function render(size) {
+/** `matte` makes the image opaque (apple-touch-icon); `inset` adds padding around the mark, in 24-unit space. */
+function render(size, { matte = null, inset = 0 } = {}) {
   const px = new Uint8Array(size * size * 4)
   const ss = 4
+  const span = 24 + inset * 2
   for (let j = 0; j < size; j++) {
     for (let i = 0; i < size; i++) {
       let bg = 0, fg = 0
       for (let sy = 0; sy < ss; sy++) {
         for (let sx = 0; sx < ss; sx++) {
-          const x = ((i + (sx + 0.5) / ss) / size) * 24
-          const y = ((j + (sy + 0.5) / ss) / size) * 24
+          const x = ((i + (sx + 0.5) / ss) / size) * span - inset
+          const y = ((j + (sy + 0.5) / ss) / size) * span - inset
           if (inRoundRect(x, y)) inKeyhole(x, y) ? fg++ : bg++
         }
       }
-      const n = ss * ss, a = (bg + fg) / n, o = (j * size + i) * 4
-      if (a === 0) continue
+      const n = ss * ss, o = (j * size + i) * 4
+      const empty = n - bg - fg
+      if (matte) {
+        for (let c = 0; c < 3; c++) px[o + c] = Math.round((BG[c] * bg + FG[c] * fg + matte[c] * empty) / n)
+        px[o + 3] = 255
+        continue
+      }
+      if (bg + fg === 0) continue
       for (let c = 0; c < 3; c++) px[o + c] = Math.round((BG[c] * bg + FG[c] * fg) / (bg + fg))
-      px[o + 3] = Math.round(a * 255)
+      px[o + 3] = Math.round(((bg + fg) / n) * 255)
     }
   }
   return px
@@ -63,8 +71,8 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc])
 }
 
-function png(size) {
-  const px = render(size)
+function png(size, opts) {
+  const px = render(size, opts)
   const raw = Buffer.alloc((size * 4 + 1) * size)
   for (let y = 0; y < size; y++) {
     raw[y * (size * 4 + 1)] = 0
@@ -103,5 +111,9 @@ mkdirSync('build', { recursive: true })
 writeFileSync('resources/icon.png', png(256))
 writeFileSync('resources/tray.png', png(32))
 writeFileSync('build/icon.ico', ico([16, 24, 32, 48, 64, 128, 256]))
-writeFileSync('docs/icon.png', (mkdirSync('docs', { recursive: true }), png(512)))
-console.log('icons written: resources/icon.png, resources/tray.png, build/icon.ico, docs/icon.png')
+mkdirSync('docs', { recursive: true })
+writeFileSync('docs/icon.png', png(512))
+writeFileSync('docs/icon-32.png', png(32))
+writeFileSync('docs/apple-touch-icon.png', png(180, { matte: [0xed, 0xf1, 0xec], inset: 2 }))
+writeFileSync('docs/icon.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6" fill="#47705A"/><circle cx="12" cy="10" r="2.6" fill="#F8FAF7"/><path d="M10.9 11.5h2.2l.7 5h-3.6z" fill="#F8FAF7"/></svg>\n')
+console.log('icons written: resources/icon.png, resources/tray.png, build/icon.ico, docs/icon*.png, docs/apple-touch-icon.png, docs/icon.svg')

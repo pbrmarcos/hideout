@@ -55,6 +55,7 @@ npm run dev        # app em modo de desenvolvimento
 npm test           # testes (criptografia, TOTP, fusão, CSV, datas)
 npm run typecheck
 npm run dist       # gera dist/Hideout-Setup.exe e dist/Hideout-Portable.exe
+npm run site       # gera o site (docs/, docs/en/, docs/es/) a partir de site/
 ```
 
 Para testar sem tocar no seu cofre real, defina `HIDEOUT_PROFILE` (pasta de dados do app) e `HIDEOUT_VAULT_DIR` (pasta dos cofres).
@@ -65,7 +66,8 @@ src/
   preload/    ponte segura entre a interface e o processo principal
   renderer/   interface (Vue 3 + Nuxt UI)
   shared/     tipos, modelos, temas e fusão de dados
-docs/         site (GitHub Pages)
+site/         modelos e textos do site (pt, en, es)
+docs/         site gerado para o GitHub Pages
 tests/        testes automatizados
 ```
 

@@ -1,62 +1,92 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hideout: senhas, notas e agenda no canto da tela</title>
-<meta name="description" content="App gratuito e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que fica no seu computador, não num servidor.">
-<meta property="og:title" content="Hideout">
-<meta property="og:description" content="Senhas, notas e agenda num cofre criptografado que mora no canto da tela.">
-<meta property="og:image" content="https://pbrmarcos.github.io/hideout/screenshots/09-seal-copied.png">
-<link rel="icon" href="icon.png">
+<script>document.documentElement.classList.add('js')</script>
+<title>Hideout: senhas, notas e agenda num cofre que só você abre</title>
+<meta name="description" content="App grátis e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.">
+<link rel="canonical" href="https://pbrmarcos.github.io/hideout/">
+<link rel="alternate" hreflang="pt-BR" href="https://pbrmarcos.github.io/hideout/">
+<link rel="alternate" hreflang="en" href="https://pbrmarcos.github.io/hideout/en/">
+<link rel="alternate" hreflang="es" href="https://pbrmarcos.github.io/hideout/es/">
+<link rel="alternate" hreflang="x-default" href="https://pbrmarcos.github.io/hideout/">
+<meta name="theme-color" content="#EDF1EC">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hideout">
+<meta property="og:url" content="https://pbrmarcos.github.io/hideout/">
+<meta property="og:title" content="Hideout: senhas, notas e agenda num cofre que só você abre">
+<meta property="og:description" content="App grátis e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:image" content="https://pbrmarcos.github.io/hideout/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="O Hideout encaixado na lateral da tela, com a lista de acessos e senhas ocultas.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Hideout","url":"https://pbrmarcos.github.io/hideout/","description":"App grátis e de código aberto para Windows. Senhas, notas e lembretes num cofre criptografado que só abre no seu computador. Sem servidor e sem conta.","applicationCategory":"SecurityApplication","operatingSystem":"Windows 10, Windows 11","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/pbrmarcos/hideout/releases/latest","license":"https://opensource.org/licenses/MIT","image":"https://pbrmarcos.github.io/hideout/og.png","screenshot":"https://pbrmarcos.github.io/hideout/screenshots/09-seal-copied.png","inLanguage":"pt-BR","codeRepository":"https://github.com/pbrmarcos/hideout"}</script>
+<link rel="preload" href="fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/site.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/site.js" defer></script>
 </head>
-<body data-title-key="meta.title">
+<body data-title-key="meta.title" data-desc-key="meta.desc" data-page="index">
+<a class="skip" href="#main" data-i18n="nav.skip">Pular para o conteúdo</a>
 <header class="wrap nav">
-  <a class="brand" href="./">
+  <a class="brand" data-page-link="index" href="./" translate="no">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="#47705A"/><circle cx="12" cy="10" r="2.6" fill="#F8FAF7"/><path d="M10.9 11.5h2.2l.7 5h-3.6z" fill="#F8FAF7"/></svg>
     Hideout
   </a>
   <span class="sp"></span>
-  <nav class="links" aria-label="Seções">
+  <nav class="links" data-i18n-attr="aria-label:nav.label" aria-label="Seções">
     <a href="#seguranca" data-i18n="nav.security">Segurança</a>
     <a href="#telas" data-i18n="nav.screens">Telas</a>
-    <a href="guia.html" data-keep-lang data-i18n="nav.guide">Atalhos e ajustes</a>
-    <a href="#comunidade" data-i18n="nav.community">Comunidade</a>
+    <a data-page-link="guia" href="guia.html" data-i18n="nav.guide">Atalhos e ajustes</a>
+    <a href="#baixar" data-i18n="nav.community">Baixar</a>
   </nav>
-  <div class="langs" role="group" aria-label="Idioma / Language">
-    <button data-lang="pt" aria-pressed="true" lang="pt-BR">PT</button>
-    <button data-lang="en" aria-pressed="false" lang="en">EN</button>
-    <button data-lang="es" aria-pressed="false" lang="es">ES</button>
-  </div>
+  <nav class="langs" aria-label="Idioma / Language / Idioma">
+    <a data-lang-link="pt" href="./" aria-current="page" hreflang="pt-BR" lang="pt-BR">PT</a>
+    <a data-lang-link="en" href="en/" hreflang="en" lang="en">EN</a>
+    <a data-lang-link="es" href="es/" hreflang="es" lang="es">ES</a>
+  </nav>
 </header>
 
-<main>
-  <!-- Fold 1: what it is -->
+<main id="main">
+  <!-- 1. What it is -->
   <div class="wrap hero">
     <div>
-      <h1 data-i18n="hero.title">Suas senhas, notas e agenda num cofre que mora no canto da tela.</h1>
-      <p class="lead" data-i18n="hero.lead">O Hideout ocupa 30% da largura, encaixa na esquerda ou na direita e copia qualquer senha com um clique. Grátis e de código aberto.</p>
+      <h1 data-i18n="hero.title">Senhas, notas e agenda a um clique, num cofre que só você abre.</h1>
+      <p class="lead" data-i18n="hero.lead">Grátis e de código aberto para Windows. O cofre é um arquivo criptografado no seu PC: sem servidor, sem conta. Encaixa na esquerda ou na direita e copia senhas com um clique.</p>
       <div class="ctas">
         <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
-          <span data-i18n="hero.download">Baixar para Windows</span>
+          <span data-i18n="hero.download">Baixar grátis para Windows</span>
         </a>
         <a class="btn ghost" href="https://github.com/pbrmarcos/hideout">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
-          <span data-i18n="hero.github">Ver no GitHub</span>
+          <span data-i18n="hero.github">Conferir o código</span>
         </a>
       </div>
-      <p class="tech">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
-        <span data-i18n="hero.tech">Feito com Electron, Vue 3 e Nuxt UI. Criptografia AES-256-GCM, chave derivada por scrypt e 2FA TOTP. Windows 10 e 11.</span>
-      </p>
+      <p class="cta-note" data-i18n="hero.note">Windows 10 e 11. O Windows pode avisar que o app é desconhecido: clique em Mais informações e depois em Executar assim mesmo.</p>
+      <p class="mobile-note" data-i18n="hero.mobile">É um app para Windows: abra esta página no computador para instalar.</p>
+      <ul class="trust">
+        <li><a href="https://github.com/pbrmarcos/hideout/blob/main/LICENSE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg><span data-i18n="trust.oss">Código aberto (MIT)</span></a></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="trust.crypto">AES-256-GCM e scrypt</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="m2 2 20 20"/></svg><span data-i18n="trust.local">Sem servidor, sem conta</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg><span data-i18n="trust.2fa">2FA e PIN</span></li>
+      </ul>
     </div>
     <div>
       <div class="desk" id="desk" data-mode="right">
         <div class="other o1"></div>
         <div class="other o2"></div>
-        <div class="panel"><img src="screenshots/09-seal-copied.png" alt="Hideout encaixado na lateral da tela" width="576" height="880"></div>
+        <div class="panel"><img src="screenshots/50-snapped-right.webp" data-i18n-attr="alt:hero.alt" alt="O Hideout encaixado na lateral direita da tela, com a lista de acessos e as senhas ocultas." width="576" height="1032" fetchpriority="high"></div>
         <div class="task"></div>
       </div>
       <div class="modes">
@@ -69,12 +99,12 @@
     </div>
   </div>
 
-  <!-- Fold 2: serverless security -->
-  <section class="fold tint" id="seguranca">
+  <!-- 2. Serverless security -->
+  <section class="fold tint" id="seguranca" aria-labelledby="h-sec">
     <div class="wrap sec">
       <div class="reveal">
-        <h2 data-i18n="sec.title">Suas senhas ficam no seu computador. Não num servidor.</h2>
-        <p class="sub" data-i18n="sec.lead">O Hideout não tem servidor, não tem conta online e não manda nada para a internet. O cofre é um arquivo seu, embaralhado antes de sair do seu PC.</p>
+        <h2 id="h-sec" data-i18n="sec.title">Suas senhas só se abrem no seu computador. Nenhum servidor vê nada.</h2>
+        <p class="sub" data-i18n="sec.lead">O Hideout não tem servidor, não pede conta online e não envia nada para a internet. O cofre é um arquivo criptografado. Se ele estiver no OneDrive, que é o padrão, a nuvem só guarda bytes embaralhados.</p>
         <ul class="points">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p1"><b>Senha mestra</b> vira a chave por scrypt, que torna adivinhação em massa cara e lenta.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p2"><b>2FA</b> com app autenticador quando você entra num computador novo.</span></li>
@@ -82,6 +112,10 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p4"><b>Copiou, sumiu:</b> a senha sai da área de transferência em 30 segundos e não entra no histórico do Win+V.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n-html="sec.p5"><b>Código aberto:</b> qualquer pessoa pode conferir o que o app faz.</span></li>
         </ul>
+        <div class="ctas sec-ctas">
+          <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe"><span data-i18n="hero.download">Baixar grátis para Windows</span></a>
+          <a class="textlink" href="https://github.com/pbrmarcos/hideout/blob/main/src/main/crypto.ts"><span data-i18n="sec.code">Ler o código da criptografia</span></a>
+        </div>
       </div>
       <div class="reveal d2">
         <div class="flow">
@@ -99,7 +133,7 @@
           </div>
           <div class="node">
             <span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span>
-            <b data-i18n="sec.cloud">Seu OneDrive</b>
+            <b data-i18n="sec.cloud">Seu OneDrive ou outra pasta</b>
             <span data-i18n="sec.cloud.d">Só guarda e sincroniza o arquivo. Não consegue ler nada.</span>
           </div>
         </div>
@@ -111,83 +145,98 @@
     </div>
   </section>
 
-  <!-- Fold 3: screens and customization -->
-  <section class="fold" id="telas">
+  <!-- 3. Screens and customization -->
+  <section class="fold" id="telas" aria-labelledby="h-scr">
     <div class="wrap screens">
-      <div class="stage reveal">
-        <div class="frame"><img id="shot" src="screenshots/09-seal-copied.png" alt="Lista de acessos" width="576" height="880"></div>
-        <p id="shot-caption" data-i18n="scr.s.accesses.d">Um clique na senha copia. A barrinha mostra quando ela vai sumir.</p>
-      </div>
-      <div class="reveal d1">
-        <h2 data-i18n="scr.title">Do seu jeito</h2>
-        <p class="sub" data-i18n="scr.lead">Veja as telas de verdade e troque o tema para conferir. A interface do app está em português.</p>
-        <div class="tabs" role="tablist">
-          <button role="tab" aria-selected="true" data-panel="p-screens" data-i18n="scr.tab.screens">Telas</button>
-          <button role="tab" aria-selected="false" data-panel="p-themes" data-i18n="scr.tab.themes">Temas</button>
+      <div class="reveal intro">
+        <h2 id="h-scr" data-i18n="scr.title">Veja as telas reais e escolha entre 8 temas</h2>
+        <p class="sub" data-i18n="scr.lead">Toque nos botões para trocar a tela ou o tema. A interface do app está em português.</p>
+        <div class="tabs" role="tablist" data-i18n-attr="aria-label:scr.tabs.label" aria-label="Telas e temas">
+          <button role="tab" id="t-screens" aria-controls="p-screens" aria-selected="true" tabindex="0" data-panel="p-screens" data-i18n="scr.tab.screens">Telas</button>
+          <button role="tab" id="t-themes" aria-controls="p-themes" aria-selected="false" tabindex="-1" data-panel="p-themes" data-i18n="scr.tab.themes">Temas</button>
         </div>
-        <div id="p-screens" class="chips" data-group="screens" role="tabpanel">
-          <button aria-pressed="true" data-src="screenshots/09-seal-copied.png" data-caption="scr.s.accesses.d" data-alt="Lista de acessos"><span data-i18n="scr.s.accesses">Acessos</span></button>
-          <button aria-pressed="false" data-src="screenshots/12-wifi-qr.png" data-caption="scr.s.wifi.d" data-alt="Wi-Fi com QR Code"><span data-i18n="scr.s.wifi">Modelos</span></button>
-          <button aria-pressed="false" data-src="screenshots/13-note-edit.png" data-caption="scr.s.notes.d" data-alt="Nota com checklist"><span data-i18n="scr.s.notes">Notas</span></button>
-          <button aria-pressed="false" data-src="screenshots/16-agenda.png" data-caption="scr.s.agenda.d" data-alt="Agenda"><span data-i18n="scr.s.agenda">Agenda</span></button>
-          <button aria-pressed="false" data-src="screenshots/17-search.png" data-caption="scr.s.search.d" data-alt="Busca global"><span data-i18n="scr.s.search">Busca</span></button>
-          <button aria-pressed="false" data-src="screenshots/03-totp.png" data-caption="scr.s.2fa.d" data-alt="Ativar 2FA com QR Code"><span data-i18n="scr.s.2fa">2FA</span></button>
-          <button aria-pressed="false" data-src="screenshots/20-lock.png" data-caption="scr.s.pin.d" data-alt="Desbloqueio com PIN"><span data-i18n="scr.s.pin">PIN</span></button>
+        <div id="p-screens" class="chips" data-group="screens" role="tabpanel" aria-labelledby="t-screens">
+          <button aria-pressed="true" data-src="screenshots/09-seal-copied.webp" data-caption="scr.s.accesses.d"><span data-i18n="scr.s.accesses">Acessos</span></button>
+          <button aria-pressed="false" data-src="screenshots/12-wifi-qr.webp" data-caption="scr.s.wifi.d"><span data-i18n="scr.s.wifi">Modelos</span></button>
+          <button aria-pressed="false" data-src="screenshots/13-note-edit.webp" data-caption="scr.s.notes.d"><span data-i18n="scr.s.notes">Notas</span></button>
+          <button aria-pressed="false" data-src="screenshots/16-agenda.webp" data-caption="scr.s.agenda.d"><span data-i18n="scr.s.agenda">Agenda</span></button>
+          <button aria-pressed="false" data-src="screenshots/17-search.webp" data-caption="scr.s.search.d"><span data-i18n="scr.s.search">Busca</span></button>
+          <button aria-pressed="false" data-src="screenshots/03-totp.webp" data-caption="scr.s.2fa.d"><span data-i18n="scr.s.2fa">2FA</span></button>
+          <button aria-pressed="false" data-src="screenshots/20-lock.webp" data-caption="scr.s.pin.d"><span data-i18n="scr.s.pin">PIN</span></button>
         </div>
-        <div id="p-themes" class="chips" data-group="themes" role="tabpanel" hidden>
-          <button aria-pressed="true" data-src="screenshots/09-seal-copied.png" data-caption="scr.themes.d" data-alt="Tema Sálvia"><span class="sw" style="background:#EDF1EC"><i style="background:#47705A"></i></span>Sálvia</button>
-          <button aria-pressed="false" data-src="screenshots/19-theme-lavanda.png" data-caption="scr.themes.d" data-alt="Tema Lavanda"><span class="sw" style="background:#EFEDF6"><i style="background:#6A5BA3"></i></span>Lavanda</button>
-          <button aria-pressed="false" data-src="screenshots/19-theme-oceano.png" data-caption="scr.themes.d" data-alt="Tema Oceano"><span class="sw" style="background:#F5F7FA"><i style="background:#0077C8"></i></span>Oceano</button>
-          <button aria-pressed="false" data-src="screenshots/19-theme-rubi.png" data-caption="scr.themes.d" data-alt="Tema Rubi"><span class="sw" style="background:#F6EEEE"><i style="background:#B4232F"></i></span>Rubi</button>
-          <button aria-pressed="false" data-src="screenshots/19-theme-noite.png" data-caption="scr.themes.d" data-alt="Tema Noite"><span class="sw" style="background:#171C21"><i style="background:#8DBBA0"></i></span>Noite</button>
-          <button aria-pressed="false" data-src="screenshots/19-theme-matrix.png" data-caption="scr.themes.d" data-alt="Tema Matrix"><span class="sw" style="background:#050A06"><i style="background:#00FF41"></i></span>Matrix</button>
+        <div id="p-themes" class="chips" data-group="themes" role="tabpanel" aria-labelledby="t-themes" hidden>
+          <button aria-pressed="true" data-src="screenshots/09-seal-copied.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#EDF1EC"><i style="background:#47705A"></i></span>Sálvia</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-lavanda.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#EFEDF6"><i style="background:#6A5BA3"></i></span>Lavanda</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-areia.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F1ECE4"><i style="background:#7A6236"></i></span>Areia</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-nevoa.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#EAEFF4"><i style="background:#476A8E"></i></span>Névoa</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-noite.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#171C21"><i style="background:#8DBBA0"></i></span>Noite</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-oceano.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F5F7FA"><i style="background:#0077C8"></i></span>Oceano</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-rubi.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#F6EEEE"><i style="background:#B4232F"></i></span>Rubi</button>
+          <button aria-pressed="false" data-src="screenshots/19-theme-matrix.webp" data-caption="scr.themes.d" translate="no"><span class="sw" style="background:#050A06"><i style="background:#00FF41"></i></span>Matrix</button>
         </div>
         <p class="note-line">
           <span data-i18n="scr.window">A janela também flutua ou encaixa na esquerda e na direita.</span>
-          <a href="guia.html" data-keep-lang><span data-i18n="scr.guide">Ver todos os atalhos e ajustes</span></a>
+          <a data-page-link="guia" href="guia.html"><span data-i18n="scr.guide">Ver todos os atalhos e ajustes</span></a>
         </p>
       </div>
+      <figure class="stage reveal d1">
+        <div class="frame"><img id="shot" src="screenshots/09-seal-copied.webp" data-i18n-attr="alt:scr.s.accesses.d" alt="Um clique copia a senha. Dá para importar as senhas salvas no Chrome, Edge ou Brave." width="576" height="877" loading="lazy"></div>
+        <figcaption id="shot-caption" aria-live="polite" data-i18n="scr.s.accesses.d">Um clique copia a senha. Dá para importar as senhas salvas no Chrome, Edge ou Brave.</figcaption>
+      </figure>
     </div>
   </section>
 
-  <!-- Fold 4: download, contribute, comments -->
-  <section class="fold tint" id="comunidade">
+  <!-- 4. Download, FAQ, contribute, comments -->
+  <section class="fold tint" id="baixar" aria-labelledby="h-dl">
     <div class="wrap">
-      <h2 class="reveal" data-i18n="com.title">Baixe, colabore e comente</h2>
-      <div class="community">
+      <div class="dlhead reveal">
+        <h2 id="h-dl" data-i18n="com.title">Baixe o Hideout e crie seu cofre</h2>
+        <p class="sub" data-i18n="com.lead">Grátis, sem conta, e suas senhas só se abrem no seu PC.</p>
+      </div>
+      <div class="dlgrid">
         <div class="reveal">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span data-i18n="com.dl">Baixar</span></h3>
           <div class="dl">
             <a class="main" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8M8 12l4 4 4-4"/></svg>
-              <span><b data-i18n="com.dl.setup">Instalador</b><span data-i18n="com.dl.setup.d">Cria atalhos e abre com o Windows, se você quiser.</span></span>
+              <span><b data-i18n="com.dl.setup">Instalador</b><span data-i18n="com.dl.setup.d">Cria atalhos e pode abrir junto com o Windows.</span></span>
             </a>
             <a href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Portable.exe">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
               <span><b data-i18n="com.dl.portable">Portátil</b><span data-i18n="com.dl.portable.d">Um único .exe, roda sem instalar.</span></span>
             </a>
           </div>
-          <p class="small" data-i18n="com.dl.note">Se o Windows avisar, clique em Mais informações e depois em Executar assim mesmo. O instalador ainda não tem assinatura digital paga.</p>
+          <p class="small">Versão 0.1.0, publicada em 26 de outubro de 2026. <span data-i18n="com.dl.note">O Windows avisa porque o instalador ainda não tem certificado de assinatura, que é pago. Clique em Mais informações e depois em Executar assim mesmo. Todo o código está no GitHub para você conferir.</span></p>
         </div>
-        <div class="reveal d1">
+        <div class="faq reveal d1">
+          <h3 data-i18n="faq.title">Perguntas frequentes</h3>
+          <details><summary data-i18n="faq.q1">Esqueci a senha mestra. E agora?</summary><p data-i18n="faq.a1">Use o código de recuperação de 24 caracteres que o Hideout mostra uma única vez, ao criar a conta. Com ele você cria uma senha nova, e ele também serve se perder o celular do 2FA. Sem a senha e sem o código, ninguém abre o cofre, nem quem fez o app.</p></details>
+          <details><summary data-i18n="faq.q2">Preciso de OneDrive? Funciona em mais de um PC?</summary><p data-i18n="faq.a2">Não precisa. Por padrão o cofre fica na pasta Hideout-Dados do OneDrive, mas você escolhe qualquer pasta. Com o OneDrive, o mesmo cofre abre em outro PC com usuário, senha mestra e 2FA.</p></details>
+          <details><summary data-i18n="faq.q3">Dá para trazer as senhas do navegador?</summary><p data-i18n="faq.a3">Sim. Exporte o CSV de senhas do Chrome, Edge ou Brave e use Importar do navegador na aba Acessos. Depois apague o CSV, porque ele não é criptografado.</p></details>
+          <details><summary data-i18n="faq.q4">Por que o Windows avisa ao instalar?</summary><p data-i18n="faq.a4">O instalador ainda não tem certificado de assinatura digital, que é pago. Clique em Mais informações e depois em Executar assim mesmo. O código inteiro está no GitHub.</p></details>
+          <details><summary data-i18n="faq.q5">Como sei que é seguro?</summary><p data-i18n="faq.a5">O código é aberto (MIT) e qualquer pessoa pode conferir. Não há servidor nem telemetria. A criptografia, AES-256-GCM com chave derivada por scrypt, está no arquivo src/main/crypto.ts. O Hideout ainda não passou por auditoria independente.</p></details>
+        </div>
+      </div>
+      <div class="community">
+        <div class="reveal">
           <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/></svg><span data-i18n="com.collab">Colaborar</span></h3>
-          <p class="sub" style="font-size:16px" data-i18n="com.collab.d">Achou um erro ou tem uma ideia? Todo mundo pode ajudar.</p>
+          <p class="sub sm" data-i18n="com.collab.d">Achou um erro ou tem uma ideia? Todo mundo pode ajudar.</p>
           <div class="collab">
             <a href="https://github.com/pbrmarcos/hideout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span data-i18n="com.star">Dar uma estrela</span></a>
             <a href="https://github.com/pbrmarcos/hideout/issues/new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span data-i18n="com.issue">Relatar um problema</span></a>
             <a href="https://github.com/pbrmarcos/hideout/discussions/categories/ideas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></svg><span data-i18n="com.ideas">Sugerir uma ideia</span></a>
             <a href="https://github.com/pbrmarcos/hideout/pulls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg><span data-i18n="com.pr">Enviar código</span></a>
           </div>
-          <p class="small" data-i18n="com.build">Para rodar o código:</p>
-          <pre class="code">git clone https://github.com/pbrmarcos/hideout
-cd hideout && npm install
+          <p class="small" data-i18n="com.build">Feito com Electron, Vue 3 e Nuxt UI. Para rodar o código:</p>
+          <pre class="code" translate="no">git clone https://github.com/pbrmarcos/hideout
+cd hideout
+npm install
 npm run dev</pre>
         </div>
-        <div class="reveal d2">
+        <div class="reveal d1">
           <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span data-i18n="com.comments">Comentários</span></h3>
-          <p class="sub" style="font-size:16px" data-i18n="com.comments.d">Os comentários usam o GitHub Discussions. Eles só carregam quando você pede.</p>
-          <div id="comments">
-            <button class="btn ghost sm" id="load-comments" style="margin-top:14px"><span data-i18n="com.comments.load">Carregar comentários</span></button>
+          <p class="sub sm" data-i18n="com.comments.d">Os comentários usam o GitHub Discussions e só carregam quando você pede. Para comentar, entre com sua conta do GitHub.</p>
+          <div id="comments" tabindex="-1">
+            <button class="btn ghost sm" id="load-comments"><span data-i18n="com.comments.load">Carregar comentários</span></button>
           </div>
         </div>
       </div>
@@ -199,13 +248,10 @@ npm run dev</pre>
   <div class="wrap">
     <span data-i18n="foot.license">Hideout é código aberto sob a licença MIT.</span>
     <span class="sp"></span>
-    <a href="guia.html" data-keep-lang data-i18n="nav.guide">Atalhos e ajustes</a>
+    <a data-page-link="guia" href="guia.html" data-i18n="nav.guide">Atalhos e ajustes</a>
     <a href="https://github.com/pbrmarcos/hideout">GitHub</a>
     <a href="https://github.com/pbrmarcos/hideout/releases" data-i18n="foot.releases">Versões</a>
   </div>
 </footer>
-
-<script src="assets/i18n.js"></script>
-<script src="assets/site.js"></script>
 </body>
 </html>

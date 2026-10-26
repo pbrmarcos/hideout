@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.classList.add('js')</script>
+<title>Hideout</title>
+<meta name="description" content="">
+<!--HEAD-->
+<link rel="preload" href="fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/guide.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/site.js" defer></script>
+<script src="assets/guide.js" defer></script>
+</head>
+<body data-title-key="g.meta.title" data-desc-key="g.meta.desc" data-page="guia">
+<a class="skip" href="#main" data-i18n="nav.skip">Pular para o conteúdo</a>
+<header class="wrap nav">
+  <a class="brand" data-page-link="index" href="./" translate="no">
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="#47705A"/><circle cx="12" cy="10" r="2.6" fill="#F8FAF7"/><path d="M10.9 11.5h2.2l.7 5h-3.6z" fill="#F8FAF7"/></svg>
+    Hideout
+  </a>
+  <span class="sp"></span>
+  <nav class="links" data-i18n-attr="aria-label:nav.label" aria-label="">
+    <a data-page-link="index" data-anchor="#seguranca" href="./#seguranca" data-i18n="nav.security"></a>
+    <a data-page-link="index" data-anchor="#telas" href="./#telas" data-i18n="nav.screens"></a>
+    <a data-page-link="index" data-anchor="#baixar" href="./#baixar" data-i18n="nav.community"></a>
+  </nav>
+  <nav class="langs" aria-label="Idioma / Language / Idioma">
+    <a data-lang-link="pt" hreflang="pt-BR" lang="pt-BR">PT</a>
+    <a data-lang-link="en" hreflang="en" lang="en">EN</a>
+    <a data-lang-link="es" hreflang="es" lang="es">ES</a>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="wrap ghead">
+    <a class="back" data-page-link="index" href="./"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span data-i18n="g.back"></span></a>
+    <h1 data-i18n="g.title"></h1>
+    <p class="sub" data-i18n="g.lead"></p>
+    <button class="btn ghost sm motion" id="motion-toggle" aria-pressed="false">
+      <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg>
+      <span data-i18n="g.motion.pause"></span>
+    </button>
+  </div>
+
+  <section class="fold tint" aria-labelledby="h-sc">
+    <div class="wrap">
+      <h2 id="h-sc" data-i18n="g.sc.title"></h2>
+      <div class="shortcuts">
+        <article class="sc reveal" data-scene="toggle">
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>Alt</kbd><span class="plus" aria-hidden="true">+</span><kbd>V</kbd></h3>
+          <div class="scene" aria-hidden="true"><div class="mini-desk"></div><div class="mini-panel"><i></i><i class="s"></i><i></i><i class="s"></i><i></i><i class="s"></i></div></div>
+          <p data-i18n="g.sc.v"></p>
+        </article>
+        <article class="sc reveal d1" data-scene="autotype">
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>Alt</kbd><span class="plus" aria-hidden="true">+</span><kbd>A</kbd></h3>
+          <div class="scene" aria-hidden="true">
+            <div class="form">
+              <span class="lbl" data-i18n="g.scene.email"></span><span class="fld f-user"></span>
+              <span class="lbl" data-i18n="g.scene.pass"></span><span class="fld f-pass"></span>
+              <span class="f-row"><span class="f-btn" data-i18n="g.scene.enter"></span><span class="f-ok">✓</span></span>
+            </div>
+          </div>
+          <p data-i18n="g.sc.a"></p>
+        </article>
+        <article class="sc reveal d2" data-scene="search">
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>K</kbd></h3>
+          <div class="scene" aria-hidden="true">
+            <div class="mini-app"><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i><i></i></div>
+            <div class="mini-palette">
+              <div class="p-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4.2-4.2"/></svg><span class="p-q"></span></div>
+              <div class="p-r" translate="no">Google Analytics</div>
+              <div class="p-r2" translate="no">Gmail</div>
+            </div>
+          </div>
+          <p data-i18n="g.sc.k"></p>
+        </article>
+        <article class="sc reveal" data-scene="tabs">
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></h3>
+          <div class="scene" aria-hidden="true"><div class="mini-tabs" data-on="1"><span data-i18n="scr.s.accesses"></span><span data-i18n="scr.s.notes"></span><span data-i18n="scr.s.agenda"></span></div></div>
+          <p data-i18n="g.sc.tabs"></p>
+        </article>
+        <article class="sc wide reveal d1" data-scene="sheet">
+          <h3 class="keys"><kbd>Ctrl</kbd><span class="plus" aria-hidden="true">+</span><kbd>N</kbd><span class="plus" aria-hidden="true">/</span><kbd>Esc</kbd></h3>
+          <div class="scene" aria-hidden="true">
+            <div class="mini-app"><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i></div>
+            <div class="mini-sheet"><b data-i18n="g.scene.new"></b><i></i><i></i><i style="width:60%"></i></div>
+          </div>
+          <p data-i18n="g.sc.n"></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="fold" aria-labelledby="h-win">
+    <div class="wrap">
+      <div class="row2">
+        <div class="reveal">
+          <h2 id="h-win" data-i18n="g.win.title"></h2>
+          <p class="sub" data-i18n="g.win.d"></p>
+        </div>
+        <div class="reveal d1" data-scene="snap">
+          <div class="desk" data-mode="right" aria-hidden="true">
+            <div class="other o1"></div>
+            <div class="other o2"></div>
+            <div class="panel"><img src="screenshots/51-snapped-agenda.webp" alt="" width="576" height="1032" loading="lazy"></div>
+            <div class="task"></div>
+          </div>
+          <div class="modes">
+            <div class="seg" aria-hidden="true">
+              <button data-m="left" aria-pressed="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg><span data-i18n="demo.left"></span></button>
+              <button data-m="float" aria-pressed="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><rect width="8" height="8" x="8" y="8" rx="1.5"/></svg><span data-i18n="demo.float"></span></button>
+              <button data-m="right" aria-pressed="true" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg><span data-i18n="demo.right"></span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="reveal">
+          <h2 data-i18n="g.seal.title"></h2>
+          <p class="sub" data-i18n="g.seal.d"></p>
+        </div>
+        <div class="demo reveal d1" data-scene="seal">
+          <div class="drow">
+            <span class="av" aria-hidden="true">G</span>
+            <span class="dtx"><b translate="no">Gmail</b><span translate="no">nome@gmail.com</span></span>
+            <button class="seal" data-seal="6000"><span class="vh" data-i18n="g.seal.btn"></span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
+          </div>
+          <p class="vh" aria-live="polite" data-seal-status></p>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="reveal">
+          <h2 data-i18n="g.agenda.title"></h2>
+          <p class="sub" data-i18n="g.agenda.d"></p>
+        </div>
+        <div class="a-box reveal d1" data-scene="agenda" lang="pt-BR" data-items='[{"text":"pagar boleto amanhã 9h","title":"pagar boleto","when":"Amanhã, 09:00"},{"text":"ligar para o contador hoje 14:30","title":"ligar para o contador","when":"14:30"},{"text":"revisão do carro 25/12 8h","title":"revisão do carro","when":"Sex, 25 dez, 08:00"}]'>
+          <div class="a-field" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <span class="a-input"></span>
+            <span class="a-chip"></span>
+          </div>
+          <ul class="a-list" data-i18n-attr="aria-label:g.agenda.list" aria-label=""></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fold tint" aria-labelledby="h-set">
+    <div class="wrap">
+      <h2 id="h-set" data-i18n="g.set.title"></h2>
+      <div class="settings">
+        <div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a6 6 0 0 0 6-6c0-5-4.5-9-10-9Z"/></svg><span data-i18n="g.set.look"></span></h3>
+            <div class="opt"><b data-i18n="g.set.look.theme"></b><span data-i18n="g.set.look.theme.d"></span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span data-i18n="g.set.sec"></span></h3>
+            <div class="opt"><b data-i18n="g.set.sec.lock"></b><span data-i18n="g.set.sec.lock.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.sec.win"></b><span data-i18n="g.set.sec.win.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.sec.clip"></b><span data-i18n="g.set.sec.clip.d"></span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg><span data-i18n="g.set.win"></span></h3>
+            <div class="opt"><b data-i18n="g.set.win.start"></b><span data-i18n="g.set.win.start.d"></span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 14.06 2 22"/><path d="m18 2 4 4-11.06 11.06-4-4z"/></svg><span data-i18n="g.set.feat"></span></h3>
+            <div class="opt"><b data-i18n="g.set.feat.type"></b><span data-i18n="g.set.feat.type.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.feat.att"></b><span data-i18n="g.set.feat.att.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.feat.tpl"></b><span data-i18n="g.set.feat.tpl.d"></span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-i18n="g.set.acc"></span></h3>
+            <div class="opt"><b data-i18n="g.set.acc.pw"></b><span data-i18n="g.set.acc.pw.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.acc.2fa"></b><span data-i18n="g.set.acc.2fa.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.acc.rc"></b><span data-i18n="g.set.acc.rc.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.acc.dev"></b><span data-i18n="g.set.acc.dev.d"></span></div>
+          </div>
+          <div class="group reveal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg><span data-i18n="g.set.data"></span></h3>
+            <div class="opt"><b data-i18n="g.set.data.dir"></b><span data-i18n="g.set.data.dir.d"></span></div>
+            <div class="opt"><b data-i18n="g.set.data.bak"></b><span data-i18n="g.set.data.bak.d"></span></div>
+          </div>
+        </div>
+        <div class="sticky reveal d1"><img src="screenshots/18-settings.webp" data-i18n-attr="alt:g.set.alt" alt="" width="576" height="877" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap final">
+    <h2 data-i18n="g.final.title"></h2>
+    <div class="ctas">
+      <a class="btn primary" href="https://github.com/pbrmarcos/hideout/releases/latest/download/Hideout-Setup.exe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+        <span data-i18n="hero.download"></span>
+      </a>
+      <a class="btn ghost" href="https://github.com/pbrmarcos/hideout"><span data-i18n="hero.github"></span></a>
+    </div>
+    <p class="cta-note center" data-i18n="hero.note"></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="foot.license"></span>
+    <span class="sp"></span>
+    <a data-page-link="index" href="./" translate="no">Hideout</a>
+    <a href="https://github.com/pbrmarcos/hideout">GitHub</a>
+    <a href="https://github.com/pbrmarcos/hideout/releases" data-i18n="foot.releases"></a>
+  </div>
+</footer>
+</body>
+</html>

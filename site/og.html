@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Hideout</title>
+<meta name="description" content="">
+<!--HEAD-->
+<link rel="stylesheet" href="assets/site.css">
+<style>
+html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+.card { width: 1200px; height: 630px; display: grid; grid-template-columns: 620px 1fr; gap: 40px; padding: 64px 56px; box-sizing: border-box; background: var(--bg); }
+.card .brand { font-size: 30px; gap: 14px; }
+.card h1 { font-size: 52px; line-height: 1.06; letter-spacing: -.02em; margin: 34px 0 26px; font-weight: 780; }
+.card .trust { margin: 0; }
+.card .trust li { font-size: 19px; padding: 8px 16px; }
+.card .desk { width: 100%; align-self: center; box-shadow: 0 0 0 8px var(--frame), 0 26px 50px -20px rgb(30 39 34 / .45); }
+</style>
+</head>
+<body data-title-key="meta.title" data-desc-key="meta.desc">
+<div class="card">
+  <div>
+    <div class="brand" translate="no">
+      <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="#47705A"/><circle cx="12" cy="10" r="2.6" fill="#F8FAF7"/><path d="M10.9 11.5h2.2l.7 5h-3.6z" fill="#F8FAF7"/></svg>
+      Hideout
+    </div>
+    <h1 data-i18n="hero.title"></h1>
+    <ul class="trust">
+      <li><span data-i18n="trust.local"></span></li>
+      <li><span data-i18n="trust.oss"></span></li>
+      <li><span data-i18n="trust.crypto"></span></li>
+    </ul>
+  </div>
+  <div class="desk" data-mode="right">
+    <div class="other o1"></div>
+    <div class="other o2"></div>
+    <div class="panel"><img src="screenshots/50-snapped-right.png" alt="" width="576" height="1032"></div>
+    <div class="task"></div>
+  </div>
+</div>
+</body>
+</html>
