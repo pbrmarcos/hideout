@@ -261,3 +261,9 @@ textarea,
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Ônix is strictly black and white: letter avatars lose their tint. */
+html[data-theme='onix'] .row .av {
+  background: var(--hx-soft);
+  color: var(--hx-ink);
+}

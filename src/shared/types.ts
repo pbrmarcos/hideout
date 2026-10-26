@@ -2,7 +2,7 @@ export type ItemType = 'login' | 'card' | 'wifi' | 'document' | 'bank' | 'server
 export type Repeat = 'none' | 'daily' | 'weekly' | 'monthly'
 export type ThemeId =
   | 'salvia' | 'lavanda' | 'areia' | 'nevoa' | 'noite'
-  | 'oceano' | 'rubi' | 'matrix'
+  | 'oceano' | 'rubi' | 'onix' | 'matrix'
   | 'custom1' | 'custom2' | 'custom3'
 export type WindowMode = 'float' | 'left' | 'right'
 export type Lang = 'pt' | 'en' | 'es'
