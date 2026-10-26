@@ -1,0 +1,32 @@
+appId: app.hideout.desktop
+productName: Hideout
+copyright: Copyright © 2026 Hideout contributors
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - resources/**
+  - package.json
+asarUnpack:
+  - resources/**
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Hideout
+  artifactName: Hideout-Setup-${version}.${ext}
+  uninstallDisplayName: Hideout
+  deleteAppDataOnUninstall: false
+portable:
+  artifactName: Hideout-Portable-${version}.${ext}
+publish: null
