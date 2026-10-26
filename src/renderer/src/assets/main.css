@@ -1,0 +1,263 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+/* Theme tokens (--hx-*) are written on <html> by theme.ts. Nuxt UI's variables follow them. */
+:root,
+:root.dark {
+  --ui-radius: 0.5rem;
+  --ui-primary: var(--hx-primary);
+  --ui-success: var(--hx-primary);
+  --ui-warning: var(--hx-warn);
+  --ui-error: var(--hx-danger);
+  --ui-bg: var(--hx-surface);
+  --ui-bg-muted: var(--hx-bg);
+  --ui-bg-elevated: var(--hx-surface);
+  --ui-bg-accented: var(--hx-line);
+  --ui-bg-inverted: var(--hx-ink);
+  --ui-text: var(--hx-ink);
+  --ui-text-highlighted: var(--hx-ink);
+  --ui-text-toned: var(--hx-ink);
+  --ui-text-muted: var(--hx-muted);
+  --ui-text-dimmed: var(--hx-muted);
+  --ui-text-inverted: var(--hx-on-primary);
+  --ui-border: var(--hx-line);
+  --ui-border-muted: var(--hx-line);
+  --ui-border-accented: var(--hx-muted);
+}
+
+:root.mono {
+  --font-sans: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--hx-bg);
+  color: var(--hx-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable] {
+  user-select: text;
+}
+
+::selection {
+  background: var(--hx-soft);
+  color: var(--hx-soft-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--hx-primary);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hx-line);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--hx-muted);
+}
+
+.drag {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Shared building blocks, in the same vocabulary as the mockups. */
+.hx-ib {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hx-muted);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background-color 0.15s, color 0.15s;
+}
+.hx-ib:hover {
+  background: var(--hx-line);
+  color: var(--hx-ink);
+}
+.hx-ib:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hx-btn {
+  height: 38px;
+  border-radius: 10px;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  cursor: pointer;
+  transition: filter 0.15s, background-color 0.15s;
+}
+.hx-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.hx-btn.lg {
+  height: 46px;
+  border-radius: 12px;
+  font-size: 15px;
+  padding: 0 20px;
+}
+.hx-primary {
+  background: var(--hx-primary);
+  color: var(--hx-on-primary);
+  box-shadow: var(--hx-glow);
+}
+.hx-primary:hover:not(:disabled) {
+  filter: brightness(0.93);
+}
+.hx-soft {
+  background: var(--hx-soft);
+  color: var(--hx-soft-ink);
+}
+.hx-ghost {
+  background: transparent;
+  color: var(--hx-ink);
+}
+.hx-ghost:hover {
+  background: var(--hx-line);
+}
+.hx-danger {
+  background: transparent;
+  color: var(--hx-danger);
+}
+.hx-danger:hover {
+  background: var(--hx-danger-soft);
+}
+.hx-link {
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--hx-soft-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.hx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hx-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hx-ink);
+  opacity: 0.85;
+}
+.hx-in {
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--hx-line);
+  border-radius: 10px;
+  background: var(--hx-surface);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hx-in:focus-within {
+  border-color: var(--hx-primary);
+  box-shadow: 0 0 0 3px var(--hx-soft);
+}
+.hx-in input,
+.hx-in textarea {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--hx-ink);
+  flex-grow: 1;
+  min-width: 0;
+  height: 38px;
+}
+.hx-in textarea {
+  height: auto;
+  padding: 10px 0;
+  resize: none;
+  line-height: 1.5;
+}
+.hx-in input::placeholder,
+.hx-in textarea::placeholder {
+  color: var(--hx-muted);
+}
+.hx-in.lg input {
+  height: 42px;
+  font-size: 15px;
+}
+.hx-hint {
+  font-size: 12.5px;
+  color: var(--hx-muted);
+  line-height: 1.45;
+}
+.hx-error {
+  font-size: 12.5px;
+  color: var(--hx-danger);
+  font-weight: 600;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+
+.hx-sheet-enter-active,
+.hx-sheet-leave-active {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s;
+}
+.hx-sheet-enter-from,
+.hx-sheet-leave-to {
+  transform: translateY(24px);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
