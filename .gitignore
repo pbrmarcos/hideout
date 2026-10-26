@@ -1,0 +1,15 @@
+node_modules/
+out/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+
+# local tooling
+.vscode/
+*.local
+
+# never commit real vaults
+*.vault
+*.vault.bak*
+*.anexos/
