@@ -29,4 +29,9 @@ nsis:
   deleteAppDataOnUninstall: false
 portable:
   artifactName: Hideout-Portable.${ext}
-publish: null
+# Read by electron-updater (app-update.yml, latest.yml). Releases are uploaded by hand with gh.
+publish:
+  provider: github
+  owner: pbrmarcos
+  repo: hideout
+  releaseType: release

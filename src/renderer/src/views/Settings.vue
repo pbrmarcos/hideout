@@ -2,13 +2,13 @@
 import { computed, ref } from 'vue'
 import { LANGS } from '@shared/i18n'
 import { CUSTOM_IDS, THEMES, completeTheme, type CustomId } from '@shared/themes'
-import type { AlertSettings, AppState, Lang, Settings, SignupStart, SoundId, VaultData } from '@shared/types'
+import type { AlertSettings, AppState, Lang, Settings, SignupStart, SoundId, UpdateState, VaultData } from '@shared/types'
 import { api, ApiError } from '../api'
 import { useCopy } from '../copy'
 import { relDate } from '../format'
 import { t } from '../i18n'
 import { SOUND_IDS, SOUND_LABEL, playSound } from '../sounds'
-import { S, logout, setLang, setTheme } from '../store'
+import { S, installUpdate, logout, setLang, setTheme } from '../store'
 import CodeInput from '../components/CodeInput.vue'
 import PinPad from '../components/PinPad.vue'
 import QrCode from '../components/QrCode.vue'
@@ -54,6 +54,29 @@ function setVolume(v: number | undefined): void {
     setAlerts({ volume: v / 100 })
     playSound('pop', v / 100)
   }, 250)
+}
+
+// --- updates --------------------------------------------------------------------------
+const updateText = computed(() => {
+  const u = S.update
+  const v = u.version ?? ''
+  switch (u.status) {
+    case 'dev': return t('Atualizações só funcionam no app instalado.')
+    case 'checking': return t('Procurando…')
+    case 'latest': return t('Você está na versão mais recente.')
+    case 'downloading': return t('Baixando a versão {v}… {p}%', { v, p: u.percent })
+    case 'ready': return t('A versão {v} está pronta para instalar.', { v })
+    case 'manual': return t('A versão {v} está disponível para baixar.', { v })
+    case 'error': return t('Não foi possível verificar agora.')
+    default: return ''
+  }
+})
+async function checkNow(): Promise<void> {
+  try {
+    S.update = await api<UpdateState>('update:check')
+  } catch (e) {
+    fail(e)
+  }
 }
 
 const devices = computed(() => [...S.data!.devices].sort((a, b) => b.lastSeen.localeCompare(a.lastSeen)))
@@ -290,7 +313,17 @@ const dialogTitle = computed(
         <button class="act" @click="backup"><UIcon name="i-lucide-download" class="size-4" />{{ t('Exportar backup criptografado') }}</button>
         <button class="act" @click="S.sheet = { kind: 'trash' }"><UIcon name="i-lucide-trash-2" class="size-4" />{{ t('Lixeira (30 dias)') }}</button>
       </div>
-      <p class="hx-hint pad">{{ t('Hideout {version}. Código aberto, licença MIT.', { version: S.app?.version ?? '' }) }}</p>
+      <div class="r">
+        <span class="l">{{ t('Procurar atualizações') }}<span class="s">{{ t('Ao abrir e uma vez por dia. Só consulta a lista de versões no GitHub.') }}</span></span>
+        <USwitch :model-value="st.checkUpdates" :aria-label="t('Procurar atualizações')" @update:model-value="(v) => set({ checkUpdates: v })" />
+      </div>
+      <div class="r">
+        <span class="l">{{ t('Hideout {version}', { version: S.app?.version ?? '' }) }}<span v-if="updateText" class="s">{{ updateText }}</span></span>
+        <button v-if="S.update.status === 'ready'" class="hx-btn hx-primary sm" @click="installUpdate">{{ t('Reiniciar e atualizar') }}</button>
+        <button v-else-if="S.update.status === 'manual'" class="hx-btn hx-soft sm" @click="api('update:page')">{{ t('Baixar') }}</button>
+        <button v-else class="hx-btn hx-soft sm" :disabled="['dev', 'checking', 'downloading'].includes(S.update.status)" @click="checkNow">{{ t('Procurar agora') }}</button>
+      </div>
+      <p class="hx-hint pad">{{ t('Código aberto, licença MIT.') }}</p>
     </section>
 
   <UModal :open="!!dialog" :title="dialogTitle" :close="{ 'aria-label': t('Fechar') }" @update:open="(o) => !o && (dialog = null)">

@@ -11,6 +11,7 @@ import type { AppState, Settings, SoundId, VaultData, WindowMode } from '@shared
 import { matchWindow } from './autotype'
 import { checkLeaks } from './leaks'
 import { Timer } from './timer'
+import { DOWNLOAD_PAGE, Updater } from './updater'
 import { parseBrowserPasswords } from './csv'
 import { Reminders, type Fired } from './reminders'
 import { loadSettings, remove, saveSettings } from './storage'
@@ -188,13 +189,22 @@ function createWindow(): void {
 function registerIpc(): void {
   handle('app:state', () => state())
   handle('settings:set', (patch: Partial<Settings>) => {
+    const turnedOnUpdates = patch.checkUpdates === true && !settings.checkUpdates
     settings = { ...settings, ...patch }
     saveSettings(settings)
     applyLoginItem()
     registerShortcuts()
     applyLang()
+    if (turnedOnUpdates) void updater.check(true)
     return state()
   })
+  handle('update:get', () => updater.state())
+  handle('update:check', () => updater.check(true))
+  handle('update:install', () => {
+    quitting = true
+    updater.install()
+  })
+  handle('update:page', () => shell.openExternal(DOWNLOAD_PAGE))
   handle('timer:get', () => timer.state())
   handle('timer:start', (ms?: number) => timer.start(ms))
   handle('timer:add', (ms: number) => timer.add(ms))
@@ -348,6 +358,21 @@ const timer = new Timer(
   }
 )
 
+let announced: string | null = null
+const updater = new Updater(
+  () => settings.checkUpdates,
+  (s) => send('update:state', s),
+  (version, manual) => {
+    if (announced === version) return
+    announced = version
+    if (manual) {
+      reminders.notify(tr('Nova versão do Hideout'), tr('A versão {v} está disponível. Clique para baixar.', { v: version }), 'none', () => void shell.openExternal(DOWNLOAD_PAGE))
+    } else {
+      reminders.notify(tr('Nova versão do Hideout'), tr('A versão {v} foi baixada. Reinicie o Hideout para instalar.', { v: version }), 'none', () => main.show())
+    }
+  }
+)
+
 function watchIdle(): void {
   setInterval(() => {
     if (!vault.unlockedUser) return
@@ -383,5 +408,6 @@ app.whenReady().then(async () => {
   applyLoginItem()
   watchIdle()
   reminders.start()
+  updater.start()
   winHelper.warmUp()
 })

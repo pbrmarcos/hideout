@@ -40,7 +40,7 @@ export default defineConfig({
               'lucide:building-2', 'lucide:star', 'lucide:folder-input', 'lucide:folder-plus', 'lucide:ellipsis',
               'lucide:arrow-up', 'lucide:arrow-down', 'lucide:chevron-up', 'lucide:pencil', 'lucide:trash-2',
               // TO DO tab, timer and alerts
-              'lucide:list-todo', 'lucide:timer', 'lucide:play', 'lucide:pause', 'lucide:rotate-ccw', 'lucide:volume-2'
+              'lucide:list-todo', 'lucide:timer', 'lucide:play', 'lucide:pause', 'lucide:rotate-ccw', 'lucide:volume-2', 'lucide:sparkles'
             ]
           }
         },

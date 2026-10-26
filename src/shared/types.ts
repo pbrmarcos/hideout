@@ -131,6 +131,20 @@ export interface Settings {
   lang: Lang | null
   customThemes: Partial<Record<'custom1' | 'custom2' | 'custom3', CustomTheme>>
   alerts: AlertSettings
+  /** Looks for a new version on GitHub when the app opens and once a day. */
+  checkUpdates: boolean
+}
+
+/**
+ * dev: not a packaged build. manual: portable build, which cannot replace itself, so the user downloads it.
+ */
+export type UpdateStatus = 'idle' | 'dev' | 'checking' | 'latest' | 'downloading' | 'ready' | 'manual' | 'error'
+export interface UpdateState {
+  status: UpdateStatus
+  /** The new version, when there is one. */
+  version: string | null
+  percent: number
+  checkedAt: string | null
 }
 
 export type SoundId = 'chime' | 'bell' | 'soft' | 'pop' | 'marimba' | 'digital' | 'windows' | 'none'

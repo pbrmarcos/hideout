@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json"
   },
   "dependencies": {
+    "electron-updater": "^6.8.11",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

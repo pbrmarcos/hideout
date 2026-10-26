@@ -7,6 +7,7 @@ import AccessEdit from './AccessEdit.vue'
 import Agenda from './Agenda.vue'
 import AutoTypePicker from './AutoTypePicker.vue'
 import CategoryDialog from '../components/CategoryDialog.vue'
+import UpdateBanner from '../components/UpdateBanner.vue'
 import NoteEdit from './NoteEdit.vue'
 import Notes from './Notes.vue'
 import SearchPalette from './SearchPalette.vue'
@@ -75,6 +76,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       </nav>
     </div>
 
+    <UpdateBanner />
     <main class="panel">
       <Todo v-if="S.tab === 'todo'" />
       <Accesses v-else-if="S.tab === 'accesses'" />

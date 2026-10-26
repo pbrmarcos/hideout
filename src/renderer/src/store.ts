@@ -1,6 +1,6 @@
 import { reactive, watch } from 'vue'
 import { DEFAULT_CATEGORY, findCategory, newCategory, newNote, newTask, nextOccurrence, normalizeData, now } from '@shared/model'
-import type { Access, AppState, Category, CustomTheme, ItemType, Lang, Note, SortMode, SoundId, Task, ThemeId, TimerState, UnlockInfo, VaultData, WindowState } from '@shared/types'
+import type { Access, AppState, Category, CustomTheme, ItemType, Lang, Note, SortMode, SoundId, Task, ThemeId, TimerState, UnlockInfo, UpdateState, VaultData, WindowState } from '@shared/types'
 import { api, onMain } from './api'
 import type { CustomId } from '@shared/themes'
 import { lang, t } from './i18n'
@@ -78,6 +78,9 @@ export const S = reactive({
   leaks: null as { at: string; found: Array<{ id: string; count: number }> } | null,
   window: { mode: 'float', alwaysOnTop: false } as WindowState,
   timer: { running: false, endsAt: null, remaining: 15 * 60_000, total: 15 * 60_000 } as TimerState,
+  update: { status: 'idle', version: null, percent: 0, checkedAt: null } as UpdateState,
+  /** Banner closed for this version until the app restarts. */
+  updateDismissed: null as string | null,
   theme: 'salvia' as ThemeId,
   fired: [] as FiredTask[],
   saving: false,
@@ -102,6 +105,7 @@ export async function boot(): Promise<void> {
   S.app = await api<AppState>('app:state')
   S.window = await api<WindowState>('win:state')
   S.timer = await api<TimerState>('timer:get')
+  S.update = await api<UpdateState>('update:get')
   syncLang()
   const last = S.app.settings.lastUser
   setTheme(last ? S.app.settings.themes[last] : null, false)
@@ -123,6 +127,7 @@ export async function boot(): Promise<void> {
     if (S.phase === 'app') (S.tab = tab), (S.sheet = null)
   })
   onMain('timer:state', (st: TimerState) => (S.timer = st))
+  onMain('update:state', (u: UpdateState) => (S.update = u))
   onMain('sound:play', (p: { sound: SoundId; volume: number }) => playSound(p.sound, p.volume))
   onMain('autotype:choose', (p: { title: string; ids: string[] }) => (S.autoType = p))
 }
@@ -159,6 +164,12 @@ function onLocked(reason: string): void {
 export async function lockNow(): Promise<void> {
   await flushSave()
   await api('vault:lock')
+}
+
+/** Saves pending edits, then closes and runs the downloaded installer. */
+export async function installUpdate(): Promise<void> {
+  await flushSave()
+  await api('update:install')
 }
 
 export async function logout(): Promise<void> {

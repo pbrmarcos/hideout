@@ -61,7 +61,8 @@ export function loadSettings(): Settings {
     themes: {},
     lang: null,
     customThemes: {},
-    alerts: { agendaNotify: true, agendaLead: 0, agendaSound: 'chime', todoDaily: null, todoSound: 'soft', timerSound: 'bell', volume: 0.7 }
+    alerts: { agendaNotify: true, agendaLead: 0, agendaSound: 'chime', todoDaily: null, todoSound: 'soft', timerSound: 'bell', volume: 0.7 },
+    checkUpdates: true
   }
   const saved = readJson<Partial<Settings>>(settingsPath(), {})
   return { ...defaults, ...saved, alerts: { ...defaults.alerts, ...saved.alerts } }
